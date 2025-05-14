@@ -4,8 +4,14 @@ import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
+import ImageCarousel from '@/components/ImageCarousel';
 
 const Index = () => {
+  const carouselImages = [
+    "/lovable-uploads/57766084-0d04-442f-ac28-784b372f1897.png",
+    "/lovable-uploads/ba0fe2a9-c3f7-43c1-b846-d9ceca512891.png"
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar isLoggedIn={false} />
@@ -33,10 +39,10 @@ const Index = () => {
             </div>
             <div className="md:w-1/2">
               <div className="rounded-lg overflow-hidden shadow-xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=800&q=80" 
-                  alt="Learning English" 
-                  className="w-full h-auto"
+                <ImageCarousel 
+                  images={carouselImages} 
+                  altText="English learning presentation"
+                  className="w-full h-[400px]"
                 />
               </div>
             </div>
