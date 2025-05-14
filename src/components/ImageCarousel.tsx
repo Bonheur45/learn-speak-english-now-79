@@ -39,14 +39,15 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   // For simple fade transition, use this approach
   if (images.length <= 2) {
     return (
-      <div className={cn("relative overflow-hidden rounded-lg", className)} style={{ minHeight: "200px" }}>
+      <div className={cn("relative overflow-hidden md:rounded-lg", className)} 
+           style={{ minHeight: "200px" }}>
         {images.map((image, index) => (
           <img
             key={index}
             src={image}
             alt={`${altText} ${index + 1}`}
             className={cn(
-              "w-full h-full transition-all duration-1000 absolute inset-0 object-cover",
+              "w-full h-full transition-all duration-1000 absolute inset-0 object-cover px-0 md:px-4",
               index === currentImageIndex ? "opacity-100 z-10" : "opacity-0 z-0"
             )}
           />
@@ -61,18 +62,18 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
       <CarouselContent>
         {images.map((image, index) => (
           <CarouselItem key={index}>
-            <div className="p-1">
+            <div className="p-0 sm:p-1">
               <img 
                 src={image} 
                 alt={`${altText} ${index + 1}`} 
-                className="w-full h-auto object-cover rounded-lg"
+                className="w-full h-auto object-cover md:rounded-lg"
               />
             </div>
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious className="left-2 lg:-left-12" />
-      <CarouselNext className="right-2 lg:-right-12" />
+      <CarouselPrevious className="hidden md:flex left-2 lg:-left-12" />
+      <CarouselNext className="hidden md:flex right-2 lg:-right-12" />
     </Carousel>
   );
 };

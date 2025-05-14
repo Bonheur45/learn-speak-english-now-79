@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -17,9 +18,9 @@ const Index = () => {
       
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-white to-gray-100 py-12 md:py-20 flex-grow">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-0 sm:px-4">
           <div className="flex flex-col md:flex-row items-center">
-            <div className="md:w-1/2 md:pr-8 mb-8 md:mb-0">
+            <div className="md:w-1/2 px-4 md:pr-8 mb-8 md:mb-0">
               <h1 className="text-4xl md:text-5xl font-bold text-brand-blue mb-4">
                 Master English the <span className="text-brand-yellow">Right Way</span>
               </h1>
@@ -36,8 +37,8 @@ const Index = () => {
                 </Button>
               </div>
             </div>
-            <div className="md:w-1/2">
-              <div className="rounded-lg overflow-hidden shadow-xl">
+            <div className="md:w-1/2 w-full">
+              <div className="md:rounded-lg overflow-hidden md:shadow-xl">
                 <ImageCarousel 
                   images={carouselImages} 
                   altText="English learning presentation"

@@ -15,8 +15,8 @@ const Logo = ({ size = 'medium' }: LogoProps) => {
 
   return (
     <Link to="/" className="flex items-center gap-2">
-      <div className="bg-brand-yellow p-2 rounded-full">
-        <div className="w-8 h-8 flex items-center justify-center">
+      <div className="bg-brand-yellow p-1 rounded-full">
+        <div className="w-10 h-10 flex items-center justify-center">
           <span role="img" aria-label="thumbs up" className="text-2xl">👍</span>
         </div>
       </div>
