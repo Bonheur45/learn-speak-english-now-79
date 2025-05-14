@@ -39,14 +39,14 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   // For simple fade transition, use this approach
   if (images.length <= 2) {
     return (
-      <div className={`relative overflow-hidden rounded-lg ${className}`}>
+      <div className={cn("relative overflow-hidden rounded-lg", className)} style={{ minHeight: "200px" }}>
         {images.map((image, index) => (
           <img
             key={index}
             src={image}
             alt={`${altText} ${index + 1}`}
             className={cn(
-              "w-full h-auto transition-all duration-1000 absolute inset-0 object-cover",
+              "w-full h-full transition-all duration-1000 absolute inset-0 object-cover",
               index === currentImageIndex ? "opacity-100 z-10" : "opacity-0 z-0"
             )}
           />
