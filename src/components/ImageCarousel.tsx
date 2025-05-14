@@ -1,5 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselPrevious, 
+  CarouselNext 
+} from "@/components/ui/carousel";
 
 interface ImageCarouselProps {
   images: string[];
@@ -28,19 +36,44 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
 
   if (images.length === 0) return null;
 
+  // For simple fade transition, use this approach
+  if (images.length <= 2) {
+    return (
+      <div className={`relative overflow-hidden rounded-lg ${className}`}>
+        {images.map((image, index) => (
+          <img
+            key={index}
+            src={image}
+            alt={`${altText} ${index + 1}`}
+            className={cn(
+              "w-full h-auto transition-all duration-1000 absolute inset-0 object-cover",
+              index === currentImageIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+            )}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // For more than 2 images, use the Carousel component from shadcn/ui
   return (
-    <div className={`relative overflow-hidden rounded-lg ${className}`}>
-      {images.map((image, index) => (
-        <img
-          key={index}
-          src={image}
-          alt={`${altText} ${index + 1}`}
-          className={`w-full h-auto transition-opacity duration-1000 absolute inset-0 object-cover ${
-            index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
-      ))}
-    </div>
+    <Carousel className={cn("w-full", className)}>
+      <CarouselContent>
+        {images.map((image, index) => (
+          <CarouselItem key={index}>
+            <div className="p-1">
+              <img 
+                src={image} 
+                alt={`${altText} ${index + 1}`} 
+                className="w-full h-auto object-cover rounded-lg"
+              />
+            </div>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious className="left-2 lg:-left-12" />
+      <CarouselNext className="right-2 lg:-right-12" />
+    </Carousel>
   );
 };
 

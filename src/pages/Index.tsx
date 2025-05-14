@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -42,7 +41,7 @@ const Index = () => {
                 <ImageCarousel 
                   images={carouselImages} 
                   altText="English learning presentation"
-                  className="w-full h-[400px]"
+                  className="w-full aspect-[4/3] md:h-[400px]"
                 />
               </div>
             </div>
