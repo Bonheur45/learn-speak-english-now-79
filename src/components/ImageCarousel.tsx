@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { 
@@ -38,7 +39,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   // For simple fade transition, use this approach
   if (images.length <= 2) {
     return (
-      <div className={cn("relative overflow-hidden", className)} 
+      <div className={cn("relative overflow-hidden md:rounded-lg", className)} 
            style={{ minHeight: "200px" }}>
         {images.map((image, index) => (
           <img
@@ -59,7 +60,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
 
   // For more than 2 images, use the Carousel component from shadcn/ui
   return (
-    <Carousel className={cn("w-full", className)}>
+    <Carousel className={cn("w-full overflow-hidden md:rounded-lg", className)}>
       <CarouselContent>
         {images.map((image, index) => (
           <CarouselItem key={index}>
