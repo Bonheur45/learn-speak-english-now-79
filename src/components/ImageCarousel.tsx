@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { 
@@ -47,8 +48,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
             alt={`${altText} ${index + 1}`}
             className={cn(
               "w-full h-full transition-all duration-1000 absolute inset-0 object-cover",
-              // Keep rounded corners on medium and larger screens, full width on mobile
-              "px-0 md:px-4 md:rounded-lg",
+              // Apply rounded corners directly to the image on medium and larger screens
+              "md:rounded-lg",
               index === currentImageIndex ? "opacity-100 z-10" : "opacity-0 z-0"
             )}
           />
@@ -63,7 +64,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
       <CarouselContent>
         {images.map((image, index) => (
           <CarouselItem key={index}>
-            <div className="p-0 sm:p-1">
+            <div className="p-0">
               <img 
                 src={image} 
                 alt={`${altText} ${index + 1}`} 
