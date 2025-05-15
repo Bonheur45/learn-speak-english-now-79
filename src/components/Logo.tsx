@@ -22,11 +22,11 @@ const Logo = ({ size = 'medium' }: LogoProps) => {
   return (
     <Link to="/" className="flex items-center gap-2">
       <div className="bg-brand-yellow p-1 rounded-full">
-        <div className={`${logoSizes[size]} flex items-center justify-center overflow-hidden`}>
+        <div className={`${logoSizes[size]} flex items-center justify-center overflow-hidden rounded-full`}>
           <img 
             src="/lovable-uploads/c82aba41-bfb1-45f2-8f3d-04ad8aad88fd.png" 
             alt="Thumbs up" 
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-contain"
           />
         </div>
       </div>

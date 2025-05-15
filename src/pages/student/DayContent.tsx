@@ -46,12 +46,16 @@ const DayContent = () => {
         {
           title: "Aspects of Present Tenses",
           link: "#",
-          isCompleted: completedActivities.topic1
+          isCompleted: completedActivities.topic1,
+          videoUrl: "#",
+          notesUrl: "#"
         },
         {
           title: "Present Perfect Continuous Tense",
           link: "#",
-          isCompleted: completedActivities.topic2
+          isCompleted: completedActivities.topic2,
+          videoUrl: "#",
+          notesUrl: "#"
         }
       ]
     },
@@ -115,7 +119,7 @@ const DayContent = () => {
           </CardContent>
         </Card>
         
-        <div className="space-y-4">
+        <div className="space-y-4 max-w-3xl mx-auto">
           {/* The Story to Read */}
           <Card className={`border-l-4 ${content.storyToRead.isCompleted ? 'border-l-green-500' : 'border-l-gray-300'}`}>
             <CardContent className="p-6">
@@ -136,7 +140,7 @@ const DayContent = () => {
                       onClick={() => markAsComplete('reading')}
                       disabled={content.storyToRead.isCompleted}
                     >
-                      {content.storyToRead.isCompleted ? 'Completed' : 'Mark as Complete'}
+                      {content.storyToRead.isCompleted ? 'Completed' : 'Start'}
                     </Button>
                   </div>
                 </div>
@@ -165,7 +169,7 @@ const DayContent = () => {
                         onClick={() => markAsComplete('listeningAmerican')}
                         disabled={content.listenToStory.americanCompleted}
                       >
-                        {content.listenToStory.americanCompleted ? 'Completed' : 'Mark as Complete'}
+                        {content.listenToStory.americanCompleted ? 'Completed' : 'Start'}
                       </Button>
                     </div>
                     <div className="flex justify-between items-center">
@@ -179,7 +183,7 @@ const DayContent = () => {
                         onClick={() => markAsComplete('listeningBritish')}
                         disabled={content.listenToStory.britishCompleted}
                       >
-                        {content.listenToStory.britishCompleted ? 'Completed' : 'Mark as Complete'}
+                        {content.listenToStory.britishCompleted ? 'Completed' : 'Start'}
                       </Button>
                     </div>
                   </div>
@@ -205,7 +209,7 @@ const DayContent = () => {
                       onClick={() => markAsComplete('glossary')}
                       disabled={content.storyGlossary.isCompleted}
                     >
-                      {content.storyGlossary.isCompleted ? 'Completed' : 'Mark as Complete'}
+                      {content.storyGlossary.isCompleted ? 'Completed' : 'Start'}
                     </Button>
                   </div>
                 </div>
@@ -224,18 +228,31 @@ const DayContent = () => {
                   <h3 className="text-lg font-semibold mb-2">Class Topic</h3>
                   <div className="space-y-4">
                     {content.classTopic.topics.map((topic, index) => (
-                      <div key={index} className="flex justify-between items-center">
-                        <Link to={topic.link} className="text-blue-500 hover:underline">
-                          {topic.title}
-                        </Link>
-                        <Button 
-                          variant={topic.isCompleted ? "outline" : "default"}
-                          size="sm"
-                          onClick={() => markAsComplete(index === 0 ? 'topic1' : 'topic2')}
-                          disabled={topic.isCompleted}
-                        >
-                          {topic.isCompleted ? 'Completed' : 'Mark as Complete'}
-                        </Button>
+                      <div key={index} className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <Link to={topic.link} className="text-blue-500 hover:underline">
+                            {topic.title}
+                          </Link>
+                          <Button 
+                            variant={topic.isCompleted ? "outline" : "default"}
+                            size="sm"
+                            onClick={() => markAsComplete(index === 0 ? 'topic1' : 'topic2')}
+                            disabled={topic.isCompleted}
+                          >
+                            {topic.isCompleted ? 'Completed' : 'Start'}
+                          </Button>
+                        </div>
+                        <div className="flex gap-2 ml-4 text-sm">
+                          <Link to={topic.videoUrl} className="text-blue-500 hover:underline flex items-center gap-1">
+                            <Play className="h-3 w-3" />
+                            Video Lesson
+                          </Link>
+                          <span>|</span>
+                          <Link to={topic.notesUrl} className="text-blue-500 hover:underline flex items-center gap-1">
+                            <FileText className="h-3 w-3" />
+                            Notes
+                          </Link>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -271,7 +288,7 @@ const DayContent = () => {
                         onClick={() => markAsComplete('vocabularyTest')}
                         disabled={content.assessments.vocabularyCompleted}
                       >
-                        {content.assessments.vocabularyCompleted ? 'Completed' : 'Take Test'}
+                        {content.assessments.vocabularyCompleted ? 'Completed' : 'Start Test'}
                       </Button>
                     </div>
                     <div className="flex justify-between items-center">
@@ -291,7 +308,7 @@ const DayContent = () => {
                         onClick={() => markAsComplete('topicTest')}
                         disabled={content.assessments.topicCompleted}
                       >
-                        {content.assessments.topicCompleted ? 'Completed' : 'Take Test'}
+                        {content.assessments.topicCompleted ? 'Completed' : 'Start Test'}
                       </Button>
                     </div>
                   </div>
@@ -321,7 +338,7 @@ const DayContent = () => {
                       onClick={() => markAsComplete('watchShortMovie')}
                       disabled={content.watchShortMovies.isCompleted}
                     >
-                      {content.watchShortMovies.isCompleted ? 'Completed' : 'Mark as Complete'}
+                      {content.watchShortMovies.isCompleted ? 'Completed' : 'Start'}
                     </Button>
                   </div>
                 </div>
