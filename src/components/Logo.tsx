@@ -26,7 +26,7 @@ const Logo = ({ size = 'medium' }: LogoProps) => {
           <img 
             src="/lovable-uploads/c82aba41-bfb1-45f2-8f3d-04ad8aad88fd.png" 
             alt="Thumbs up" 
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover object-center"
           />
         </div>
       </div>
