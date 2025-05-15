@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { 
@@ -39,7 +38,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   // For simple fade transition, use this approach
   if (images.length <= 2) {
     return (
-      <div className={cn("relative overflow-hidden md:rounded-lg", className)} 
+      <div className={cn("relative overflow-hidden", className)} 
            style={{ minHeight: "200px" }}>
         {images.map((image, index) => (
           <img
@@ -47,7 +46,9 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
             src={image}
             alt={`${altText} ${index + 1}`}
             className={cn(
-              "w-full h-full transition-all duration-1000 absolute inset-0 object-cover px-0 md:px-4",
+              "w-full h-full transition-all duration-1000 absolute inset-0 object-cover",
+              // Keep rounded corners on medium and larger screens, full width on mobile
+              "px-0 md:px-4 rounded-none md:rounded-lg",
               index === currentImageIndex ? "opacity-100 z-10" : "opacity-0 z-0"
             )}
           />
@@ -66,7 +67,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
               <img 
                 src={image} 
                 alt={`${altText} ${index + 1}`} 
-                className="w-full h-auto object-cover md:rounded-lg"
+                className="w-full h-auto object-cover rounded-none md:rounded-lg"
               />
             </div>
           </CarouselItem>
