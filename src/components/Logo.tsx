@@ -24,8 +24,8 @@ const Logo = ({ size = 'medium' }: LogoProps) => {
       <div className="bg-brand-yellow p-1 rounded-full">
         <div className={`${logoSizes[size]} flex items-center justify-center overflow-hidden rounded-full`}>
           <img 
-            src="/lovable-uploads/c82aba41-bfb1-45f2-8f3d-04ad8aad88fd.png" 
-            alt="Thumbs up" 
+            src="/lovable-uploads/52010dde-2ada-455c-86a1-5930e906e0cd.png" 
+            alt="Let's Do It English Logo" 
             className="w-full h-full object-contain"
           />
         </div>

@@ -105,7 +105,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-gray-100 py-8">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-6">
             <Logo size="small" />
             <p className="text-gray-600 mt-4 md:mt-0">
               © {new Date().getFullYear()} Let's Do It English. All rights reserved.
@@ -114,7 +114,22 @@ const Index = () => {
               <Link to="/about" className="text-gray-600 hover:text-brand-blue">About</Link>
               <Link to="/contact" className="text-gray-600 hover:text-brand-blue">Contact</Link>
               <Link to="/privacy" className="text-gray-600 hover:text-brand-blue">Privacy</Link>
+              <Link to="/faq" className="text-gray-600 hover:text-brand-blue">FAQ</Link>
             </div>
+          </div>
+          
+          {/* Quick FAQ Summary */}
+          <div className="border-t border-gray-200 pt-6 mt-6">
+            <h3 className="text-lg font-bold text-brand-blue mb-4">How The Program Works</h3>
+            <p className="text-sm text-gray-600 mb-2">
+              The program is free and organized into three Trims, each lasting two months. 
+              All class materials are digitally delivered—video lessons, test forms, reading tasks, 
+              short movie episodes, listening challenges, podcasts, and more—through our e-learning 
+              system to each subscriber's portal. The final Trim focuses on writing, with a mentor guidance.
+            </p>
+            <Link to="/faq" className="text-sm text-brand-blue hover:underline">
+              Learn more about our program →
+            </Link>
           </div>
         </div>
       </footer>

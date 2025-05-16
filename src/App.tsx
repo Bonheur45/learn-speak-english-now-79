@@ -15,6 +15,10 @@ import NotFound from "./pages/NotFound";
 import DayContent from "./pages/student/DayContent";
 import Assessments from "./pages/student/Assessments";
 import Lessons from "./pages/student/Lessons";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
+import FAQ from "./pages/FAQ";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +43,12 @@ const App = () => (
           <Route path="/tutor/dashboard" element={<TutorDashboard />} />
           <Route path="/tutor/students" element={<Students />} />
           <Route path="/tutor/materials" element={<Materials />} />
+          
+          {/* Static Pages */}
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/faq" element={<FAQ />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
