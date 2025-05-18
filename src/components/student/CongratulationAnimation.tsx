@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Confetti, Trophy } from 'lucide-react';
+import { Trophy, Sparkles } from 'lucide-react';
 
 const CongratulationAnimation: React.FC = () => {
   const [particles, setParticles] = useState<Array<{id: number, x: number, y: number, size: number, color: string, rotation: number}>>([]);
