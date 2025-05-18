@@ -30,16 +30,17 @@ const Contact = () => {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // In a real app, this would send the email
-    console.log(values);
+    // Create mailto link with form data
+    const mailtoLink = `mailto:letsdoitenglishprogram@gmail.com?subject=${encodeURIComponent(values.subject)}&body=${encodeURIComponent(`Name: ${values.name}\nEmail: ${values.email}\n\n${values.message}`)}`;
     
-    // Simulate email sending
+    // Open the email client
+    window.location.href = mailtoLink;
+    
+    // Show success toast
     toast({
-      title: "Message sent!",
-      description: "Thank you for contacting us. We'll get back to you soon.",
+      title: "Email client opened!",
+      description: "Please send the email through your email client.",
     });
-    
-    form.reset();
   }
 
   return (
@@ -147,7 +148,7 @@ const Contact = () => {
                   )}
                 />
                 
-                <Button type="submit" className="w-full bg-brand-blue hover:bg-brand-blue/90">
+                <Button type="submit" className="w-full bg-brand-yellow text-brand-blue hover:brightness-95">
                   Send Message
                 </Button>
               </form>
