@@ -4,11 +4,12 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookOpen, Headphones, FileText, FileCheck, Play, X } from 'lucide-react';
+import { ArrowLeft, BookOpen, Headphones, FileText, FileCheck, Play, X, Trophy, Confetti } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
+import CongratulationAnimation from '@/components/student/CongratulationAnimation';
 
 const DayContent = () => {
   const { dayId } = useParams<{ dayId: string }>();
@@ -34,6 +35,8 @@ const DayContent = () => {
     type: 'glossary' | 'reading' | 'listening' | 'video' | 'test' | 'notes';
     content: any;
   } | null>(null);
+
+  const [showCongratulations, setShowCongratulations] = useState(false);
   
   // Load completion state from localStorage
   useEffect(() => {
@@ -61,6 +64,19 @@ const DayContent = () => {
   useEffect(() => {
     if (dayId) {
       localStorage.setItem(`day-${dayId}-activities`, JSON.stringify(completedActivities));
+      
+      // Check if all activities are completed
+      const allCompleted = Object.values(completedActivities).every(Boolean);
+      if (allCompleted) {
+        setShowCongratulations(true);
+        
+        // Hide congratulations after 5 seconds
+        const timer = setTimeout(() => {
+          setShowCongratulations(false);
+        }, 5000);
+        
+        return () => clearTimeout(timer);
+      }
     }
   }, [completedActivities, dayId]);
   
@@ -317,7 +333,7 @@ const DayContent = () => {
               {openDialogContent.content.map((item: any, index: number) => (
                 <div key={index} className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-xl font-semibold mb-1">{item.term}</h3>
-                  <p className="text-gray-700">{item.definition}</p>
+                  <p className="text-gray-700 text-lg">{item.definition}</p>
                 </div>
               ))}
             </div>
@@ -330,7 +346,7 @@ const DayContent = () => {
             <div className="mb-4">
               <span className="text-gray-500">{content.storyToRead.date}</span>
             </div>
-            <div className="prose max-w-none mb-10" dangerouslySetInnerHTML={{ __html: openDialogContent.content }} />
+            <div className="prose prose-lg max-w-none mb-10" dangerouslySetInnerHTML={{ __html: openDialogContent.content }} />
           </>
         );
       
@@ -340,7 +356,7 @@ const DayContent = () => {
             <div className="mb-4">
               <span className="text-gray-500">Course Materials</span>
             </div>
-            <div className="prose max-w-none mb-10" dangerouslySetInnerHTML={{ __html: openDialogContent.content }} />
+            <div className="prose prose-lg max-w-none mb-10" dangerouslySetInnerHTML={{ __html: openDialogContent.content }} />
           </>
         );
       
@@ -357,7 +373,7 @@ const DayContent = () => {
             </div>
             <div className="w-full bg-gray-100 p-4 rounded-lg">
               <h3 className="text-xl font-semibold mb-4">{openDialogContent.title}</h3>
-              <p className="text-gray-700">
+              <p className="text-gray-700 text-lg">
                 This video covers the essential concepts related to {openDialogContent.title.toLowerCase()}. 
                 Watch the full video to gain a comprehensive understanding of the topic.
               </p>
@@ -398,16 +414,16 @@ const DayContent = () => {
                 </div>
               </div>
               
-              <p className="text-gray-700 mb-4">
+              <p className="text-gray-700 text-lg mb-4">
                 Listen to the complete audio to practice your pronunciation and comprehension.
                 This recording features a {openDialogContent.title.includes('American') ? 'North American' : 'British'} accent.
               </p>
               
               <div className="space-y-4">
                 <details className="bg-white p-3 rounded-lg border">
-                  <summary className="font-medium cursor-pointer">Listening Tips</summary>
+                  <summary className="font-medium cursor-pointer text-lg">Listening Tips</summary>
                   <div className="pt-3 text-gray-700">
-                    <ul className="list-disc pl-5 space-y-2">
+                    <ul className="list-disc pl-5 space-y-2 text-lg">
                       <li>Listen for main ideas first before focusing on details</li>
                       <li>Pay attention to stress and intonation patterns</li>
                       <li>Try to visualize what you're hearing</li>
@@ -417,9 +433,9 @@ const DayContent = () => {
                 </details>
                 
                 <details className="bg-white p-3 rounded-lg border">
-                  <summary className="font-medium cursor-pointer">Transcript</summary>
+                  <summary className="font-medium cursor-pointer text-lg">Transcript</summary>
                   <div className="pt-3 text-gray-700">
-                    <p>Sarah had always been known as someone with exceptional talent. Her teachers recognized her intelligence, and her friends admired her creativity...</p>
+                    <p className="text-lg">Sarah had always been known as someone with exceptional talent. Her teachers recognized her intelligence, and her friends admired her creativity...</p>
                     <Button variant="link" className="mt-2 p-0 h-auto">Show full transcript</Button>
                   </div>
                 </details>
@@ -429,7 +445,7 @@ const DayContent = () => {
         );
         
       default:
-        return <p>Content not available</p>;
+        return <p className="text-lg">Content not available</p>;
     }
   };
 
@@ -448,11 +464,11 @@ const DayContent = () => {
         </div>
 
         {/* Progress Card */}
-        <Card className="mb-6">
+        <Card className="mb-6 relative">
           <CardHeader>
             <CardTitle>Your Progress</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="space-y-2">
               <Progress value={(completedCount / totalActivities) * 100} className="h-2" />
               <div className="flex justify-between text-sm">
@@ -460,6 +476,13 @@ const DayContent = () => {
                 <span>{Math.round((completedCount / totalActivities) * 100)}%</span>
               </div>
             </div>
+            
+            {/* Congratulations Animation */}
+            {showCongratulations && (
+              <div className="absolute top-0 left-0 w-full h-full">
+                <CongratulationAnimation />
+              </div>
+            )}
           </CardContent>
         </Card>
         
@@ -473,11 +496,11 @@ const DayContent = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold mb-2">The Story to Read</h3>
-                  <p className="mb-4">{content.storyToRead.title}</p>
+                  <p className="mb-4 text-lg">{content.storyToRead.title}</p>
                   <div className="flex justify-between items-center">
                     <Button 
                       variant="link" 
-                      className="text-blue-500 p-0 h-auto hover:underline"
+                      className="text-blue-500 p-0 h-auto hover:underline text-lg"
                       onClick={() => openActivity('reading', 'reading', content.storyToRead.title, content.storyToRead.content)}
                     >
                       Read Now
