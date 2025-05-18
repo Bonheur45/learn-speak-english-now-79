@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,9 +8,12 @@ import { ArrowLeft, BookOpen, Headphones, FileText, FileCheck, Play, X } from 'l
 import { toast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
 
 const DayContent = () => {
   const { dayId } = useParams<{ dayId: string }>();
+  const navigate = useNavigate();
+  
   const [completedActivities, setCompletedActivities] = useState<{
     [key: string]: boolean;
   }>({
@@ -28,15 +31,47 @@ const DayContent = () => {
   const [openActivityId, setOpenActivityId] = useState<string | null>(null);
   const [openDialogContent, setOpenDialogContent] = useState<{
     title: string;
-    type: 'glossary' | 'reading' | 'listening' | 'video' | 'test';
+    type: 'glossary' | 'reading' | 'listening' | 'video' | 'test' | 'notes';
     content: any;
   } | null>(null);
+  
+  // Load completion state from localStorage
+  useEffect(() => {
+    if (dayId) {
+      const storedActivities = localStorage.getItem(`day-${dayId}-activities`);
+      if (storedActivities) {
+        setCompletedActivities(JSON.parse(storedActivities));
+      }
+      
+      // Check if tests have been completed
+      const vocabScore = localStorage.getItem(`day${dayId}-vocabulary-score`);
+      const topicScore = localStorage.getItem(`day${dayId}-topic-score`);
+      
+      if (vocabScore && !completedActivities.vocabularyTest) {
+        setCompletedActivities(prev => ({ ...prev, vocabularyTest: true }));
+      }
+      
+      if (topicScore && !completedActivities.topicTest) {
+        setCompletedActivities(prev => ({ ...prev, topicTest: true }));
+      }
+    }
+  }, [dayId]);
+  
+  // Save completion state to localStorage whenever it changes
+  useEffect(() => {
+    if (dayId) {
+      localStorage.setItem(`day-${dayId}-activities`, JSON.stringify(completedActivities));
+    }
+  }, [completedActivities, dayId]);
   
   // Sample glossary items
   const glossaryItems = [
     { term: "Procrastination", definition: "The act of delaying or postponing tasks." },
     { term: "Overcome", definition: "To succeed in dealing with a problem or difficulty." },
     { term: "Potential", definition: "Latent qualities or abilities that may be developed and lead to future success." },
+    { term: "Consistency", definition: "The quality of always behaving or performing in a similar way, or of always happening in a similar way." },
+    { term: "Discipline", definition: "Training that corrects, molds, or perfects the mental faculties or moral character; control gained by enforcing obedience or order." },
+    { term: "Introspection", definition: "Examining one's own thoughts and feelings." },
   ];
   
   // This would come from an API in a real application
@@ -45,7 +80,55 @@ const DayContent = () => {
       title: "Breaking Free: Overcoming Procrastination and Unlocking Your Potential",
       link: "#",
       isCompleted: completedActivities.reading,
-      content: "This is the full story content that would be displayed when opened...",
+      content: `
+        <h2>Breaking Free: Overcoming Procrastination and Unlocking Your Potential</h2>
+        
+        <p>
+          Sarah had always been known as someone with exceptional talent. Her teachers recognized her intelligence, and her friends admired her creativity. But there was one persistent challenge that kept her from reaching her full potential: procrastination.
+        </p>
+        
+        <p>
+          Every night, Sarah would promise herself that tomorrow would be different. She would wake up early, tackle her tasks head-on, and finally make progress on that project she'd been putting off for weeks. Yet, when morning came, she'd find herself scrolling through social media, watching "just one more" video, or suddenly becoming very interested in reorganizing her bookshelf.
+        </p>
+        
+        <p>
+          This cycle continued until she reached a breaking point during her final year of university. With deadlines looming and opportunities slipping away, Sarah realized something had to change. She began researching why she procrastinated and discovered that it wasn't about laziness or poor time management—it was often rooted in fear of failure, perfectionism, or feeling overwhelmed.
+        </p>
+        
+        <p>
+          Armed with this new understanding, Sarah developed strategies to overcome her procrastination:
+        </p>
+        
+        <ol>
+          <li>
+            <strong>Breaking tasks into smaller steps:</strong> Instead of facing a mountain of work, she divided projects into manageable chunks.
+          </li>
+          <li>
+            <strong>Setting specific times for difficult tasks:</strong> She blocked out dedicated time periods for challenging work when her energy was highest.
+          </li>
+          <li>
+            <strong>Using the two-minute rule:</strong> If something took less than two minutes, she would do it immediately rather than putting it off.
+          </li>
+          <li>
+            <strong>Creating accountability:</strong> She shared her goals with friends who would check in on her progress.
+          </li>
+          <li>
+            <strong>Practicing self-compassion:</strong> She learned to be kinder to herself when she slipped up, rather than falling into a cycle of self-criticism.
+          </li>
+        </ol>
+        
+        <p>
+          The change didn't happen overnight. There were days when old habits resurfaced, but gradually, Sarah began to notice a shift. She started completing assignments well before deadlines. Her stress levels decreased, and her confidence grew. Most importantly, she began to recognize and fulfill her potential.
+        </p>
+        
+        <p>
+          By the end of the academic year, Sarah had not only caught up on her work but had excelled. Her final project received the highest grade in her class, and she was offered an internship at a prestigious company—an opportunity she would have missed had she continued procrastinating.
+        </p>
+        
+        <p>
+          Sarah's journey taught her that overcoming procrastination wasn't simply about becoming more productive—it was about removing the barriers that prevented her from becoming the person she was capable of being. By breaking free from the cycle of delay and avoidance, she had finally unlocked her potential.
+        </p>
+      `,
       date: "5/11/2025"
     },
     listenToStory: {
@@ -68,14 +151,96 @@ const DayContent = () => {
           link: "#",
           isCompleted: completedActivities.topic1,
           videoUrl: "#",
-          notesUrl: "#"
+          notesUrl: "#",
+          notes: `
+            <h2>Aspects of Present Tenses</h2>
+            
+            <p>Present tenses in English are used to talk about actions and states that exist now or that happen regularly. There are four main present tenses:</p>
+            
+            <h3>1. Present Simple</h3>
+            <p><strong>Form:</strong> Subject + base form of verb (+ s/es for third person singular)</p>
+            <p><strong>Example:</strong> I work at a bank. She works at a hospital.</p>
+            <p><strong>Usage:</strong> Facts, habits, routines, general truths, scheduled events</p>
+            
+            <h3>2. Present Continuous (Progressive)</h3>
+            <p><strong>Form:</strong> Subject + am/is/are + present participle (verb + ing)</p>
+            <p><strong>Example:</strong> I am working on a project. They are studying for an exam.</p>
+            <p><strong>Usage:</strong> Actions happening right now, temporary situations, planned future arrangements</p>
+            
+            <h3>3. Present Perfect</h3>
+            <p><strong>Form:</strong> Subject + have/has + past participle</p>
+            <p><strong>Example:</strong> I have finished my homework. She has lived here for five years.</p>
+            <p><strong>Usage:</strong> Past actions with present results, experiences, changes over time, unfinished time periods</p>
+            
+            <h3>4. Present Perfect Continuous</h3>
+            <p><strong>Form:</strong> Subject + have/has + been + present participle (verb + ing)</p>
+            <p><strong>Example:</strong> I have been waiting for an hour. He has been working here since 2020.</p>
+            <p><strong>Usage:</strong> Actions that started in the past and continue to the present, often emphasizing duration</p>
+            
+            <h3>Key Differences:</h3>
+            <ul>
+              <li>Present Simple focuses on <strong>facts and routines</strong></li>
+              <li>Present Continuous focuses on <strong>current or temporary actions</strong></li>
+              <li>Present Perfect focuses on <strong>completion and results</strong></li>
+              <li>Present Perfect Continuous focuses on <strong>duration and continuity</strong></li>
+            </ul>
+          `
         },
         {
           title: "Present Perfect Continuous Tense",
           link: "#",
           isCompleted: completedActivities.topic2,
           videoUrl: "#",
-          notesUrl: "#"
+          notesUrl: "#",
+          notes: `
+            <h2>Present Perfect Continuous Tense</h2>
+            
+            <p>The Present Perfect Continuous tense (also called Present Perfect Progressive) is used to talk about actions that started in the past and have been continuing up until the present moment.</p>
+            
+            <h3>Form:</h3>
+            <p><strong>Subject + have/has + been + verb-ing</strong></p>
+            
+            <h3>Positive Sentences:</h3>
+            <ul>
+              <li>I <strong>have been studying</strong> English for five years.</li>
+              <li>She <strong>has been working</strong> at this company since 2020.</li>
+              <li>They <strong>have been waiting</strong> for the bus for 30 minutes.</li>
+            </ul>
+            
+            <h3>Negative Sentences:</h3>
+            <ul>
+              <li>I <strong>haven't been sleeping</strong> well lately.</li>
+              <li>He <strong>hasn't been feeling</strong> well all week.</li>
+              <li>We <strong>haven't been playing</strong> football since last summer.</li>
+            </ul>
+            
+            <h3>Questions:</h3>
+            <ul>
+              <li><strong>Have</strong> you <strong>been learning</strong> Spanish?</li>
+              <li><strong>Has</strong> she <strong>been living</strong> in London for long?</li>
+              <li>How long <strong>have</strong> they <strong>been waiting</strong>?</li>
+            </ul>
+            
+            <h3>Key Uses:</h3>
+            <ol>
+              <li><strong>Duration up to present:</strong> To emphasize the duration of an action that started in the past and continues to the present moment
+                <p><em>Example:</em> I have been working on this report all morning.</p>
+              </li>
+              <li><strong>Temporary situations:</strong> For situations that have been happening recently but are not permanent
+                <p><em>Example:</em> She has been staying with her parents until her apartment is ready.</p>
+              </li>
+              <li><strong>Explaining results:</strong> To explain the reason for a present result, especially with visible evidence
+                <p><em>Example:</em> I'm tired because I have been running. (The result is being tired)</p>
+              </li>
+            </ol>
+            
+            <h3>Time Expressions:</h3>
+            <ul>
+              <li>With <strong>"for"</strong> to indicate a period of time: for two hours, for six months, for many years</li>
+              <li>With <strong>"since"</strong> to indicate a starting point: since morning, since 2010, since I was a child</li>
+              <li>Other expressions: lately, recently, all day, all week, in the last few days</li>
+            </ul>
+          `
         }
       ]
     },
@@ -84,8 +249,8 @@ const DayContent = () => {
       topicTest: "#",
       vocabularyCompleted: completedActivities.vocabularyTest,
       topicCompleted: completedActivities.topicTest,
-      vocabularyScore: 85,
-      topicScore: 92
+      vocabularyScore: localStorage.getItem(`day${dayId}-vocabulary-score`) ? parseInt(localStorage.getItem(`day${dayId}-vocabulary-score`) || "0") : 85,
+      topicScore: localStorage.getItem(`day${dayId}-topic-score`) ? parseInt(localStorage.getItem(`day${dayId}-topic-score`) || "0") : 92
     },
     watchShortMovies: {
       title: "Episode 1 - A new Neighbor: British",
@@ -113,7 +278,19 @@ const DayContent = () => {
     setOpenDialogContent(null);
   };
   
-  const openActivity = (activityId: string, type: 'glossary' | 'reading' | 'listening' | 'video' | 'test', title: string, content: any) => {
+  const openActivity = (activityId: string, type: 'glossary' | 'reading' | 'listening' | 'video' | 'test' | 'notes', title: string, content: any) => {
+    // For test activities, navigate to the appropriate test page
+    if (type === 'test') {
+      if (activityId === 'vocabularyTest') {
+        navigate(`/student/days/${dayId}/vocabulary-test`);
+        return;
+      } else if (activityId === 'topicTest') {
+        navigate(`/student/days/${dayId}/topic-test`);
+        return;
+      }
+    }
+    
+    // For other activities, open the dialog
     setOpenActivityId(activityId);
     setOpenDialogContent({
       title,
@@ -138,8 +315,9 @@ const DayContent = () => {
             </div>
             <div className="space-y-6 mb-10">
               {openDialogContent.content.map((item: any, index: number) => (
-                <div key={index}>
-                  <p className="text-xl mb-1">{item.term}: {item.definition}</p>
+                <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-xl font-semibold mb-1">{item.term}</h3>
+                  <p className="text-gray-700">{item.definition}</p>
                 </div>
               ))}
             </div>
@@ -152,20 +330,101 @@ const DayContent = () => {
             <div className="mb-4">
               <span className="text-gray-500">{content.storyToRead.date}</span>
             </div>
-            <div className="prose max-w-none mb-10">
-              <p>{openDialogContent.content}</p>
+            <div className="prose max-w-none mb-10" dangerouslySetInnerHTML={{ __html: openDialogContent.content }} />
+          </>
+        );
+      
+      case 'notes':
+        return (
+          <>
+            <div className="mb-4">
+              <span className="text-gray-500">Course Materials</span>
             </div>
+            <div className="prose max-w-none mb-10" dangerouslySetInnerHTML={{ __html: openDialogContent.content }} />
           </>
         );
       
       case 'video':
         return (
           <div className="flex flex-col items-center space-y-4 mb-10">
-            <div className="w-full aspect-video bg-gray-200 flex items-center justify-center">
-              <Play className="h-12 w-12 text-gray-500" />
-              <span className="ml-2">Video would play here</span>
+            <div className="w-full aspect-video bg-gray-200 flex items-center justify-center border rounded-lg">
+              <div className="flex flex-col items-center">
+                <Play className="h-16 w-16 text-gray-500 mb-2" />
+                <span className="text-lg text-center max-w-md px-4">
+                  Video player would appear here with {openDialogContent.title} content
+                </span>
+              </div>
             </div>
-            <p className="text-lg text-center">{openDialogContent.title}</p>
+            <div className="w-full bg-gray-100 p-4 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4">{openDialogContent.title}</h3>
+              <p className="text-gray-700">
+                This video covers the essential concepts related to {openDialogContent.title.toLowerCase()}. 
+                Watch the full video to gain a comprehensive understanding of the topic.
+              </p>
+              <div className="mt-4 flex space-x-3">
+                <Button variant="outline" size="sm">
+                  <FileText className="w-4 h-4 mr-2" /> Download Transcript
+                </Button>
+                <Button variant="outline" size="sm">
+                  <FileText className="w-4 h-4 mr-2" /> Download Slides
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+        
+      case 'listening':
+        return (
+          <div className="flex flex-col items-center space-y-6 mb-10">
+            <div className="w-full bg-gray-100 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4">{openDialogContent.title} Audio</h3>
+              
+              <div className="w-full bg-white p-4 rounded-lg border mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center">
+                    <Play className="h-5 w-5 text-blue-600 mr-2" />
+                    <span className="font-medium">Breaking Free</span>
+                  </div>
+                  <span className="text-sm text-gray-500">5:32</span>
+                </div>
+                
+                <div className="w-full bg-gray-200 h-2 rounded-full mt-2">
+                  <div className="bg-blue-600 h-2 rounded-full w-3/5"></div>
+                </div>
+                
+                <div className="flex justify-between mt-2 text-sm text-gray-500">
+                  <span>3:12</span>
+                  <span>5:32</span>
+                </div>
+              </div>
+              
+              <p className="text-gray-700 mb-4">
+                Listen to the complete audio to practice your pronunciation and comprehension.
+                This recording features a {openDialogContent.title.includes('American') ? 'North American' : 'British'} accent.
+              </p>
+              
+              <div className="space-y-4">
+                <details className="bg-white p-3 rounded-lg border">
+                  <summary className="font-medium cursor-pointer">Listening Tips</summary>
+                  <div className="pt-3 text-gray-700">
+                    <ul className="list-disc pl-5 space-y-2">
+                      <li>Listen for main ideas first before focusing on details</li>
+                      <li>Pay attention to stress and intonation patterns</li>
+                      <li>Try to visualize what you're hearing</li>
+                      <li>Don't worry if you don't understand every word</li>
+                    </ul>
+                  </div>
+                </details>
+                
+                <details className="bg-white p-3 rounded-lg border">
+                  <summary className="font-medium cursor-pointer">Transcript</summary>
+                  <div className="pt-3 text-gray-700">
+                    <p>Sarah had always been known as someone with exceptional talent. Her teachers recognized her intelligence, and her friends admired her creativity...</p>
+                    <Button variant="link" className="mt-2 p-0 h-auto">Show full transcript</Button>
+                  </div>
+                </details>
+              </div>
+            </div>
           </div>
         );
         
@@ -362,7 +621,7 @@ const DayContent = () => {
                           <Button
                             variant="link"
                             className="text-blue-500 p-0 h-auto hover:underline flex items-center gap-1"
-                            onClick={() => openActivity(`topic${index+1}Notes`, 'reading', `${topic.title} - Notes`, "Notes content would be here")}
+                            onClick={() => openActivity(`topic${index+1}Notes`, 'notes', `${topic.title} - Notes`, topic.notes)}
                           >
                             <FileText className="h-3 w-3" />
                             Notes
@@ -476,35 +735,37 @@ const DayContent = () => {
       </main>
       
       {/* Activity Dialog */}
-      <Dialog open={!!openDialogContent} onOpenChange={(open) => {
+      <Sheet open={!!openDialogContent} onOpenChange={(open) => {
         if (!open) {
           setOpenActivityId(null);
           setOpenDialogContent(null);
         }
       }}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">{openDialogContent?.title || ''}</DialogTitle>
-            <DialogClose className="absolute right-4 top-4">
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </DialogClose>
-          </DialogHeader>
-          
-          <div className="py-4">
-            {renderDialogContent()}
+        <SheetContent side="right" className="w-full max-w-3xl p-0 sm:p-0">
+          <div className="h-full flex flex-col">
+            <SheetHeader className="p-6 border-b">
+              <SheetTitle className="text-2xl">{openDialogContent?.title || ''}</SheetTitle>
+              <SheetClose className="absolute right-4 top-4">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </SheetClose>
+            </SheetHeader>
+            
+            <div className="flex-grow overflow-auto p-6">
+              {renderDialogContent()}
+            </div>
+            
+            <SheetFooter className="p-6 border-t">
+              <Button 
+                onClick={() => openActivityId && markAsComplete(openActivityId)} 
+                className="bg-yellow-400 text-blue-900 hover:bg-yellow-500 w-full md:w-auto"
+              >
+                Mark as Complete
+              </Button>
+            </SheetFooter>
           </div>
-          
-          <DialogFooter>
-            <Button 
-              onClick={() => openActivityId && markAsComplete(openActivityId)} 
-              className="bg-yellow-400 text-blue-900 hover:bg-yellow-500 w-full md:w-auto"
-            >
-              Mark as Complete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </>
   );
 };

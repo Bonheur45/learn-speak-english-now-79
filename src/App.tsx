@@ -16,6 +16,8 @@ import NotFound from "./pages/NotFound";
 import DayContent from "./pages/student/DayContent";
 import Assessments from "./pages/student/Assessments";
 import Lessons from "./pages/student/Lessons";
+import VocabularyTest from "./pages/student/VocabularyTest";
+import TopicTest from "./pages/student/TopicTest";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
@@ -41,6 +43,8 @@ const App = () => {
               <Route path="/student/days" element={<Lessons />} />
               <Route path="/student/days/:dayId" element={<DayContent />} />
               <Route path="/student/assessments" element={<Assessments />} />
+              <Route path="/student/days/:dayId/vocabulary-test" element={<VocabularyTest />} />
+              <Route path="/student/days/:dayId/topic-test" element={<TopicTest />} />
               
               {/* Tutor Routes */}
               <Route path="/tutor/dashboard" element={<TutorDashboard />} />
