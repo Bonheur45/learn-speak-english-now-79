@@ -38,6 +38,8 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
             ) : userRole === 'student' ? (
               <>
                 <Link to="/student/dashboard" className={`nav-link ${isActive('/student/dashboard')}`}>Dashboard</Link>
+                <Link to="/student/cohorts" className={`nav-link ${isActive('/student/cohorts')}`}>Cohorts</Link>
+                <Link to="/student/trimesters" className={`nav-link ${isActive('/student/trimesters')}`}>Trimesters</Link>
                 <Link to="/student/days" className={`nav-link ${isActive('/student/days')}`}>Lessons</Link>
                 <Link to="/student/assessments" className={`nav-link ${isActive('/student/assessments')}`}>Assessments</Link>
                 <Link to="/student/progress" className={`nav-link ${isActive('/student/progress')}`}>Progress</Link>
@@ -46,6 +48,7 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
             ) : (
               <>
                 <Link to="/tutor/dashboard" className={`nav-link ${isActive('/tutor/dashboard')}`}>Dashboard</Link>
+                <Link to="/tutor/cohorts" className={`nav-link ${isActive('/tutor/cohorts')}`}>Cohorts</Link>
                 <Link to="/tutor/materials" className={`nav-link ${isActive('/tutor/materials')}`}>Materials</Link>
                 <Link to="/tutor/students" className={`nav-link ${isActive('/tutor/students')}`}>Students</Link>
                 <Link to="/tutor/upload" className={`nav-link ${isActive('/tutor/upload')}`}>Upload</Link>
@@ -78,6 +81,8 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
               ) : userRole === 'student' ? (
                 <>
                   <Link to="/student/dashboard" className={`py-1 px-2 ${isActive('/student/dashboard')}`} onClick={toggleMobileMenu}>Dashboard</Link>
+                  <Link to="/student/cohorts" className={`py-1 px-2 ${isActive('/student/cohorts')}`} onClick={toggleMobileMenu}>Cohorts</Link>
+                  <Link to="/student/trimesters" className={`py-1 px-2 ${isActive('/student/trimesters')}`} onClick={toggleMobileMenu}>Trimesters</Link>
                   <Link to="/student/days" className={`py-1 px-2 ${isActive('/student/days')}`} onClick={toggleMobileMenu}>Lessons</Link>
                   <Link to="/student/assessments" className={`py-1 px-2 ${isActive('/student/assessments')}`} onClick={toggleMobileMenu}>Assessments</Link>
                   <Link to="/student/progress" className={`py-1 px-2 ${isActive('/student/progress')}`} onClick={toggleMobileMenu}>Progress</Link>
@@ -86,6 +91,7 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
               ) : (
                 <>
                   <Link to="/tutor/dashboard" className={`py-1 px-2 ${isActive('/tutor/dashboard')}`} onClick={toggleMobileMenu}>Dashboard</Link>
+                  <Link to="/tutor/cohorts" className={`py-1 px-2 ${isActive('/tutor/cohorts')}`} onClick={toggleMobileMenu}>Cohorts</Link>
                   <Link to="/tutor/materials" className={`py-1 px-2 ${isActive('/tutor/materials')}`} onClick={toggleMobileMenu}>Materials</Link>
                   <Link to="/tutor/students" className={`py-1 px-2 ${isActive('/tutor/students')}`} onClick={toggleMobileMenu}>Students</Link>
                   <Link to="/tutor/upload" className={`py-1 px-2 ${isActive('/tutor/upload')}`} onClick={toggleMobileMenu}>Upload</Link>

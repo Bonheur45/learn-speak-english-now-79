@@ -18,6 +18,10 @@ import Assessments from "./pages/student/Assessments";
 import Lessons from "./pages/student/Lessons";
 import VocabularyTest from "./pages/student/VocabularyTest";
 import TopicTest from "./pages/student/TopicTest";
+import StudentCohorts from "./pages/student/Cohorts";
+import StudentTrimesters from "./pages/student/Trimesters";
+import TutorCohorts from "./pages/tutor/Cohorts";
+import UploadPage from "./pages/tutor/Upload";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
@@ -40,6 +44,8 @@ const App = () => {
               
               {/* Student Routes */}
               <Route path="/student/dashboard" element={<StudentDashboard />} />
+              <Route path="/student/cohorts" element={<StudentCohorts />} />
+              <Route path="/student/trimesters" element={<StudentTrimesters />} />
               <Route path="/student/days" element={<Lessons />} />
               <Route path="/student/days/:dayId" element={<DayContent />} />
               <Route path="/student/assessments" element={<Assessments />} />
@@ -48,8 +54,10 @@ const App = () => {
               
               {/* Tutor Routes */}
               <Route path="/tutor/dashboard" element={<TutorDashboard />} />
+              <Route path="/tutor/cohorts" element={<TutorCohorts />} />
               <Route path="/tutor/students" element={<Students />} />
               <Route path="/tutor/materials" element={<Materials />} />
+              <Route path="/tutor/upload" element={<UploadPage />} />
               
               {/* Static Pages */}
               <Route path="/about" element={<About />} />

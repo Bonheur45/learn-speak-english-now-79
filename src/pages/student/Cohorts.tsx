@@ -1,0 +1,141 @@
+
+import React from 'react';
+import Navbar from '@/components/Navbar';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { MOCK_COHORTS } from '@/lib/types';
+import { Link } from 'react-router-dom';
+
+const Cohorts = () => {
+  const cohorts = MOCK_COHORTS;
+  
+  // Get the user's current cohort (in a real app this would come from API/auth)
+  const userCohortId = '1'; // Assuming user is in cohort 1
+  
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'upcoming':
+        return 'bg-blue-100 text-blue-800';
+      case 'completed':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+  
+  return (
+    <>
+      <Navbar isLoggedIn={true} userRole="student" />
+      <main className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Cohorts</h1>
+        
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Your Enrolled Cohort</h2>
+          <div className="grid grid-cols-1 gap-6">
+            {cohorts
+              .filter(cohort => cohort.id === userCohortId)
+              .map(cohort => (
+                <Card key={cohort.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
+                    <div className="flex justify-between items-center">
+                      <CardTitle>{cohort.name}</CardTitle>
+                      <Badge className={`${getStatusColor(cohort.status)}`}>
+                        {cohort.status === 'active' ? 'Currently Active' : cohort.status}
+                      </Badge>
+                    </div>
+                    <CardDescription>
+                      {new Date(cohort.start_date).toLocaleDateString()} to {new Date(cohort.end_date).toLocaleDateString()}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="font-medium text-lg">Current Progress</h3>
+                        <p className="text-gray-600">
+                          Currently in Trimester {cohort.current_trimester} of 3
+                        </p>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-4">
+                        {[1, 2, 3].map(trimNum => (
+                          <div 
+                            key={trimNum}
+                            className={`p-4 rounded-lg border ${trimNum === cohort.current_trimester ? 'border-blue-500 bg-blue-50' : trimNum < cohort.current_trimester ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}
+                          >
+                            <h4 className="font-medium">Trimester {trimNum}</h4>
+                            <p className="text-sm text-gray-600">
+                              {trimNum === cohort.current_trimester ? 'In Progress' : trimNum < cohort.current_trimester ? 'Completed' : 'Upcoming'}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="border-t bg-gray-50">
+                    <div className="flex justify-between items-center w-full">
+                      <span className="text-sm text-gray-600">{cohort.status === 'active' ? 'Currently Active' : cohort.status}</span>
+                      <Button asChild>
+                        <Link to={`/student/trimesters?cohort=${cohort.id}`}>View Trimesters</Link>
+                      </Button>
+                    </div>
+                  </CardFooter>
+                </Card>
+              ))}
+          </div>
+        </div>
+        
+        <div>
+          <h2 className="text-xl font-semibold mb-4">All Available Cohorts</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cohorts.map(cohort => (
+              <Card 
+                key={cohort.id} 
+                className={`hover:shadow-md transition-shadow ${cohort.id === userCohortId ? 'border-blue-500' : ''}`}
+              >
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle>{cohort.name}</CardTitle>
+                      <CardDescription>
+                        {new Date(cohort.start_date).toLocaleDateString()} to {new Date(cohort.end_date).toLocaleDateString()}
+                      </CardDescription>
+                    </div>
+                    <Badge className={`${getStatusColor(cohort.status)}`}>
+                      {cohort.status}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p>
+                    Current Trimester: {cohort.current_trimester}/3
+                  </p>
+                </CardContent>
+                <CardFooter className="justify-between">
+                  {cohort.id === userCohortId ? (
+                    <span className="text-sm font-medium text-blue-600">Currently Enrolled</span>
+                  ) : (
+                    <span className="text-sm text-gray-500">Not Enrolled</span>
+                  )}
+                  <Button 
+                    asChild
+                    variant={cohort.id === userCohortId ? "default" : "outline"} 
+                    disabled={cohort.status === 'completed'}
+                  >
+                    <Link to={`/student/trimesters?cohort=${cohort.id}`}>
+                      {cohort.id === userCohortId ? 'Continue Learning' : 'View Details'}
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </main>
+    </>
+  );
+};
+
+export default Cohorts;
