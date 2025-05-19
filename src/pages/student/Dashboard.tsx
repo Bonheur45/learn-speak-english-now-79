@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
+import Layout from '@/components/Layout';
 import ProgressCard from '@/components/student/ProgressCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,10 +27,8 @@ const StudentDashboard = () => {
   ];
   
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar isLoggedIn={true} userRole="student" />
-      
-      <main className="flex-grow container mx-auto px-4 py-8">
+    <Layout isLoggedIn={true} userRole="student">
+      <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-brand-blue">Welcome back, {studentName}</h1>
@@ -124,14 +122,14 @@ const StudentDashboard = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
+      </div>
       
-      <footer className="bg-white border-t py-6">
+      <footer className="bg-white border-t py-6 mt-8">
         <div className="container mx-auto px-4 text-center text-gray-600">
           <p>© {new Date().getFullYear()} Let's Do It English. All rights reserved.</p>
         </div>
       </footer>
-    </div>
+    </Layout>
   );
 };
 

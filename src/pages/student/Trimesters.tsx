@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
+import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
@@ -27,9 +27,8 @@ const Trimesters = () => {
   
   if (!selectedCohort) {
     return (
-      <>
-        <Navbar isLoggedIn={true} userRole="student" />
-        <main className="container mx-auto px-4 py-8">
+      <Layout isLoggedIn={true} userRole="student">
+        <div className="container mx-auto px-4">
           <div className="text-center py-10">
             <h2 className="text-2xl font-bold">Cohort not found</h2>
             <p className="mt-2">The requested cohort does not exist.</p>
@@ -37,8 +36,8 @@ const Trimesters = () => {
               <Link to="/student/cohorts">View All Cohorts</Link>
             </Button>
           </div>
-        </main>
-      </>
+        </div>
+      </Layout>
     );
   }
   
@@ -54,9 +53,8 @@ const Trimesters = () => {
   };
   
   return (
-    <>
-      <Navbar isLoggedIn={true} userRole="student" />
-      <main className="container mx-auto px-4 py-8">
+    <Layout isLoggedIn={true} userRole="student">
+      <div className="container mx-auto px-4">
         <div className="mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
@@ -186,8 +184,8 @@ const Trimesters = () => {
             );
           })}
         </div>
-      </main>
-    </>
+      </div>
+    </Layout>
   );
 };
 

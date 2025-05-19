@@ -1,6 +1,6 @@
 
 import React from 'react';
-import Navbar from '@/components/Navbar';
+import Layout from '@/components/Layout';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -82,9 +82,8 @@ const Lessons = () => {
   ];
 
   return (
-    <>
-      <Navbar isLoggedIn={true} userRole="student" />
-      <main className="container mx-auto px-4 py-8">
+    <Layout isLoggedIn={true} userRole="student">
+      <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold mb-6">Available Lessons</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {days.map((day) => (
@@ -138,8 +137,8 @@ const Lessons = () => {
             </Link>
           ))}
         </div>
-      </main>
-    </>
+      </div>
+    </Layout>
   );
 };
 
