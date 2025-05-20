@@ -2,6 +2,7 @@
 import React from 'react';
 import Navbar from './Navbar';
 import { UserRole } from '@/lib/types';
+import { Toaster } from "@/components/ui/sonner";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -16,6 +17,7 @@ const Layout = ({ children, isLoggedIn, userRole }: LayoutProps) => {
       <main className="flex-1 pt-32 md:pt-28 lg:pt-24 pb-8 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
+      <Toaster position="top-right" richColors />
     </div>
   );
 };

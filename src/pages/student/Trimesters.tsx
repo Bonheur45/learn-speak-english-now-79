@@ -5,8 +5,9 @@ import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { MOCK_COHORTS, MOCK_TRIMESTERS, Trimester } from '@/lib/types';
-import { ArrowRight, BookOpen, Check, CheckCircle, CircleDashed } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { MOCK_COHORTS, MOCK_TRIMESTERS, Trimester, ProficiencyLevel } from '@/lib/types';
+import { ArrowRight, BookOpen, Calendar, Check, CheckCircle, CircleDashed, Clock } from 'lucide-react';
 
 const Trimesters = () => {
   const location = useLocation();
@@ -51,6 +52,19 @@ const Trimesters = () => {
       return 0; // Future trimester, not started
     }
   };
+
+  const getLevelColor = (level: ProficiencyLevel) => {
+    switch (level) {
+      case 'A1-A2':
+        return 'bg-emerald-100 text-emerald-800';
+      case 'B1-B2':
+        return 'bg-blue-100 text-blue-800';
+      case 'C1-C2':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
   
   return (
     <Layout isLoggedIn={true} userRole="student">
@@ -59,13 +73,48 @@ const Trimesters = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-3xl font-bold">Trimesters for {selectedCohort.name}</h1>
-              <p className="text-gray-600">Your learning journey is organized into 3 trimesters</p>
+              <div className="flex items-center gap-2 mt-2">
+                <Badge className={getLevelColor(selectedCohort.proficiency_level)}>
+                  {selectedCohort.proficiency_level}
+                </Badge>
+                <span className="text-gray-600">•</span>
+                <span className="text-gray-600 flex items-center">
+                  <Calendar className="h-4 w-4 mr-1" />
+                  {new Date(selectedCohort.start_date).toLocaleDateString()} - {new Date(selectedCohort.end_date).toLocaleDateString()}
+                </span>
+              </div>
             </div>
             <Button asChild variant="outline" className="mt-4 md:mt-0">
               <Link to="/student/cohorts">Back to Cohorts</Link>
             </Button>
           </div>
         </div>
+        
+        {/* Trimester information box */}
+        <Card className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+          <CardContent className="pt-6 pb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-medium">Your Learning Journey</h2>
+                <p className="text-gray-600">Each trimester consists of 12 days of learning materials</p>
+              </div>
+              <div className="flex items-center gap-4 bg-white p-3 rounded-lg border border-blue-100 shadow-sm">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                  <span className="text-sm">Completed</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                  <span className="text-sm">In Progress</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-gray-300 mr-2"></div>
+                  <span className="text-sm">Upcoming</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         
         <div className="space-y-8">
           {trimesters.map((trimester, index) => {
@@ -96,7 +145,8 @@ const Trimesters = () => {
                         {isInProgress && <CircleDashed className="w-5 h-5 text-blue-500 mr-2" />}
                         {trimester.name}
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1" />
                         {new Date(trimester.start_date).toLocaleDateString()} - {new Date(trimester.end_date).toLocaleDateString()}
                       </CardDescription>
                     </div>
@@ -125,16 +175,22 @@ const Trimesters = () => {
                   
                   <div className="mt-6">
                     <h3 className="text-lg font-medium mb-4">Days in this Trimester</h3>
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
                       {trimester.days.map((day, dayIndex) => (
                         <div key={day.id} className="flex items-center justify-between border-b pb-3">
                           <div className="flex items-center">
-                            <div className="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center mr-3">
-                              <span className="font-medium text-gray-700">{day.day_number}</span>
+                            <div 
+                              className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 
+                                ${isCompleted ? 'bg-green-100' : isInProgress ? 'bg-blue-100' : 'bg-gray-100'}`}
+                            >
+                              <span className="font-medium 
+                                ${isCompleted ? 'text-green-700' : isInProgress ? 'text-blue-700' : 'text-gray-700'}">
+                                {day.day_number}
+                              </span>
                             </div>
                             <div>
                               <h4 className="font-medium">{day.title}</h4>
-                              <p className="text-sm text-gray-600">{day.description}</p>
+                              <p className="text-sm text-gray-600 truncate max-w-[200px]">{day.description}</p>
                             </div>
                           </div>
                           <Button 
@@ -142,6 +198,7 @@ const Trimesters = () => {
                             variant="ghost" 
                             disabled={isUpcoming} 
                             className={isCompleted ? "text-green-600" : "text-blue-600"}
+                            size="sm"
                           >
                             <Link to={`/student/days/${day.id}`}>
                               {isCompleted ? 'Review' : 'Study'} <ArrowRight className="ml-1 h-4 w-4" />
