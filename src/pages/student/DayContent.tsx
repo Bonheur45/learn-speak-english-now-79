@@ -342,20 +342,20 @@ const DayContent = () => {
       case 'reading':
         return (
           <>
-            <div className="mb-4">
+            <div className="mb-4 px-2">
               <span className="text-gray-500">{content.storyToRead.date}</span>
             </div>
-            <div className="prose prose-lg max-w-none mb-10" dangerouslySetInnerHTML={{ __html: openDialogContent.content }} />
+            <div className="prose prose-lg max-w-none mb-10 px-2 sm:px-4 pt-4" dangerouslySetInnerHTML={{ __html: openDialogContent.content }} />
           </>
         );
       
       case 'notes':
         return (
           <>
-            <div className="mb-4">
+            <div className="mb-4 px-2">
               <span className="text-gray-500">Course Materials</span>
             </div>
-            <div className="prose prose-lg max-w-none mb-10" dangerouslySetInnerHTML={{ __html: openDialogContent.content }} />
+            <div className="prose prose-lg max-w-none mb-10 px-2 sm:px-4 pt-4" dangerouslySetInnerHTML={{ __html: openDialogContent.content }} />
           </>
         );
       

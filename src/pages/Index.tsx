@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -17,10 +16,10 @@ const Index = () => {
   ];
 
   return (
-    <Layout isLoggedIn={false}>
+    <Layout isLoggedIn={false} fullWidth={true}>
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-white to-gray-100 py-8 md:py-16 flex-grow">
-        <div className="container mx-auto px-0 sm:px-4">
+        <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 px-4 md:pr-8 mb-8 md:mb-0">
               <h1 className="text-4xl md:text-5xl font-bold text-brand-blue mb-4">
@@ -62,14 +61,14 @@ const Index = () => {
           </p>
           
           <Tabs defaultValue="A1-A2" className="w-full">
-            <TabsList className="grid grid-cols-3 mb-8">
-              <TabsTrigger value="A1-A2" className="text-base py-3">
+            <TabsList className="w-full grid grid-cols-3 mb-8">
+              <TabsTrigger value="A1-A2" className="text-xs sm:text-sm md:text-base py-3 px-1 sm:px-3">
                 Beginner (A1-A2)
               </TabsTrigger>
-              <TabsTrigger value="B1-B2" className="text-base py-3">
+              <TabsTrigger value="B1-B2" className="text-xs sm:text-sm md:text-base py-3 px-1 sm:px-3">
                 Intermediate (B1-B2)
               </TabsTrigger>
-              <TabsTrigger value="C1-C2" className="text-base py-3">
+              <TabsTrigger value="C1-C2" className="text-xs sm:text-sm md:text-base py-3 px-1 sm:px-3">
                 Advanced (C1-C2)
               </TabsTrigger>
             </TabsList>
@@ -238,7 +237,7 @@ const Index = () => {
             <p className="text-gray-600 mt-4 md:mt-0">
               © {new Date().getFullYear()} Let's Do It English. All rights reserved.
             </p>
-            <div className="flex space-x-4 mt-4 md:mt-0">
+            <div className="flex flex-wrap justify-center gap-4 mt-4 md:mt-0">
               <Link to="/about" className="text-gray-600 hover:text-brand-blue">About</Link>
               <Link to="/contact" className="text-gray-600 hover:text-brand-blue">Contact</Link>
               <Link to="/privacy" className="text-gray-600 hover:text-brand-blue">Privacy</Link>

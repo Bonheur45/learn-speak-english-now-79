@@ -28,20 +28,20 @@ const StudentDashboard = () => {
   
   return (
     <Layout isLoggedIn={true} userRole="student">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+      <div className="container mx-auto px-2 sm:px-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 lg:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-brand-blue">Welcome back, {studentName}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-brand-blue">Welcome back, {studentName}</h1>
             <p className="text-gray-600 mt-1">Here's your learning progress for today.</p>
           </div>
-          <div className="mt-4 md:mt-0">
-            <Button asChild className="bg-brand-yellow text-brand-blue hover:brightness-95">
+          <div className="mt-4 md:mt-0 w-full md:w-auto">
+            <Button asChild className="w-full md:w-auto bg-brand-yellow text-brand-blue hover:brightness-95">
               <Link to={`/student/days/${currentDay.id}`}>Continue Learning</Link>
             </Button>
           </div>
         </div>
         
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
           <ProgressCard
             title="Course Progress"
             value={completedDays}
@@ -62,7 +62,7 @@ const StudentDashboard = () => {
           />
         </div>
         
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Today's Learning Plan</CardTitle>
@@ -109,11 +109,11 @@ const StudentDashboard = () => {
               {days.slice(0, 3).map((day, index) => (
                 <div key={day.id} className={`py-3 ${index !== days.slice(0, 3).length - 1 ? 'border-b' : ''}`}>
                   <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className="font-medium">Day {day.id}: {day.title}</h4>
-                      <p className="text-sm text-gray-500">{day.description}</p>
+                    <div className="pr-2">
+                      <h4 className="font-medium text-sm sm:text-base">Day {day.id}: {day.title}</h4>
+                      <p className="text-xs sm:text-sm text-gray-500 line-clamp-1">{day.description}</p>
                     </div>
-                    <Button asChild variant="ghost" className="text-brand-blue hover:text-brand-yellow hover:bg-brand-blue">
+                    <Button asChild variant="ghost" className="text-brand-blue hover:text-brand-yellow hover:bg-brand-blue ml-2">
                       <Link to={`/student/days/${day.id}`}>View</Link>
                     </Button>
                   </div>
