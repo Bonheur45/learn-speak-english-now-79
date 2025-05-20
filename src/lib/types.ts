@@ -1,3 +1,4 @@
+
 // User related types
 export type UserRole = 'student' | 'tutor' | 'admin';
 
@@ -332,7 +333,8 @@ export const MOCK_TRIMESTERS: Trimester[] = [
         description: 'Get started with basic English concepts',
         date: '2025-01-15',
         story_text: 'Once upon a time, there was a student eager to learn English...',
-        day_number: 1
+        day_number: 1,
+        materials: []
       },
       {
         id: '2',
@@ -341,7 +343,8 @@ export const MOCK_TRIMESTERS: Trimester[] = [
         description: 'Learn everyday English greetings',
         date: '2025-01-18',
         story_text: 'Sarah walked into her new office on her first day...',
-        day_number: 2
+        day_number: 2,
+        materials: []
       },
       {
         id: '3',
@@ -350,7 +353,8 @@ export const MOCK_TRIMESTERS: Trimester[] = [
         description: 'Practice basic English conversations',
         date: '2025-01-22',
         story_text: 'John and Mary met at a cafe to practice their English...',
-        day_number: 3
+        day_number: 3,
+        materials: []
       }
     ]
   },
@@ -369,7 +373,8 @@ export const MOCK_TRIMESTERS: Trimester[] = [
         description: 'Understanding and using past tense verbs',
         date: '2025-04-20',
         story_text: 'Last weekend, Alex visited his grandmother in the countryside...',
-        day_number: 1
+        day_number: 1,
+        materials: []
       },
       {
         id: '5',
@@ -378,7 +383,8 @@ export const MOCK_TRIMESTERS: Trimester[] = [
         description: 'Expressing future events and plans',
         date: '2025-04-25',
         story_text: 'Next summer, the Johnson family will travel to Europe...',
-        day_number: 2
+        day_number: 2,
+        materials: []
       }
     ]
   },
@@ -397,7 +403,8 @@ export const MOCK_TRIMESTERS: Trimester[] = [
         description: 'Expressing hypothetical situations',
         date: '2025-08-20',
         story_text: 'If I had known about the traffic, I would have left earlier...',
-        day_number: 1
+        day_number: 1,
+        materials: []
       },
       {
         id: '7',
@@ -406,7 +413,8 @@ export const MOCK_TRIMESTERS: Trimester[] = [
         description: 'Writing formal essays and reports',
         date: '2025-08-25',
         story_text: 'The research paper discussed the effects of climate change...',
-        day_number: 2
+        day_number: 2,
+        materials: []
       }
     ]
   }
