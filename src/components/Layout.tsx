@@ -13,7 +13,7 @@ const Layout = ({ children, isLoggedIn, userRole }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar isLoggedIn={isLoggedIn} userRole={userRole} />
-      <main className="flex-1 pt-28 md:pt-24 pb-8 px-4">
+      <main className="flex-1 pt-32 md:pt-28 lg:pt-24 pb-8 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
     </div>

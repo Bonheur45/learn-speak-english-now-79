@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
+import Layout from '@/components/Layout';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import ImageCarousel from '@/components/ImageCarousel';
@@ -13,11 +12,9 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar isLoggedIn={false} />
-      
+    <Layout isLoggedIn={false}>
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-white to-gray-100 py-12 md:py-20 flex-grow">
+      <section className="bg-gradient-to-b from-white to-gray-100 py-8 md:py-16 flex-grow">
         <div className="container mx-auto px-0 sm:px-4">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 px-4 md:pr-8 mb-8 md:mb-0">
@@ -119,7 +116,7 @@ const Index = () => {
           </div>
         </div>
       </footer>
-    </div>
+    </Layout>
   );
 };
 

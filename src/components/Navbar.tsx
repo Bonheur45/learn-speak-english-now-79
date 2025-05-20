@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { UserRole } from '@/lib/types';
@@ -22,7 +21,7 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-white shadow-sm z-50">
+    <header className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Logo size="medium" />
@@ -69,7 +68,7 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
         
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4 py-2 border-t border-gray-100">
+          <div className="md:hidden mt-4 py-2 border-t border-gray-100 bg-white">
             <nav className="flex flex-col space-y-2">
               {!isLoggedIn ? (
                 <>
