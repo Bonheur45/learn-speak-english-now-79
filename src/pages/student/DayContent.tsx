@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
+import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, BookOpen, Headphones, FileText, FileCheck, Play, X, Trophy, Sparkles } from 'lucide-react';
@@ -450,9 +449,8 @@ const DayContent = () => {
   };
 
   return (
-    <>
-      <Navbar isLoggedIn={true} userRole="student" />
-      <main className="container mx-auto px-4 py-8">
+    <Layout isLoggedIn={true} userRole="student">
+      <div className="container mx-auto">
         <div className="flex items-center mb-6">
           <Button variant="outline" size="sm" asChild className="mr-4">
             <Link to="/student/days">
@@ -755,7 +753,7 @@ const DayContent = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
+      </div>
       
       {/* Activity Dialog */}
       <Sheet open={!!openDialogContent} onOpenChange={(open) => {
@@ -789,7 +787,7 @@ const DayContent = () => {
           </div>
         </SheetContent>
       </Sheet>
-    </>
+    </Layout>
   );
 };
 
