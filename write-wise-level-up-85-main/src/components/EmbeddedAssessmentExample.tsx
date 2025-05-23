@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Medal, FileText, Check, BookOpen, Calendar } from "lucide-react";
+import { Medal, FileText, Check, BookOpen, Calendar, PenLine } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -109,8 +109,18 @@ const EmbeddedAssessmentExample = () => {
 
   const startAssessment = (assessment: AssessmentProps) => {
     if (assessment.id.includes("writing")) {
-      // Navigate to the embedded assessment tool with the appropriate parameters
-      navigate(`/embedded-assessment/${assessment.courseId}/${assessment.lessonId}/${assessment.id}?returnUrl=/`);
+      // We now have two options for writing assessments:
+      // 1. Use the embedded assessment tool
+      // 2. Go to the dedicated writing assessment page
+      
+      // For demonstration, we'll show a direct path to both options
+      if (activeTab === "day-1") {
+        // Navigate to the embedded assessment tool 
+        navigate(`/embedded-assessment/${assessment.courseId}/${assessment.lessonId}/${assessment.id}?returnUrl=/`);
+      } else {
+        // Navigate to the integrated writing assessment page
+        navigate(`/student/writing-assessment/${assessment.lessonId}`);
+      }
     } else {
       // This would typically navigate to different types of assessments
       alert(`Starting assessment: ${assessment.id}`);
@@ -182,7 +192,7 @@ const EmbeddedAssessmentExample = () => {
                           >
                             {assessment.id.includes("writing") ? (
                               <>
-                                <Medal className="mr-2 h-4 w-4" />
+                                <PenLine className="mr-2 h-4 w-4" />
                                 Start Writing Task
                               </>
                             ) : (
@@ -198,6 +208,25 @@ const EmbeddedAssessmentExample = () => {
             </TabsContent>
           ))}
         </Tabs>
+        
+        {/* Explanatory card */}
+        <Card className="p-6 mt-8 bg-blue-50 border-blue-100">
+          <h3 className="text-lg font-bold mb-2">About Writing Assessments</h3>
+          <p className="mb-4 text-gray-700">
+            This demo shows two integration options for writing assessments:
+          </p>
+          <ul className="list-disc pl-5 space-y-2 mb-4 text-gray-700">
+            <li>
+              <strong>Day 1 assessments</strong> use the embedded assessment tool that can be integrated into any platform via iframe
+            </li>
+            <li>
+              <strong>Day 2 & 3 assessments</strong> use the fully integrated assessment page with student progress tracking
+            </li>
+          </ul>
+          <p className="text-gray-700">
+            Both methods use the same assessment engine and results display, but the integrated version allows for deeper integration with your learning management system.
+          </p>
+        </Card>
       </div>
     </div>
   );
