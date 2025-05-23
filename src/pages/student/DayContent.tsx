@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookOpen, Headphones, FileText, FileCheck, Play, X, Trophy, Sparkles } from 'lucide-react';
+import { ArrowLeft, BookOpen, Headphones, FileText, FileCheck, Play, X, Trophy, Sparkles, PenLine } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
@@ -25,6 +25,7 @@ const DayContent = () => {
     topic2: false,
     vocabularyTest: false,
     topicTest: false,
+    writingAssessment: false, // Add writing assessment
     watchShortMovie: false,
   });
   
@@ -48,6 +49,7 @@ const DayContent = () => {
       // Check if tests have been completed
       const vocabScore = localStorage.getItem(`day${dayId}-vocabulary-score`);
       const topicScore = localStorage.getItem(`day${dayId}-topic-score`);
+      const writingScore = localStorage.getItem(`day${dayId}-writing-score`);
       
       if (vocabScore && !completedActivities.vocabularyTest) {
         setCompletedActivities(prev => ({ ...prev, vocabularyTest: true }));
@@ -55,6 +57,10 @@ const DayContent = () => {
       
       if (topicScore && !completedActivities.topicTest) {
         setCompletedActivities(prev => ({ ...prev, topicTest: true }));
+      }
+      
+      if (writingScore && !completedActivities.writingAssessment) {
+        setCompletedActivities(prev => ({ ...prev, writingAssessment: true }));
       }
     }
   }, [dayId]);
@@ -262,10 +268,13 @@ const DayContent = () => {
     assessments: {
       vocabularyTest: "#",
       topicTest: "#",
+      writingAssessment: "#", // Add writing assessment
       vocabularyCompleted: completedActivities.vocabularyTest,
       topicCompleted: completedActivities.topicTest,
+      writingCompleted: completedActivities.writingAssessment, // Add writing completion
       vocabularyScore: localStorage.getItem(`day${dayId}-vocabulary-score`) ? parseInt(localStorage.getItem(`day${dayId}-vocabulary-score`) || "0") : 85,
-      topicScore: localStorage.getItem(`day${dayId}-topic-score`) ? parseInt(localStorage.getItem(`day${dayId}-topic-score`) || "0") : 92
+      topicScore: localStorage.getItem(`day${dayId}-topic-score`) ? parseInt(localStorage.getItem(`day${dayId}-topic-score`) || "0") : 92,
+      writingScore: localStorage.getItem(`day${dayId}-writing-score`) ? parseInt(localStorage.getItem(`day${dayId}-writing-score`) || "0") : 88 // Add writing score
     },
     watchShortMovies: {
       title: "Episode 1 - A new Neighbor: British",
@@ -301,6 +310,9 @@ const DayContent = () => {
         return;
       } else if (activityId === 'topicTest') {
         navigate(`/student/days/${dayId}/topic-test`);
+        return;
+      } else if (activityId === 'writingAssessment') {
+        navigate(`/student/writing-assessment/${dayId}`);
         return;
       }
     }
@@ -656,12 +668,12 @@ const DayContent = () => {
             </CardContent>
           </Card>
           
-          {/* Assessments */}
-          <Card className={`border-l-4 ${content.assessments.vocabularyCompleted && content.assessments.topicCompleted ? 'border-l-green-500' : 'border-l-gray-300'}`}>
+          {/* Assessments - Updated to include Writing Assessment */}
+          <Card className={`border-l-4 ${content.assessments.vocabularyCompleted && content.assessments.topicCompleted && content.assessments.writingCompleted ? 'border-l-green-500' : 'border-l-gray-300'}`}>
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
-                <div className={`p-2 rounded-full ${content.assessments.vocabularyCompleted && content.assessments.topicCompleted ? 'bg-green-100' : 'bg-gray-100'}`}>
-                  <FileCheck className={`h-6 w-6 ${content.assessments.vocabularyCompleted && content.assessments.topicCompleted ? 'text-green-500' : 'text-gray-500'}`} />
+                <div className={`p-2 rounded-full ${content.assessments.vocabularyCompleted && content.assessments.topicCompleted && content.assessments.writingCompleted ? 'bg-green-100' : 'bg-gray-100'}`}>
+                  <FileCheck className={`h-6 w-6 ${content.assessments.vocabularyCompleted && content.assessments.topicCompleted && content.assessments.writingCompleted ? 'text-green-500' : 'text-gray-500'}`} />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold mb-2">Assessments</h3>
@@ -712,6 +724,33 @@ const DayContent = () => {
                         disabled={content.assessments.topicCompleted}
                       >
                         {content.assessments.topicCompleted ? 'Completed' : 'Start Test'}
+                      </Button>
+                    </div>
+                    {/* NEW: Writing Assessment */}
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="link"
+                          className="text-blue-500 p-0 h-auto hover:underline flex items-center gap-2"
+                          onClick={() => openActivity('writingAssessment', 'test', 'Writing Assessment', "Writing assessment content")}
+                        >
+                          <PenLine className="h-4 w-4" />
+                          Writing Assessment
+                        </Button>
+                        {content.assessments.writingCompleted && (
+                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                            Score: {content.assessments.writingScore}%
+                          </span>
+                        )}
+                      </div>
+                      <Button 
+                        variant={content.assessments.writingCompleted ? "outline" : "default"}
+                        size="sm"
+                        onClick={() => openActivity('writingAssessment', 'test', 'Writing Assessment', "Writing assessment content")}
+                        disabled={content.assessments.writingCompleted}
+                        className={content.assessments.writingCompleted ? "" : "bg-amber-400 hover:bg-amber-500 text-black"}
+                      >
+                        {content.assessments.writingCompleted ? 'Completed' : 'Start Writing'}
                       </Button>
                     </div>
                   </div>
