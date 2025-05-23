@@ -1,0 +1,44 @@
+
+.quill-fullscreen .ql-toolbar {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.quill-fullscreen .ql-container {
+  border: none;
+  height: calc(100% - 42px) !important;
+}
+
+.editor-container .ql-editor {
+  min-height: 200px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.editor-container .ql-toolbar {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.editor-container .ql-container {
+  border: 1px solid #e2e8f0;
+  border-top: none;
+}
+
+/* Custom scrollbar for editor */
+.editor-container .ql-editor::-webkit-scrollbar {
+  width: 6px;
+}
+
+.editor-container .ql-editor::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.editor-container .ql-editor::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.editor-container .ql-editor::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
