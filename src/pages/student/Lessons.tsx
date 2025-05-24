@@ -148,77 +148,69 @@ const Lessons = () => {
                   
                   <CollapsibleContent>
                     <CardContent className="pt-0">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {trimester.days.map((day) => {
-                          const dayProgress = getDayProgress(day.day_number);
-                          const isAccessible = status !== 'upcoming';
-                          
-                          return (
-                            <Card key={day.id} className={`transition-all hover:shadow-md ${
-                              !isAccessible ? 'opacity-60' : ''
-                            }`}>
-                              <CardContent className="p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                                      dayProgress.totalCompleted === dayProgress.total ? 'bg-green-100 text-green-700' :
-                                      dayProgress.totalCompleted > 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                                    }`}>
+                      <div className="mt-6">
+                        <h3 className="text-lg font-medium mb-4">Days in this Trimester</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                          {trimester.days.map((day, dayIndex) => {
+                            const dayProgress = getDayProgress(day.day_number);
+                            const isAccessible = status !== 'upcoming';
+                            
+                            return (
+                              <div key={day.id} className="flex items-center justify-between py-3">
+                                <div className="flex items-center">
+                                  <div 
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 
+                                      ${status === 'completed' || dayProgress.totalCompleted === dayProgress.total ? 'bg-green-100' : 
+                                        status === 'current' ? 'bg-blue-100' : 'bg-gray-100'}`}
+                                  >
+                                    <span className={`font-medium 
+                                      ${status === 'completed' || dayProgress.totalCompleted === dayProgress.total ? 'text-green-700' : 
+                                        status === 'current' ? 'text-blue-700' : 'text-gray-700'}`}>
                                       {day.day_number}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium">{day.title}</h4>
+                                    <p className="text-sm text-gray-600 truncate max-w-[200px]">{day.description}</p>
+                                    
+                                    {/* Activity icons */}
+                                    <div className="flex items-center gap-1 mt-1">
+                                      <BookOpen className={`h-3 w-3 ${dayProgress.reading ? 'text-green-500' : 'text-gray-400'}`} title="Reading" />
+                                      <Headphones className={`h-3 w-3 ${dayProgress.listeningAmerican ? 'text-green-500' : 'text-gray-400'}`} title="US Listening" />
+                                      <Headphones className={`h-3 w-3 ${dayProgress.listeningBritish ? 'text-green-500' : 'text-gray-400'}`} title="UK Listening" />
+                                      <FileCheck className={`h-3 w-3 ${dayProgress.vocabulary ? 'text-green-500' : 'text-gray-400'}`} title="Vocabulary" />
+                                      <FileCheck className={`h-3 w-3 ${dayProgress.topic ? 'text-green-500' : 'text-gray-400'}`} title="Topic" />
                                     </div>
-                                    {dayProgress.totalCompleted === dayProgress.total && (
-                                      <CheckCircle className="h-4 w-4 text-green-500" />
-                                    )}
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    {dayProgress.totalCompleted}/{dayProgress.total}
-                                  </div>
-                                </div>
-                                
-                                <h4 className="font-medium text-sm mb-1 line-clamp-2">{day.title}</h4>
-                                <p className="text-xs text-gray-600 mb-3 line-clamp-2">{day.description}</p>
-                                
-                                <div className="mb-3">
-                                  <Progress 
-                                    value={(dayProgress.totalCompleted / dayProgress.total) * 100} 
-                                    className="h-1.5" 
-                                  />
-                                </div>
-                                
-                                <div className="flex flex-wrap gap-1 mb-3">
-                                  <div className="flex items-center" title="Reading">
-                                    <BookOpen className={`h-3 w-3 ${dayProgress.reading ? 'text-green-500' : 'text-gray-400'}`} />
-                                  </div>
-                                  <div className="flex items-center" title="US Listening">
-                                    <Headphones className={`h-3 w-3 ${dayProgress.listeningAmerican ? 'text-green-500' : 'text-gray-400'}`} />
-                                  </div>
-                                  <div className="flex items-center" title="UK Listening">
-                                    <Headphones className={`h-3 w-3 ${dayProgress.listeningBritish ? 'text-green-500' : 'text-gray-400'}`} />
-                                  </div>
-                                  <div className="flex items-center" title="Vocabulary">
-                                    <FileCheck className={`h-3 w-3 ${dayProgress.vocabulary ? 'text-green-500' : 'text-gray-400'}`} />
-                                  </div>
-                                  <div className="flex items-center" title="Topic">
-                                    <FileCheck className={`h-3 w-3 ${dayProgress.topic ? 'text-green-500' : 'text-gray-400'}`} />
+                                    
+                                    {/* Progress bar */}
+                                    <div className="mt-2">
+                                      <Progress 
+                                        value={(dayProgress.totalCompleted / dayProgress.total) * 100} 
+                                        className="h-1.5 w-32" 
+                                      />
+                                    </div>
                                   </div>
                                 </div>
-                                
                                 <Button 
                                   asChild 
-                                  size="sm" 
-                                  className="w-full text-xs"
-                                  variant={dayProgress.totalCompleted === dayProgress.total ? "outline" : "default"}
-                                  disabled={!isAccessible}
+                                  variant="ghost" 
+                                  disabled={!isAccessible} 
+                                  className={`${
+                                    status === 'completed' || dayProgress.totalCompleted === dayProgress.total 
+                                      ? "text-green-600" 
+                                      : "text-blue-600"
+                                  } ${!isAccessible ? 'opacity-50' : ''}`}
+                                  size="sm"
                                 >
                                   <Link to={`/student/days/${day.id}`}>
                                     {!isAccessible ? 'Locked' :
-                                     dayProgress.totalCompleted === dayProgress.total ? 'Review' : 'Continue'}
+                                     status === 'completed' || dayProgress.totalCompleted === dayProgress.total ? 'Review' : 'Study'}
                                   </Link>
                                 </Button>
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     </CardContent>
                   </CollapsibleContent>
