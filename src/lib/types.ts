@@ -1,4 +1,3 @@
-
 // User related types
 export type UserRole = 'student' | 'tutor' | 'admin';
 
@@ -325,38 +324,16 @@ export const MOCK_TRIMESTERS: Trimester[] = [
     number: 1,
     start_date: '2025-01-15',
     end_date: '2025-04-15',
-    days: [
-      {
-        id: '1',
-        trimester_id: '1',
-        title: 'Introduction to English',
-        description: 'Get started with basic English concepts',
-        date: '2025-01-15',
-        story_text: 'Once upon a time, there was a student eager to learn English...',
-        day_number: 1,
-        materials: []
-      },
-      {
-        id: '2',
-        trimester_id: '1',
-        title: 'Common Greetings',
-        description: 'Learn everyday English greetings',
-        date: '2025-01-18',
-        story_text: 'Sarah walked into her new office on her first day...',
-        day_number: 2,
-        materials: []
-      },
-      {
-        id: '3',
-        trimester_id: '1',
-        title: 'Basic Conversation',
-        description: 'Practice basic English conversations',
-        date: '2025-01-22',
-        story_text: 'John and Mary met at a cafe to practice their English...',
-        day_number: 3,
-        materials: []
-      }
-    ]
+    days: Array.from({ length: 24 }, (_, i) => ({
+      id: `${i + 1}`,
+      trimester_id: '1',
+      title: `Day ${i + 1}: ${getDayTitle(i + 1)}`,
+      description: getDayDescription(i + 1),
+      date: new Date(2025, 0, 15 + i * 3).toISOString().split('T')[0], // Every 3 days
+      story_text: `Story content for day ${i + 1}...`,
+      day_number: i + 1,
+      materials: []
+    }))
   },
   {
     id: '2',
@@ -365,28 +342,16 @@ export const MOCK_TRIMESTERS: Trimester[] = [
     number: 2,
     start_date: '2025-04-16',
     end_date: '2025-08-15',
-    days: [
-      {
-        id: '4',
-        trimester_id: '2',
-        title: 'Past Tense',
-        description: 'Understanding and using past tense verbs',
-        date: '2025-04-20',
-        story_text: 'Last weekend, Alex visited his grandmother in the countryside...',
-        day_number: 1,
-        materials: []
-      },
-      {
-        id: '5',
-        trimester_id: '2',
-        title: 'Future Tense',
-        description: 'Expressing future events and plans',
-        date: '2025-04-25',
-        story_text: 'Next summer, the Johnson family will travel to Europe...',
-        day_number: 2,
-        materials: []
-      }
-    ]
+    days: Array.from({ length: 24 }, (_, i) => ({
+      id: `${i + 25}`,
+      trimester_id: '2',
+      title: `Day ${i + 25}: ${getDayTitle(i + 25)}`,
+      description: getDayDescription(i + 25),
+      date: new Date(2025, 3, 16 + i * 4).toISOString().split('T')[0], // Every 4 days
+      story_text: `Story content for day ${i + 25}...`,
+      day_number: i + 25,
+      materials: []
+    }))
   },
   {
     id: '3',
@@ -395,32 +360,45 @@ export const MOCK_TRIMESTERS: Trimester[] = [
     number: 3,
     start_date: '2025-08-16',
     end_date: '2025-12-15',
-    days: [
-      {
-        id: '6',
-        trimester_id: '3',
-        title: 'Conditional Sentences',
-        description: 'Expressing hypothetical situations',
-        date: '2025-08-20',
-        story_text: 'If I had known about the traffic, I would have left earlier...',
-        day_number: 1,
-        materials: []
-      },
-      {
-        id: '7',
-        trimester_id: '3',
-        title: 'Academic Writing',
-        description: 'Writing formal essays and reports',
-        date: '2025-08-25',
-        story_text: 'The research paper discussed the effects of climate change...',
-        day_number: 2,
-        materials: []
-      }
-    ]
+    days: Array.from({ length: 24 }, (_, i) => ({
+      id: `${i + 49}`,
+      trimester_id: '3',
+      title: `Day ${i + 49}: ${getDayTitle(i + 49)}`,
+      description: getDayDescription(i + 49),
+      date: new Date(2025, 7, 16 + i * 4).toISOString().split('T')[0], // Every 4 days
+      story_text: `Story content for day ${i + 49}...`,
+      day_number: i + 49,
+      materials: []
+    }))
   }
 ];
 
-// Keep the MOCK_DAYS for backward compatibility
+// Helper functions for generating day content
+function getDayTitle(dayNumber: number): string {
+  const titles = [
+    'Introduction to English', 'Common Greetings', 'Basic Conversation', 'Present Tense Verbs',
+    'Family & Friends', 'Daily Routines', 'Food & Drinks', 'Shopping Basics',
+    'Directions & Places', 'Weather & Seasons', 'Hobbies & Interests', 'Past Tense Introduction',
+    'Travel & Transportation', 'Health & Body', 'Work & Professions', 'Technology Basics',
+    'Future Plans', 'Cultural Differences', 'Entertainment', 'Environmental Issues',
+    'Advanced Grammar', 'Business English', 'Academic Writing', 'Review & Assessment'
+  ];
+  return titles[(dayNumber - 1) % 24] || `Lesson ${dayNumber}`;
+}
+
+function getDayDescription(dayNumber: number): string {
+  const descriptions = [
+    'Get started with basic English concepts', 'Learn everyday English greetings', 'Practice basic English conversations', 'Understanding present tense verbs',
+    'Talking about family and relationships', 'Describing daily activities', 'Vocabulary for food and dining', 'Essential shopping phrases',
+    'Asking for and giving directions', 'Weather vocabulary and seasons', 'Discussing personal interests', 'Introduction to past tense',
+    'Travel vocabulary and phrases', 'Health-related vocabulary', 'Job titles and workplace language', 'Technology in daily life',
+    'Expressing future intentions', 'Understanding cultural norms', 'Movies, music, and leisure', 'Environmental awareness',
+    'Complex grammatical structures', 'Professional communication', 'Writing skills development', 'Comprehensive review session'
+  ];
+  return descriptions[(dayNumber - 1) % 24] || `Learning objectives for day ${dayNumber}`;
+}
+
+// Mock data for demonstration
 export const MOCK_DAYS: Day[] = [
   ...MOCK_TRIMESTERS[0].days,
   ...MOCK_TRIMESTERS[1].days.slice(0, 1)
