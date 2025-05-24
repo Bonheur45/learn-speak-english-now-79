@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -35,7 +34,7 @@ const Index = () => {
                   <Link to="/register">Start Learning Today</Link>
                 </Button>
                 <Button asChild variant="outline" className="border-brand-blue text-brand-blue hover:bg-brand-blue hover:text-white">
-                  <Link to="/login">Existing Users</Link>
+                  <Link to="/learn-more">Learn More</Link>
                 </Button>
               </div>
             </div>
