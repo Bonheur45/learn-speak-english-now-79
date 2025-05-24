@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -39,7 +40,7 @@ const Index = () => {
               </div>
             </div>
             <div className="md:w-1/2 w-full">
-              <div className="md:rounded-lg overflow-hidden md:shadow-xl">
+              <div className="md:rounded-lg overflow-hidden md:shadow-xl -mx-4 md:mx-0">
                 <ImageCarousel 
                   images={carouselImages} 
                   altText="English learning presentation"
@@ -144,74 +145,6 @@ const Index = () => {
               <h3 className="text-xl font-bold mb-2">Track Your Progress</h3>
               <p className="text-gray-600">Monitor your learning journey with detailed assessments and performance analytics.</p>
             </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* How It Works Section */}
-      <section className="py-12 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-brand-blue mb-4">How Our Program Works</h2>
-          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-            Our structured approach ensures consistent progress and measurable results
-          </p>
-          
-          <div className="grid md:grid-cols-4 gap-4">
-            <Card className="hover:shadow-md transition-all">
-              <CardHeader className="pb-2">
-                <div className="w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center mb-2">
-                  <span className="font-bold">1</span>
-                </div>
-                <CardTitle className="text-lg">Choose Your Level</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 text-sm">
-                  Select from beginner (A1-A2), intermediate (B1-B2), or advanced (C1-C2) based on your current English proficiency.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="hover:shadow-md transition-all">
-              <CardHeader className="pb-2">
-                <div className="w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center mb-2">
-                  <span className="font-bold">2</span>
-                </div>
-                <CardTitle className="text-lg">Join a Cohort</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 text-sm">
-                  Enroll in one of our cohorts (limited to 30 students) to learn alongside peers at your level.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="hover:shadow-md transition-all">
-              <CardHeader className="pb-2">
-                <div className="w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center mb-2">
-                  <span className="font-bold">3</span>
-                </div>
-                <CardTitle className="text-lg">Follow the Curriculum</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 text-sm">
-                  Progress through 3 trimesters, each containing 12 days of carefully curated learning materials and activities.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="hover:shadow-md transition-all">
-              <CardHeader className="pb-2">
-                <div className="w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center mb-2">
-                  <span className="font-bold">4</span>
-                </div>
-                <CardTitle className="text-lg">Track Your Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 text-sm">
-                  Monitor your development through assessments, get feedback from tutors, and celebrate your achievements.
-                </p>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </section>
