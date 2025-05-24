@@ -127,17 +127,24 @@ const WritingAssessment = () => {
       setAttempts(newAttempts);
       localStorage.setItem(`writing-attempts-${dayId}`, newAttempts.toString());
       
+      // Save the writing assessment score for display in DayContent
+      const averageScore = Math.round((assessmentResult.detailedAnalysis.vocabulary.score + 
+        assessmentResult.detailedAnalysis.grammar.score + 
+        assessmentResult.detailedAnalysis.coherence.score + 
+        assessmentResult.detailedAnalysis.complexity.score) / 4);
+      localStorage.setItem(`day${dayId}-writing-score`, averageScore.toString());
+      
       console.log("Assessment completed for day:", {
         dayId,
         attempt: newAttempts,
-        score: assessmentResult.score,
+        score: averageScore,
         cefrLevel: assessmentResult.cefrLevel
       });
       
       setTimeout(() => {
         toast({
           title: "Assessment Saved",
-          description: `Attempt ${newAttempts} saved. Score: ${assessmentResult.score}%`,
+          description: `Attempt ${newAttempts} saved. Score: ${averageScore}%`,
         });
       }, 1000);
     } catch (error) {
@@ -152,12 +159,8 @@ const WritingAssessment = () => {
     }
   };
 
-  const handleReturnToDashboard = () => {
-    if (dayId) {
-      navigate(`/student/lessons/${dayId}`);
-    } else {
-      navigate('/student/dashboard');
-    }
+  const handleReturnToDayContent = () => {
+    navigate(`/student/days/${dayId}`);
   };
 
   const handleStartNewAttempt = () => {
@@ -195,7 +198,7 @@ const WritingAssessment = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={handleReturnToDashboard}
+                onClick={handleReturnToDayContent}
                 className="mr-2"
               >
                 <ArrowLeft className="h-4 w-4 mr-1" /> Back
@@ -280,7 +283,7 @@ const WritingAssessment = () => {
                 </Button>
               )}
               <Button 
-                onClick={handleReturnToDashboard} 
+                onClick={handleReturnToDayContent} 
                 className="px-6 py-4 bg-amber-400 hover:bg-amber-500 text-black"
               >
                 Return to Lesson

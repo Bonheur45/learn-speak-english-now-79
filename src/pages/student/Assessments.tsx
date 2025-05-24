@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -14,40 +13,48 @@ const Assessments = () => {
       id: 1, 
       day: 1, 
       vocabularyScore: 85, 
-      topicScore: 90, 
+      topicScore: 90,
+      writingScore: 88,
       date: '2025-04-20',
       vocabularyCompleted: true,
       topicCompleted: true,
+      writingCompleted: true,
       title: "Introduction to English"
     },
     { 
       id: 2, 
       day: 2, 
       vocabularyScore: 78, 
-      topicScore: 85, 
+      topicScore: 85,
+      writingScore: 82,
       date: '2025-04-21',
       vocabularyCompleted: true,
       topicCompleted: true,
+      writingCompleted: true,
       title: "Common Greetings"
     },
     { 
       id: 3, 
       day: 3, 
       vocabularyScore: 92, 
-      topicScore: 88, 
+      topicScore: 88,
+      writingScore: 90,
       date: '2025-04-22',
       vocabularyCompleted: true,
       topicCompleted: true,
+      writingCompleted: true,
       title: "Basic Conversation"
     },
     { 
       id: 4, 
       day: 4, 
       vocabularyScore: 95, 
-      topicScore: 94, 
+      topicScore: 94,
+      writingScore: 87,
       date: '2025-04-23',
       vocabularyCompleted: true,
       topicCompleted: true,
+      writingCompleted: true,
       title: "Present Tenses"
     }
   ]);
@@ -61,14 +68,23 @@ const Assessments = () => {
     updatedAssessments.forEach((assessment, index) => {
       const vocabScore = localStorage.getItem(`day${assessment.day}-vocabulary-score`);
       const topicScore = localStorage.getItem(`day${assessment.day}-topic-score`);
+      const writingScore = localStorage.getItem(`day${assessment.day}-writing-score`);
       
       if (vocabScore) {
         updatedAssessments[index].vocabularyScore = parseInt(vocabScore);
+        updatedAssessments[index].vocabularyCompleted = true;
         hasUpdates = true;
       }
       
       if (topicScore) {
         updatedAssessments[index].topicScore = parseInt(topicScore);
+        updatedAssessments[index].topicCompleted = true;
+        hasUpdates = true;
+      }
+      
+      if (writingScore) {
+        updatedAssessments[index].writingScore = parseInt(writingScore);
+        updatedAssessments[index].writingCompleted = true;
         hasUpdates = true;
       }
     });
@@ -78,10 +94,11 @@ const Assessments = () => {
     }
   }, []);
 
-  // Calculate average scores
+  // Calculate average scores including writing
   const avgVocabularyScore = assessments.reduce((sum, assessment) => sum + assessment.vocabularyScore, 0) / assessments.length;
   const avgTopicScore = assessments.reduce((sum, assessment) => sum + assessment.topicScore, 0) / assessments.length;
-  const overallAverage = (avgVocabularyScore + avgTopicScore) / 2;
+  const avgWritingScore = assessments.reduce((sum, assessment) => sum + assessment.writingScore, 0) / assessments.length;
+  const overallAverage = (avgVocabularyScore + avgTopicScore + avgWritingScore) / 3;
 
   return (
     <>
@@ -89,7 +106,7 @@ const Assessments = () => {
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Your Assessment Scores</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="border-t-4 border-t-blue-500">
             <CardHeader>
               <CardTitle>Vocabulary Average</CardTitle>
@@ -152,6 +169,37 @@ const Assessments = () => {
             </CardContent>
           </Card>
           
+          <Card className="border-t-4 border-t-amber-500">
+            <CardHeader>
+              <CardTitle>Writing Average</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <div className="relative w-16 h-16 mr-4">
+                  <svg className="w-full h-full" viewBox="0 0 100 100">
+                    <circle 
+                      cx="50" cy="50" r="45" 
+                      fill="none" 
+                      stroke="#e5e5e5" 
+                      strokeWidth="10"
+                    />
+                    <circle 
+                      cx="50" cy="50" r="45" 
+                      fill="none" 
+                      stroke="#f59e0b" 
+                      strokeWidth="10" 
+                      strokeDasharray={`${avgWritingScore * 2.83} 283`} 
+                      strokeDashoffset="0" 
+                      strokeLinecap="round"
+                      transform="rotate(-90 50 50)"
+                    />
+                  </svg>
+                </div>
+                <p className="text-4xl font-bold text-amber-600">{avgWritingScore.toFixed(1)}%</p>
+              </div>
+            </CardContent>
+          </Card>
+          
           <Card className="border-t-4 border-t-purple-500">
             <CardHeader>
               <CardTitle>Overall Average</CardTitle>
@@ -196,6 +244,7 @@ const Assessments = () => {
                   <TableHead>Title</TableHead>
                   <TableHead>Vocabulary</TableHead>
                   <TableHead>Topic</TableHead>
+                  <TableHead>Writing</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -223,6 +272,18 @@ const Assessments = () => {
                           <>
                             <span className={`inline-block w-3 h-3 rounded-full ${assessment.topicScore >= 70 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
                             <span>{assessment.topicScore}%</span>
+                          </>
+                        ) : (
+                          <span className="text-gray-400">Not taken</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        {assessment.writingCompleted ? (
+                          <>
+                            <span className={`inline-block w-3 h-3 rounded-full ${assessment.writingScore >= 70 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                            <span>{assessment.writingScore}%</span>
                           </>
                         ) : (
                           <span className="text-gray-400">Not taken</span>

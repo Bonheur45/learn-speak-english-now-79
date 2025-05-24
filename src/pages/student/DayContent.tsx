@@ -25,7 +25,7 @@ const DayContent = () => {
     topic2: false,
     vocabularyTest: false,
     topicTest: false,
-    writingAssessment: false, // Add writing assessment
+    writingAssessment: false,
     watchShortMovie: false,
   });
   
@@ -46,22 +46,17 @@ const DayContent = () => {
         setCompletedActivities(JSON.parse(storedActivities));
       }
       
-      // Check if tests have been completed
+      // Check if tests have been completed and update state accordingly
       const vocabScore = localStorage.getItem(`day${dayId}-vocabulary-score`);
       const topicScore = localStorage.getItem(`day${dayId}-topic-score`);
       const writingScore = localStorage.getItem(`day${dayId}-writing-score`);
       
-      if (vocabScore && !completedActivities.vocabularyTest) {
-        setCompletedActivities(prev => ({ ...prev, vocabularyTest: true }));
-      }
-      
-      if (topicScore && !completedActivities.topicTest) {
-        setCompletedActivities(prev => ({ ...prev, topicTest: true }));
-      }
-      
-      if (writingScore && !completedActivities.writingAssessment) {
-        setCompletedActivities(prev => ({ ...prev, writingAssessment: true }));
-      }
+      setCompletedActivities(prev => ({
+        ...prev,
+        vocabularyTest: !!vocabScore,
+        topicTest: !!topicScore,
+        writingAssessment: !!writingScore
+      }));
     }
   }, [dayId]);
   
@@ -268,13 +263,13 @@ const DayContent = () => {
     assessments: {
       vocabularyTest: "#",
       topicTest: "#",
-      writingAssessment: "#", // Add writing assessment
+      writingAssessment: "#",
       vocabularyCompleted: completedActivities.vocabularyTest,
       topicCompleted: completedActivities.topicTest,
-      writingCompleted: completedActivities.writingAssessment, // Add writing completion
-      vocabularyScore: localStorage.getItem(`day${dayId}-vocabulary-score`) ? parseInt(localStorage.getItem(`day${dayId}-vocabulary-score`) || "0") : 85,
-      topicScore: localStorage.getItem(`day${dayId}-topic-score`) ? parseInt(localStorage.getItem(`day${dayId}-topic-score`) || "0") : 92,
-      writingScore: localStorage.getItem(`day${dayId}-writing-score`) ? parseInt(localStorage.getItem(`day${dayId}-writing-score`) || "0") : 88 // Add writing score
+      writingCompleted: completedActivities.writingAssessment,
+      vocabularyScore: localStorage.getItem(`day${dayId}-vocabulary-score`) ? parseInt(localStorage.getItem(`day${dayId}-vocabulary-score`) || "0") : null,
+      topicScore: localStorage.getItem(`day${dayId}-topic-score`) ? parseInt(localStorage.getItem(`day${dayId}-topic-score`) || "0") : null,
+      writingScore: localStorage.getItem(`day${dayId}-writing-score`) ? parseInt(localStorage.getItem(`day${dayId}-writing-score`) || "0") : null
     },
     watchShortMovies: {
       title: "Episode 1 - A new Neighbor: British",
@@ -668,7 +663,7 @@ const DayContent = () => {
             </CardContent>
           </Card>
           
-          {/* Assessments - Updated to include Writing Assessment */}
+          {/* Assessments - Updated to show writing assessment scores */}
           <Card className={`border-l-4 ${content.assessments.vocabularyCompleted && content.assessments.topicCompleted && content.assessments.writingCompleted ? 'border-l-green-500' : 'border-l-gray-300'}`}>
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
@@ -687,7 +682,7 @@ const DayContent = () => {
                         >
                           Vocabulary Test
                         </Button>
-                        {content.assessments.vocabularyCompleted && (
+                        {content.assessments.vocabularyCompleted && content.assessments.vocabularyScore && (
                           <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                             Score: {content.assessments.vocabularyScore}%
                           </span>
@@ -711,7 +706,7 @@ const DayContent = () => {
                         >
                           Topic Test
                         </Button>
-                        {content.assessments.topicCompleted && (
+                        {content.assessments.topicCompleted && content.assessments.topicScore && (
                           <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                             Score: {content.assessments.topicScore}%
                           </span>
@@ -726,7 +721,7 @@ const DayContent = () => {
                         {content.assessments.topicCompleted ? 'Completed' : 'Start Test'}
                       </Button>
                     </div>
-                    {/* NEW: Writing Assessment */}
+                    {/* Writing Assessment */}
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
                         <Button
@@ -737,7 +732,7 @@ const DayContent = () => {
                           <PenLine className="h-4 w-4" />
                           Writing Assessment
                         </Button>
-                        {content.assessments.writingCompleted && (
+                        {content.assessments.writingCompleted && content.assessments.writingScore && (
                           <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                             Score: {content.assessments.writingScore}%
                           </span>
