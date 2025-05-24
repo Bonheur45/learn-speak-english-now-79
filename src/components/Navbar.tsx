@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { UserRole } from '@/lib/types';
@@ -56,7 +55,7 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
   NavLink.displayName = "NavLink";
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+    <header className="fixed top-0 left-0 w-full bg-white shadow-sm z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Logo size="medium" />
