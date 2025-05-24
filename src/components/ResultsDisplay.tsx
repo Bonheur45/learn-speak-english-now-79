@@ -1,132 +1,177 @@
 
+import { useState } from "react";
+import { CircularProgressIndicator } from "./CircularProgressIndicator";
 import { AssessmentResult } from "@/types/assessment";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, BookOpen, MessageCircle, Zap } from "lucide-react";
 
 interface ResultsDisplayProps {
   result: AssessmentResult | null;
 }
 
+// Function to determine CEFR level based on percentage according to the specified ranges
+const getCefrLevelFromPercentage = (percentage: number): string => {
+  if (percentage >= 80) return 'C1-C2';
+  if (percentage >= 75) return 'B2';
+  if (percentage >= 70) return 'B1';
+  if (percentage >= 65) return 'A2';
+  return 'A1';
+};
+
 const ResultsDisplay = ({ result }: ResultsDisplayProps) => {
+  const [activeTab, setActiveTab] = useState("overview");
+  
   if (!result) return null;
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
-    return "text-red-600";
+  // Calculate the average of the four main components
+  const calculateAverage = () => {
+    const { vocabulary, grammar, coherence, complexity } = result.detailedAnalysis;
+    const sum = vocabulary.score + grammar.score + coherence.score + complexity.score;
+    return Math.round(sum / 4); // Round to whole number
   };
-
-  const getCEFRColor = (level: string) => {
-    const colors: { [key: string]: string } = {
-      'A1': 'bg-red-100 text-red-800',
-      'A2': 'bg-orange-100 text-orange-800',
-      'B1': 'bg-yellow-100 text-yellow-800',
-      'B2': 'bg-blue-100 text-blue-800',
-      'C1': 'bg-green-100 text-green-800',
-      'C2': 'bg-purple-100 text-purple-800'
-    };
-    return colors[level] || 'bg-gray-100 text-gray-800';
-  };
-
+  
+  const averageScore = calculateAverage();
+  const levelFromPercentage = getCefrLevelFromPercentage(averageScore);
+  
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
-      {/* Overall Score Card */}
-      <Card className="border-l-4 border-l-amber-400">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Trophy className="h-6 w-6 text-amber-500" />
-            <CardTitle className="text-2xl">Assessment Results</CardTitle>
+    <div className="w-full max-w-3xl">
+      <h2 className="text-3xl font-bold text-center mb-8">Assessment Completed</h2>
+      
+      <div className="flex flex-col items-center mb-8">
+        <CircularProgressIndicator percentage={averageScore} />
+        <div className="mt-6 text-center">
+          <h3 className="text-2xl font-bold">
+            {averageScore >= 60 ? "Great job! You've passed this assessment." : "Thank you for completing the assessment."}
+          </h3>
+          <p className="text-lg mt-2">
+            Your CEFR level: <span className="font-bold">{levelFromPercentage}</span>
+            <span className="text-sm text-gray-500 ml-2">
+              (Confidence: 90%)
+            </span>
+          </p>
+          <div className="mt-2 mb-3">
+            <p className="text-sm text-gray-600 mb-2">Score interpretation scale:</p>
+            <div className="flex justify-center items-center space-x-1">
+              <span className="text-xs px-2 py-1 bg-red-100 rounded">A1: &lt;65%</span>
+              <span className="text-xs px-2 py-1 bg-orange-100 rounded">A2: 65-69%</span>
+              <span className="text-xs px-2 py-1 bg-yellow-100 rounded">B1: 70-74%</span>
+              <span className="text-xs px-2 py-1 bg-green-100 rounded">B2: 75-79%</span>
+              <span className="text-xs px-2 py-1 bg-blue-100 rounded">C1-C2: 80-100%</span>
+            </div>
           </div>
-          <div className="space-y-2">
-            <div className={`text-4xl font-bold ${getScoreColor(result.score)}`}>
-              {result.score}%
-            </div>
-            <Badge className={`text-lg px-4 py-1 ${getCEFRColor(result.cefrLevel)}`}>
-              CEFR Level: {result.cefrLevel}
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-center text-gray-700 text-lg">{result.feedback}</p>
-        </CardContent>
-      </Card>
-
-      {/* Detailed Analysis */}
-      <div className="grid md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-            <BookOpen className="h-5 w-5 text-blue-600 mr-2" />
-            <CardTitle className="text-lg">Vocabulary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Progress value={result.detailedAnalysis.vocabulary.score} className="h-2" />
-              <div className="flex justify-between text-sm">
-                <span className={getScoreColor(result.detailedAnalysis.vocabulary.score)}>
-                  {result.detailedAnalysis.vocabulary.score}%
-                </span>
-              </div>
-              <p className="text-sm text-gray-600">{result.detailedAnalysis.vocabulary.feedback}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-            <MessageCircle className="h-5 w-5 text-green-600 mr-2" />
-            <CardTitle className="text-lg">Grammar</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Progress value={result.detailedAnalysis.grammar.score} className="h-2" />
-              <div className="flex justify-between text-sm">
-                <span className={getScoreColor(result.detailedAnalysis.grammar.score)}>
-                  {result.detailedAnalysis.grammar.score}%
-                </span>
-              </div>
-              <p className="text-sm text-gray-600">{result.detailedAnalysis.grammar.feedback}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-            <Zap className="h-5 w-5 text-purple-600 mr-2" />
-            <CardTitle className="text-lg">Coherence</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Progress value={result.detailedAnalysis.coherence.score} className="h-2" />
-              <div className="flex justify-between text-sm">
-                <span className={getScoreColor(result.detailedAnalysis.coherence.score)}>
-                  {result.detailedAnalysis.coherence.score}%
-                </span>
-              </div>
-              <p className="text-sm text-gray-600">{result.detailedAnalysis.coherence.feedback}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-            <Trophy className="h-5 w-5 text-amber-600 mr-2" />
-            <CardTitle className="text-lg">Complexity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Progress value={result.detailedAnalysis.complexity.score} className="h-2" />
-              <div className="flex justify-between text-sm">
-                <span className={getScoreColor(result.detailedAnalysis.complexity.score)}>
-                  {result.detailedAnalysis.complexity.score}%
-                </span>
-              </div>
-              <p className="text-sm text-gray-600">{result.detailedAnalysis.complexity.feedback}</p>
-            </div>
-          </CardContent>
-        </Card>
+        </div>
       </div>
+
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="w-full grid grid-cols-4">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="details">Skill Details</TabsTrigger>
+          <TabsTrigger value="grammar">Grammar</TabsTrigger>
+          <TabsTrigger value="suggestions">Suggestions</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview">
+          <Card className="p-6">
+            <h4 className="text-lg font-semibold mb-3">Assessment Overview</h4>
+            <p className="mb-3">Overall Score: <span className="font-bold">{averageScore}%</span> (average of all skills)</p>
+            <ul className="space-y-3">
+              <li className="flex items-start">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-3 mt-2"></span>
+                <span>{result.feedback}</span>
+              </li>
+              <li className="flex items-start">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-3 mt-2"></span>
+                <span>Your vocabulary shows {result.detailedAnalysis.vocabulary.score >= 70 ? 'good' : 'developing'} range and usage</span>
+              </li>
+              <li className="flex items-start">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-3 mt-2"></span>
+                <span>Grammar accuracy is {result.detailedAnalysis.grammar.score >= 70 ? 'solid' : 'progressing'} with room for improvement</span>
+              </li>
+            </ul>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="details">
+          <Card className="p-6">
+            <h4 className="text-lg font-semibold mb-3">Language Skills Breakdown</h4>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="font-medium">Vocabulary Range</span>
+                  <span>{Math.round(result.detailedAnalysis.vocabulary.score)}%</span>
+                </div>
+                <Progress value={result.detailedAnalysis.vocabulary.score} className="h-2" />
+              </div>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="font-medium">Grammatical Accuracy</span>
+                  <span>{Math.round(result.detailedAnalysis.grammar.score)}%</span>
+                </div>
+                <Progress value={result.detailedAnalysis.grammar.score} className="h-2" />
+              </div>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="font-medium">Coherence & Cohesion</span>
+                  <span>{Math.round(result.detailedAnalysis.coherence.score)}%</span>
+                </div>
+                <Progress value={result.detailedAnalysis.coherence.score} className="h-2" />
+              </div>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="font-medium">Complexity</span>
+                  <span>{Math.round(result.detailedAnalysis.complexity.score)}%</span>
+                </div>
+                <Progress value={result.detailedAnalysis.complexity.score} className="h-2" />
+              </div>
+              
+              <div className="mt-6 pt-4 border-t">
+                <div className="flex justify-between mb-1">
+                  <span className="font-medium text-lg">Overall Average</span>
+                  <span className="font-bold">{averageScore}%</span>
+                </div>
+                <Progress value={averageScore} className="h-3 bg-slate-100" />
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="grammar">
+          <Card className="p-6">
+            <h4 className="text-lg font-semibold mb-3">Grammar Feedback</h4>
+            <ul className="space-y-3">
+              <li className="flex items-start">
+                <span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-3 mt-2"></span>
+                <span>{result.detailedAnalysis.grammar.feedback}</span>
+              </li>
+              <li className="flex items-start">
+                <span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-3 mt-2"></span>
+                <span>Focus on sentence structure and verb tense consistency</span>
+              </li>
+            </ul>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="suggestions">
+          <Card className="p-6">
+            <h4 className="text-lg font-semibold mb-3">Improvement Suggestions</h4>
+            <ul className="space-y-3">
+              <li className="flex items-start">
+                <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-3 mt-2"></span>
+                <span>{result.detailedAnalysis.vocabulary.feedback}</span>
+              </li>
+              <li className="flex items-start">
+                <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-3 mt-2"></span>
+                <span>{result.detailedAnalysis.coherence.feedback}</span>
+              </li>
+              <li className="flex items-start">
+                <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-3 mt-2"></span>
+                <span>{result.detailedAnalysis.complexity.feedback}</span>
+              </li>
+            </ul>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
