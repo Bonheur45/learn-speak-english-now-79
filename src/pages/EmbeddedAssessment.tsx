@@ -6,10 +6,11 @@ import { assessText } from "@/utils/assessmentService";
 import { AssessmentResult } from "@/types/assessment";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trophy, FileCheck } from "lucide-react";
+import { Trophy, FileCheck, AlertCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { getAssignmentDetails } from "@/utils/assignmentService";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AssignmentDetails {
   title: string;
@@ -24,17 +25,29 @@ const EmbeddedAssessment = () => {
   const [result, setResult] = useState<AssessmentResult | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [attempts, setAttempts] = useState(0);
   const [assignment, setAssignment] = useState<AssignmentDetails | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { courseId, lessonId, assignmentId } = useParams();
   const [returnUrl, setReturnUrl] = useState("/");
+
+  const MAX_ATTEMPTS = 3;
   
   useEffect(() => {
     // Get the return URL from the URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("returnUrl")) {
       setReturnUrl(urlParams.get("returnUrl") || "/");
+    }
+
+    // Create a unique key for this embedded assessment
+    const assessmentKey = `${courseId}-${lessonId}-${assignmentId}` || 'default-assessment';
+    
+    // Load attempts from localStorage
+    const savedAttempts = localStorage.getItem(`embedded-writing-attempts-${assessmentKey}`);
+    if (savedAttempts) {
+      setAttempts(parseInt(savedAttempts));
     }
     
     // Fetch assignment details based on courseId, lessonId, and assignmentId
@@ -52,6 +65,15 @@ const EmbeddedAssessment = () => {
   }, [courseId, lessonId, assignmentId]);
   
   const handleSubmit = () => {
+    if (attempts >= MAX_ATTEMPTS) {
+      toast({
+        title: "Maximum attempts reached",
+        description: "You have used all 3 attempts for this assessment.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Extract plain text from HTML content for assessment
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = text;
@@ -73,12 +95,19 @@ const EmbeddedAssessment = () => {
       const assessmentResult = assessText(plainText);
       setResult(assessmentResult);
       setShowResults(true);
+
+      // Update attempts count
+      const assessmentKey = `${courseId}-${lessonId}-${assignmentId}` || 'default-assessment';
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+      localStorage.setItem(`embedded-writing-attempts-${assessmentKey}`, newAttempts.toString());
       
       // Here you would typically save the result to your database
       console.log("Assessment completed for:", {
         courseId,
         lessonId,
         assignmentId,
+        attempt: newAttempts,
         score: assessmentResult.score,
         cefrLevel: assessmentResult.cefrLevel
       });
@@ -87,7 +116,7 @@ const EmbeddedAssessment = () => {
       setTimeout(() => {
         toast({
           title: "Assessment Saved",
-          description: `Your score has been recorded: ${assessmentResult.score}%`,
+          description: `Attempt ${newAttempts} saved. Score: ${assessmentResult.score}%`,
         });
       }, 1000);
     } catch (error) {
@@ -106,6 +135,23 @@ const EmbeddedAssessment = () => {
     navigate(returnUrl);
   };
 
+  const handleStartNewAttempt = () => {
+    if (attempts >= MAX_ATTEMPTS) {
+      toast({
+        title: "Maximum attempts reached",
+        description: "You have used all 3 attempts for this assessment.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setText("");
+    setResult(null);
+    setShowResults(false);
+  };
+
+  const remainingAttempts = MAX_ATTEMPTS - attempts;
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <div className="container mx-auto px-4 py-8 flex-1 flex flex-col">
@@ -114,6 +160,16 @@ const EmbeddedAssessment = () => {
             <h1 className="text-2xl md:text-3xl mb-4 text-center tracking-tight font-bold">
               {assignment?.title || "Writing Assessment"}
             </h1>
+
+            {/* Attempts Alert */}
+            {attempts > 0 && (
+              <Alert className="w-full max-w-[850px] mx-auto mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Attempt {attempts + 1} of {MAX_ATTEMPTS}. You have {remainingAttempts} attempts remaining.
+                </AlertDescription>
+              </Alert>
+            )}
             
             {/* Essay Prompt Card */}
             <Card className="w-full max-w-[850px] mx-auto mb-6 p-4 sm:p-6 border-l-4 border-l-amber-400">
@@ -143,10 +199,10 @@ const EmbeddedAssessment = () => {
               <Button 
                 onClick={handleSubmit} 
                 className="px-8 py-6 text-lg bg-amber-400 hover:bg-amber-500 text-black" 
-                disabled={text.trim().length < 10 || isSubmitting}
+                disabled={text.trim().length < 10 || isSubmitting || attempts >= MAX_ATTEMPTS}
               >
                 <FileCheck className="mr-2 h-5 w-5" />
-                {isSubmitting ? "Assessing..." : "Submit Assessment"}
+                {isSubmitting ? "Assessing..." : attempts >= MAX_ATTEMPTS ? "Max Attempts Reached" : "Submit Assessment"}
               </Button>
             </div>
           </div>
@@ -154,13 +210,15 @@ const EmbeddedAssessment = () => {
           <div className="flex-1 flex flex-col items-center justify-center">
             <ResultsDisplay result={result} />
             <div className="mt-8 flex gap-4">
-              <Button 
-                onClick={() => { setText(""); setResult(null); setShowResults(false); }} 
-                variant="outline" 
-                className="px-6 py-4"
-              >
-                Start New Assessment
-              </Button>
+              {remainingAttempts > 0 && (
+                <Button 
+                  onClick={handleStartNewAttempt} 
+                  variant="outline" 
+                  className="px-6 py-4"
+                >
+                  Try Again ({remainingAttempts} left)
+                </Button>
+              )}
               <Button 
                 onClick={handleReturnToDashboard} 
                 className="px-6 py-4 bg-amber-400 hover:bg-amber-500 text-black"

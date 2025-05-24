@@ -6,17 +6,19 @@ import { assessText } from "@/utils/assessmentService";
 import { AssessmentResult } from "@/types/assessment";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { FileCheck, ArrowLeft } from "lucide-react";
+import { FileCheck, ArrowLeft, AlertCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { getAssignmentDetails } from "@/utils/assignmentService";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const WritingAssessment = () => {
   const [text, setText] = useState("");
   const [result, setResult] = useState<AssessmentResult | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [attempts, setAttempts] = useState(0);
   const [assignment, setAssignment] = useState<{
     title: string;
     prompt: string;
@@ -30,20 +32,24 @@ const WritingAssessment = () => {
   const { toast } = useToast();
   const { dayId } = useParams();
 
+  const MAX_ATTEMPTS = 3;
+
   useEffect(() => {
+    // Load attempts from localStorage
+    const savedAttempts = localStorage.getItem(`writing-attempts-${dayId}`);
+    if (savedAttempts) {
+      setAttempts(parseInt(savedAttempts));
+    }
+
     // Fetch assignment details based on dayId
     if (dayId) {
-      // This would typically call a function that fetches from your database
-      // For now, we're using the mock function
       const details = getAssignmentDetails("example-course", "day-1", "writing-assignment-1");
       setAssignment(details);
       
-      // Set up timer if there's a time limit
       if (details.timeLimit) {
-        setTimeRemaining(details.timeLimit * 60); // Convert to seconds
+        setTimeRemaining(details.timeLimit * 60);
       }
     } else {
-      // Default assignment details if not found
       setAssignment({
         title: "Writing Assessment",
         prompt: "Write an essay on a topic of your choice.",
@@ -66,7 +72,6 @@ const WritingAssessment = () => {
         });
       }, 1000);
     } else if (timeRemaining === 0 && !showResults && text.length > 0) {
-      // Auto-submit when time runs out
       handleSubmit();
     }
 
@@ -89,7 +94,15 @@ const WritingAssessment = () => {
   }, [text]);
 
   const handleSubmit = () => {
-    // Extract plain text from HTML content for assessment
+    if (attempts >= MAX_ATTEMPTS) {
+      toast({
+        title: "Maximum attempts reached",
+        description: "You have used all 3 attempts for this assessment.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = text;
     const plainText = tempDiv.textContent || "";
@@ -106,24 +119,25 @@ const WritingAssessment = () => {
     setIsSubmitting(true);
     
     try {
-      // Perform the assessment
       const assessmentResult = assessText(plainText);
       setResult(assessmentResult);
       setShowResults(true);
       
-      // Here we would typically save the result to the database
-      // This is where you'd integrate with your e-learning platform's API
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+      localStorage.setItem(`writing-attempts-${dayId}`, newAttempts.toString());
+      
       console.log("Assessment completed for day:", {
         dayId,
+        attempt: newAttempts,
         score: assessmentResult.score,
         cefrLevel: assessmentResult.cefrLevel
       });
       
-      // Mock saving the assessment result
       setTimeout(() => {
         toast({
           title: "Assessment Saved",
-          description: `Your score has been recorded: ${assessmentResult.score}%`,
+          description: `Attempt ${newAttempts} saved. Score: ${assessmentResult.score}%`,
         });
       }, 1000);
     } catch (error) {
@@ -139,7 +153,29 @@ const WritingAssessment = () => {
   };
 
   const handleReturnToDashboard = () => {
-    navigate(`/student/lessons/${dayId}`);
+    if (dayId) {
+      navigate(`/student/lessons/${dayId}`);
+    } else {
+      navigate('/student/dashboard');
+    }
+  };
+
+  const handleStartNewAttempt = () => {
+    if (attempts >= MAX_ATTEMPTS) {
+      toast({
+        title: "Maximum attempts reached",
+        description: "You have used all 3 attempts for this assessment.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setText("");
+    setResult(null);
+    setShowResults(false);
+    if (assignment?.timeLimit) {
+      setTimeRemaining(assignment.timeLimit * 60);
+    }
   };
 
   const formatTime = (seconds: number): string => {
@@ -147,6 +183,8 @@ const WritingAssessment = () => {
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
+
+  const remainingAttempts = MAX_ATTEMPTS - attempts;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -166,6 +204,16 @@ const WritingAssessment = () => {
                 {assignment?.title || "Writing Assessment"}
               </h1>
             </div>
+
+            {/* Attempts Alert */}
+            {attempts > 0 && (
+              <Alert className="w-full max-w-[850px] mx-auto mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Attempt {attempts + 1} of {MAX_ATTEMPTS}. You have {remainingAttempts} attempts remaining.
+                </AlertDescription>
+              </Alert>
+            )}
             
             {/* Essay Prompt Card */}
             <Card className="w-full max-w-[850px] mx-auto mb-6 p-4 sm:p-6 border-l-4 border-l-amber-400">
@@ -211,10 +259,10 @@ const WritingAssessment = () => {
               <Button 
                 onClick={handleSubmit} 
                 className="px-8 py-6 text-lg bg-amber-400 hover:bg-amber-500 text-black" 
-                disabled={text.trim().length < 10 || isSubmitting}
+                disabled={text.trim().length < 10 || isSubmitting || attempts >= MAX_ATTEMPTS}
               >
                 <FileCheck className="mr-2 h-5 w-5" />
-                {isSubmitting ? "Assessing..." : "Submit Assessment"}
+                {isSubmitting ? "Assessing..." : attempts >= MAX_ATTEMPTS ? "Max Attempts Reached" : "Submit Assessment"}
               </Button>
             </div>
           </div>
@@ -222,13 +270,15 @@ const WritingAssessment = () => {
           <div className="flex-1 flex flex-col items-center justify-center">
             <ResultsDisplay result={result} />
             <div className="mt-8 flex gap-4">
-              <Button 
-                onClick={() => { setText(""); setResult(null); setShowResults(false); }} 
-                variant="outline" 
-                className="px-6 py-4"
-              >
-                Try Again
-              </Button>
+              {remainingAttempts > 0 && (
+                <Button 
+                  onClick={handleStartNewAttempt} 
+                  variant="outline" 
+                  className="px-6 py-4"
+                >
+                  Try Again ({remainingAttempts} left)
+                </Button>
+              )}
               <Button 
                 onClick={handleReturnToDashboard} 
                 className="px-6 py-4 bg-amber-400 hover:bg-amber-500 text-black"
