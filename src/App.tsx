@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import LearnMore from "./pages/LearnMore";
 import StudentDashboard from "./pages/student/Dashboard";
 import TutorDashboard from "./pages/tutor/Dashboard";
 import Students from "./pages/tutor/Students";

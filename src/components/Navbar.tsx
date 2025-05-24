@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { UserRole } from '@/lib/types';
@@ -92,8 +93,8 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
                     </Link>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
-                    <Link to="/register" className="inline-flex items-center justify-center rounded-md bg-brand-yellow px-4 py-2 text-sm font-medium text-brand-blue transition-colors hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-brand-yellow focus:ring-offset-2 disabled:opacity-50">
-                      Start Learning
+                    <Link to="/learn-more" className="inline-flex items-center justify-center rounded-md bg-brand-yellow px-4 py-2 text-sm font-medium text-brand-blue transition-colors hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-brand-yellow focus:ring-offset-2 disabled:opacity-50">
+                      Learn More
                     </Link>
                   </NavigationMenuItem>
                 </NavigationMenuList>
@@ -118,9 +119,6 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
                         <NavLink href="/student/cohorts" title="Cohorts">
                           Browse and join available learning cohorts
                         </NavLink>
-                        <NavLink href="/student/trimesters" title="Trimesters">
-                          View your trimester progress and materials
-                        </NavLink>
                         <NavLink href="/student/days" title="Daily Lessons">
                           Access your daily learning materials
                         </NavLink>
@@ -129,12 +127,12 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
                   </NavigationMenuItem>
                   
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger>Assessment</NavigationMenuTrigger>
+                    <NavigationMenuTrigger>Performance</NavigationMenuTrigger>
                     <NavigationMenuContent>
                       <div className="grid gap-3 p-4 w-[400px]">
                         <div className="flex items-center gap-2 mb-2">
                           <Layout className="h-4 w-4 text-brand-blue" />
-                          <span className="font-medium">Your Assessments</span>
+                          <span className="font-medium">Your Performance</span>
                         </div>
                         <NavLink href="/student/assessments" title="All Assessments">
                           View all vocabulary and topic tests
@@ -147,12 +145,6 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
                         </NavLink>
                       </div>
                     </NavigationMenuContent>
-                  </NavigationMenuItem>
-                  
-                  <NavigationMenuItem>
-                    <Link to="/student/profile" className={navigationMenuTriggerStyle()}>
-                      Profile
-                    </Link>
                   </NavigationMenuItem>
                   
                   <NavigationMenuItem>
@@ -247,19 +239,17 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
                   <Link to="/contact" className={`py-1 px-2 ${isActive('/contact')}`} onClick={toggleMobileMenu}>Contact</Link>
                   <Link to="/faq" className={`py-1 px-2 ${isActive('/faq')}`} onClick={toggleMobileMenu}>FAQ</Link>
                   <Link to="/login" className={`py-1 px-2 ${isActive('/login')}`} onClick={toggleMobileMenu}>Login</Link>
-                  <Link to="/register" className="btn-primary mt-2" onClick={toggleMobileMenu}>Start Learning</Link>
+                  <Link to="/learn-more" className="btn-primary mt-2" onClick={toggleMobileMenu}>Learn More</Link>
                 </>
               ) : userRole === 'student' ? (
                 <>
                   <Link to="/student/dashboard" className={`py-1 px-2 ${isActive('/student/dashboard')}`} onClick={toggleMobileMenu}>Dashboard</Link>
                   <div className="pl-2 border-l-2 border-gray-200 ml-2">
                     <Link to="/student/cohorts" className={`py-1 px-2 ${isActive('/student/cohorts')}`} onClick={toggleMobileMenu}>Cohorts</Link>
-                    <Link to="/student/trimesters" className={`py-1 px-2 ${isActive('/student/trimesters')}`} onClick={toggleMobileMenu}>Trimesters</Link>
                     <Link to="/student/days" className={`py-1 px-2 ${isActive('/student/days')}`} onClick={toggleMobileMenu}>Lessons</Link>
-                    <Link to="/student/assessments" className={`py-1 px-2 ${isActive('/student/assessments')}`} onClick={toggleMobileMenu}>Assessments</Link>
+                    <Link to="/student/assessments" className={`py-1 px-2 ${isActive('/student/assessments')}`} onClick={toggleMobileMenu}>Performance</Link>
                     <Link to="/student/progress" className={`py-1 px-2 ${isActive('/student/progress')}`} onClick={toggleMobileMenu}>Progress</Link>
                   </div>
-                  <Link to="/student/profile" className={`py-1 px-2 ${isActive('/student/profile')}`} onClick={toggleMobileMenu}>Profile</Link>
                   <button className="btn-secondary mt-2" onClick={toggleMobileMenu}>Logout</button>
                 </>
               ) : (
@@ -271,7 +261,6 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
                     <Link to="/tutor/materials" className={`py-1 px-2 ${isActive('/tutor/materials')}`} onClick={toggleMobileMenu}>Materials</Link>
                   </div>
                   <Link to="/tutor/upload" className={`py-1 px-2 ${isActive('/tutor/upload')}`} onClick={toggleMobileMenu}>Upload</Link>
-                  <Link to="/tutor/profile" className={`py-1 px-2 ${isActive('/tutor/profile')}`} onClick={toggleMobileMenu}>Profile</Link>
                   <button className="btn-secondary mt-2" onClick={toggleMobileMenu}>Logout</button>
                 </>
               )}

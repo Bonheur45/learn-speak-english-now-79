@@ -1,15 +1,12 @@
 
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import Logo from '@/components/Logo';
+import Layout from '@/components/Layout';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const FAQ = () => {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar isLoggedIn={false} />
-      
-      <main className="container mx-auto px-4 py-8 flex-grow max-w-3xl">
+    <Layout isLoggedIn={false}>
+      <div className="container mx-auto px-4 max-w-3xl">
         <h1 className="text-3xl font-bold text-brand-blue mb-6">Frequently Asked Questions</h1>
         
         <div className="mb-8">
@@ -38,7 +35,7 @@ const FAQ = () => {
             </AccordionItem>
             
             <AccordionItem value="item-4">
-              <AccordionTrigger>Is there a fee for the program?</AccordionTrigger>
+              <AccordionTrigger>Is there a a fee for the program?</AccordionTrigger>
               <AccordionContent>
                 No, the program is completely free for accepted participants.
               </AccordionContent>
@@ -63,25 +60,8 @@ const FAQ = () => {
             />
           </div>
         </div>
-      </main>
-
-      <footer className="bg-gray-100 py-8 mt-8">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-            <Logo size="small" />
-            <p className="text-gray-600 mt-4 md:mt-0">
-              © {new Date().getFullYear()} Let's Do It English. All rights reserved.
-            </p>
-            <div className="flex space-x-4 mt-4 md:mt-0">
-              <a href="/about" className="text-gray-600 hover:text-brand-blue">About</a>
-              <a href="/contact" className="text-gray-600 hover:text-brand-blue">Contact</a>
-              <a href="/privacy" className="text-gray-600 hover:text-brand-blue">Privacy</a>
-              <a href="/faq" className="text-gray-600 hover:text-brand-blue">FAQ</a>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+      </div>
+    </Layout>
   );
 };
 
