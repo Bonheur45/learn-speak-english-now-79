@@ -175,11 +175,11 @@ const Lessons = () => {
                                     
                                     {/* Activity icons */}
                                     <div className="flex items-center gap-1 mt-1">
-                                      <BookOpen className={`h-3 w-3 ${dayProgress.reading ? 'text-green-500' : 'text-gray-400'}`} title="Reading" />
-                                      <Headphones className={`h-3 w-3 ${dayProgress.listeningAmerican ? 'text-green-500' : 'text-gray-400'}`} title="US Listening" />
-                                      <Headphones className={`h-3 w-3 ${dayProgress.listeningBritish ? 'text-green-500' : 'text-gray-400'}`} title="UK Listening" />
-                                      <FileCheck className={`h-3 w-3 ${dayProgress.vocabulary ? 'text-green-500' : 'text-gray-400'}`} title="Vocabulary" />
-                                      <FileCheck className={`h-3 w-3 ${dayProgress.topic ? 'text-green-500' : 'text-gray-400'}`} title="Topic" />
+                                      <BookOpen className={`h-3 w-3 ${dayProgress.reading ? 'text-green-500' : 'text-gray-400'}`} />
+                                      <Headphones className={`h-3 w-3 ${dayProgress.listeningAmerican ? 'text-green-500' : 'text-gray-400'}`} />
+                                      <Headphones className={`h-3 w-3 ${dayProgress.listeningBritish ? 'text-green-500' : 'text-gray-400'}`} />
+                                      <FileCheck className={`h-3 w-3 ${dayProgress.vocabulary ? 'text-green-500' : 'text-gray-400'}`} />
+                                      <FileCheck className={`h-3 w-3 ${dayProgress.topic ? 'text-green-500' : 'text-gray-400'}`} />
                                     </div>
                                     
                                     {/* Progress bar */}
