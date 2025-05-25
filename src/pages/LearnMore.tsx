@@ -6,7 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 const LearnMore = () => {
   return (
     <Layout isLoggedIn={false}>
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="container mx-auto px-4 max-w-4xl pt-8">
         {/* About Us Section */}
         <section className="mb-16">
           <h1 className="text-4xl font-bold text-brand-blue mb-8">About Us</h1>
