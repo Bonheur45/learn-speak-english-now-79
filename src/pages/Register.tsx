@@ -8,7 +8,7 @@ const Register = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar isLoggedIn={false} />
       
-      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 pt-24">
         <RegisterForm />
       </div>
       

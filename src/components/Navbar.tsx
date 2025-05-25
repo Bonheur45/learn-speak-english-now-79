@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { UserRole } from '@/lib/types';
@@ -72,20 +71,9 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
                     </Link>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger>About</NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <div className="grid w-[400px] gap-3 p-4">
-                        <NavLink href="/about" title="About Us">
-                          Learn about our mission and teaching philosophy
-                        </NavLink>
-                        <NavLink href="/contact" title="Contact Us">
-                          Get in touch with our team for any questions
-                        </NavLink>
-                        <NavLink href="/faq" title="FAQ">
-                          Find answers to commonly asked questions
-                        </NavLink>
-                      </div>
-                    </NavigationMenuContent>
+                    <Link to="/contact" className={`${navigationMenuTriggerStyle()} ${location.pathname === '/contact' ? 'bg-accent' : ''}`}>
+                      Contact
+                    </Link>
                   </NavigationMenuItem>
                   <NavigationMenuItem>
                     <Link to="/login" className={`${navigationMenuTriggerStyle()} ${location.pathname === '/login' ? 'bg-accent' : ''}`}>
@@ -235,9 +223,7 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
               {!isLoggedIn ? (
                 <>
                   <Link to="/" className={`py-1 px-2 ${isActive('/')}`} onClick={toggleMobileMenu}>Home</Link>
-                  <Link to="/about" className={`py-1 px-2 ${isActive('/about')}`} onClick={toggleMobileMenu}>About</Link>
                   <Link to="/contact" className={`py-1 px-2 ${isActive('/contact')}`} onClick={toggleMobileMenu}>Contact</Link>
-                  <Link to="/faq" className={`py-1 px-2 ${isActive('/faq')}`} onClick={toggleMobileMenu}>FAQ</Link>
                   <Link to="/login" className={`py-1 px-2 ${isActive('/login')}`} onClick={toggleMobileMenu}>Login</Link>
                   <Link to="/learn-more" className="btn-primary mt-2" onClick={toggleMobileMenu}>Learn More</Link>
                 </>
