@@ -12,6 +12,9 @@ const RegisterForm = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('student');
+  const [currentLevel, setCurrentLevel] = useState('');
+  const [studyExperience, setStudyExperience] = useState('');
+  const [learningGoals, setLearningGoals] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +23,15 @@ const RegisterForm = () => {
       alert('Passwords do not match!');
       return;
     }
-    console.log('Registration attempt:', { name, email, password, role });
+    console.log('Registration attempt:', { 
+      name, 
+      email, 
+      password, 
+      role, 
+      currentLevel, 
+      studyExperience, 
+      learningGoals 
+    });
     // Redirect to login in a real app
     window.location.href = '/login';
   };
@@ -109,6 +120,69 @@ const RegisterForm = () => {
                 </div>
               </div>
             </div>
+            
+            {role === 'student' && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="currentLevel">What is your current English level?</Label>
+                  <select
+                    id="currentLevel"
+                    value={currentLevel}
+                    onChange={(e) => setCurrentLevel(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                    required
+                  >
+                    <option value="">Select your level</option>
+                    <option value="A1">A1 - Beginner</option>
+                    <option value="A2">A2 - Elementary</option>
+                    <option value="B1">B1 - Intermediate</option>
+                    <option value="B2">B2 - Upper Intermediate</option>
+                    <option value="C1">C1 - Advanced</option>
+                    <option value="C2">C2 - Proficient</option>
+                    <option value="unsure">I'm not sure</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="studyExperience">How long have you been studying English?</Label>
+                  <select
+                    id="studyExperience"
+                    value={studyExperience}
+                    onChange={(e) => setStudyExperience(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                    required
+                  >
+                    <option value="">Select duration</option>
+                    <option value="less-than-1">Less than 1 year</option>
+                    <option value="1-2">1-2 years</option>
+                    <option value="3-5">3-5 years</option>
+                    <option value="5-10">5-10 years</option>
+                    <option value="more-than-10">More than 10 years</option>
+                    <option value="just-starting">Just starting</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="learningGoals">What are your main learning goals?</Label>
+                  <select
+                    id="learningGoals"
+                    value={learningGoals}
+                    onChange={(e) => setLearningGoals(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                    required
+                  >
+                    <option value="">Select your goal</option>
+                    <option value="academic">Academic purposes (university, tests)</option>
+                    <option value="professional">Professional development</option>
+                    <option value="travel">Travel and communication</option>
+                    <option value="personal">Personal interest</option>
+                    <option value="immigration">Immigration requirements</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </>
+            )}
+            
             <Button type="submit" className="w-full bg-brand-yellow text-brand-blue hover:brightness-95">
               Register
             </Button>

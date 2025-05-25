@@ -54,7 +54,7 @@ const Index = () => {
       {/* Proficiency Levels Section */}
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-brand-blue mb-2">Choose Your Level</h2>
+          <h2 className="text-3xl font-bold text-center text-brand-blue mb-2">Discover Your Level</h2>
           <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
             Our courses are structured according to the Common European Framework of Reference (CEFR) levels.
             Select the level that matches your current proficiency.
@@ -98,7 +98,9 @@ const Index = () => {
                     
                     <div className="mt-6">
                       <Button asChild className="w-full md:w-auto bg-brand-yellow text-brand-blue hover:brightness-95">
-                        <Link to={`/register?level=${level}`}>Choose {level} Level</Link>
+                        <a href="https://www.efset.org/" target="_blank" rel="noopener noreferrer">
+                          Check Your Level
+                        </a>
                       </Button>
                     </div>
                   </CardContent>
