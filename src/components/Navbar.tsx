@@ -128,9 +128,6 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
                         <NavLink href="/student/writing-submissions" title="Writing Submissions">
                           Check your writing assessment status
                         </NavLink>
-                        <NavLink href="/student/progress" title="Progress Report">
-                          Track your learning progress and scores
-                        </NavLink>
                       </div>
                     </NavigationMenuContent>
                   </NavigationMenuItem>
@@ -234,7 +231,6 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
                     <Link to="/student/cohorts" className={`py-1 px-2 ${isActive('/student/cohorts')}`} onClick={toggleMobileMenu}>Cohorts</Link>
                     <Link to="/student/days" className={`py-1 px-2 ${isActive('/student/days')}`} onClick={toggleMobileMenu}>Lessons</Link>
                     <Link to="/student/assessments" className={`py-1 px-2 ${isActive('/student/assessments')}`} onClick={toggleMobileMenu}>Performance</Link>
-                    <Link to="/student/progress" className={`py-1 px-2 ${isActive('/student/progress')}`} onClick={toggleMobileMenu}>Progress</Link>
                   </div>
                   <button className="btn-secondary mt-2" onClick={toggleMobileMenu}>Logout</button>
                 </>

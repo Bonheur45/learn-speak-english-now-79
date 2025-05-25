@@ -6,6 +6,8 @@ import ProgressCard from '@/components/student/ProgressCard';
 import WeeklyRankings from '@/components/student/WeeklyRankings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Video, Clock } from 'lucide-react';
 import { MOCK_DAYS, MOCK_PROGRESS } from '@/lib/types';
 
 const StudentDashboard = () => {
@@ -19,7 +21,7 @@ const StudentDashboard = () => {
   const completedDays = 1;
   const totalDays = days.length;
   
-  // Mock data for weekly rankings
+  // Mock data for weekly rankings with updated scores
   const cohortStudents = [
     { id: 'user2', name: 'Alice Johnson', username: 'alice_j', score: 95 },
     { id: currentUserId, name: studentName, username: 'john_doe', score: 87 },
@@ -28,14 +30,23 @@ const StudentDashboard = () => {
     { id: 'user5', name: 'David Brown', username: 'david_b', score: 75 },
   ];
   
-  // Get today's activities
+  // Get today's activities including Writing
   const todayActivities = [
     { name: 'Reading', completed: true },
     { name: 'Listening (American)', completed: true },
     { name: 'Listening (British)', completed: false },
+    { name: 'Writing Assessment', completed: false },
     { name: 'Vocabulary Assessment', completed: false },
     { name: 'Topic Assessment', completed: false }
   ];
+
+  // Live class details
+  const liveClass = {
+    title: 'Interactive English Conversation',
+    time: '2:00 PM - 3:00 PM',
+    meetLink: 'https://meet.google.com/xyz-abcd-efg',
+    isLive: true
+  };
   
   return (
     <Layout isLoggedIn={true} userRole="student">
@@ -52,7 +63,7 @@ const StudentDashboard = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
           <ProgressCard
             title="Course Progress"
             value={completedDays}
@@ -66,6 +77,12 @@ const StudentDashboard = () => {
             label={`${progress[0].score_summary.vocabulary}% correct`}
           />
           <ProgressCard
+            title="Writing Score"
+            value={85}
+            maxValue={100}
+            label="85% average"
+          />
+          <ProgressCard
             title="Topic Assessments"
             value={progress[0].score_summary.topic}
             maxValue={100}
@@ -75,6 +92,27 @@ const StudentDashboard = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
           <div className="lg:col-span-2 space-y-4">
+            {/* Live Class Notice */}
+            <Alert className="border-green-200 bg-green-50">
+              <Video className="h-4 w-4 text-green-600" />
+              <AlertDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-green-800">{liveClass.title}</p>
+                    <p className="text-green-700 flex items-center mt-1">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {liveClass.time}
+                    </p>
+                  </div>
+                  <Button asChild size="sm" className="bg-green-600 hover:bg-green-700">
+                    <a href={liveClass.meetLink} target="_blank" rel="noopener noreferrer">
+                      Join Live Class
+                    </a>
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+
             <Card>
               <CardHeader>
                 <CardTitle>Today's Learning Plan</CardTitle>
@@ -101,7 +139,11 @@ const StudentDashboard = () => {
                       </span>
                       {!activity.completed && (
                         <Button variant="ghost" size="sm" className="text-brand-blue hover:text-brand-yellow hover:bg-brand-blue">
-                          Start
+                          {activity.name === 'Writing Assessment' ? (
+                            <Link to={`/student/writing-assessment/${currentDay.id}`}>Start</Link>
+                          ) : (
+                            'Start'
+                          )}
                         </Button>
                       )}
                     </li>

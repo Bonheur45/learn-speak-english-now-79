@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, Medal, Award } from 'lucide-react';
+import { Trophy, Medal, Award, TrendingUp } from 'lucide-react';
 
 interface Student {
   id: string;
@@ -9,6 +9,7 @@ interface Student {
   username: string;
   score: number;
   avatar?: string;
+  weeklyChange?: number;
 }
 
 interface WeeklyRankingsProps {
@@ -45,6 +46,18 @@ const WeeklyRankings = ({ students, currentUserId }: WeeklyRankingsProps) => {
     }
   };
 
+  const getChangeIndicator = (change?: number) => {
+    if (!change) return null;
+    
+    const isPositive = change > 0;
+    return (
+      <div className={`flex items-center text-xs ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+        <TrendingUp className={`h-3 w-3 mr-1 ${!isPositive ? 'rotate-180' : ''}`} />
+        {Math.abs(change)}
+      </div>
+    );
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -62,8 +75,8 @@ const WeeklyRankings = ({ students, currentUserId }: WeeklyRankingsProps) => {
             return (
               <div
                 key={student.id}
-                className={`flex items-center justify-between p-3 rounded-lg border ${getPositionColor(position)} ${
-                  isCurrentUser ? 'ring-2 ring-brand-blue' : ''
+                className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 ${getPositionColor(position)} ${
+                  isCurrentUser ? 'ring-2 ring-brand-blue shadow-md' : ''
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -94,12 +107,23 @@ const WeeklyRankings = ({ students, currentUserId }: WeeklyRankingsProps) => {
                 </div>
                 
                 <div className="text-right">
-                  <p className="font-bold text-lg">{student.score}</p>
-                  <p className="text-xs text-gray-500">points</p>
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <p className="font-bold text-lg">{student.score}</p>
+                      <p className="text-xs text-gray-500">points</p>
+                    </div>
+                    {getChangeIndicator(student.weeklyChange)}
+                  </div>
                 </div>
               </div>
             );
           })}
+        </div>
+        
+        <div className="mt-4 pt-3 border-t border-gray-200">
+          <p className="text-xs text-gray-500 text-center">
+            Rankings update weekly based on assessment scores and participation
+          </p>
         </div>
       </CardContent>
     </Card>
