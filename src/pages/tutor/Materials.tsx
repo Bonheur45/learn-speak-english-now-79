@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -77,7 +76,7 @@ const Materials = () => {
       case 'form':
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
         );
       default:
@@ -130,9 +129,12 @@ const Materials = () => {
                       <CardTitle>{day.title}</CardTitle>
                       <CardDescription className="mt-1">{day.description}</CardDescription>
                     </div>
-                    <div className="mt-2 md:mt-0">
+                    <div className="mt-2 md:mt-0 flex gap-2">
                       <Button asChild variant="outline" size="sm" className="text-brand-blue">
-                        <Link to={`/tutor/day/${day.id}`}>Edit Day</Link>
+                        <Link to={`/tutor/day-editor/${day.id}`}>Edit Day Content</Link>
+                      </Button>
+                      <Button asChild variant="outline" size="sm" className="text-gray-600">
+                        <Link to={`/tutor/day/${day.id}`}>Manage Files</Link>
                       </Button>
                     </div>
                   </div>
