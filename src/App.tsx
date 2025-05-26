@@ -28,7 +28,9 @@ import WritingAssessment from "./pages/student/WritingAssessment";
 import TutorDashboard from "./pages/tutor/Dashboard";
 import TutorCohorts from "./pages/tutor/Cohorts";
 import TutorStudents from "./pages/tutor/Students";
-import Materials from "./pages/tutor/Materials";
+import CohortMaterials from "./pages/tutor/CohortMaterials";
+import TrimesterMaterials from "./pages/tutor/TrimesterMaterials";
+import DaysList from "./pages/tutor/DaysList";
 import Upload from "./pages/tutor/Upload";
 import DayEditor from "./pages/tutor/DayEditor";
 
@@ -64,11 +66,13 @@ function App() {
             <Route path="/student/topic-test/:dayId" element={<TopicTest />} />
             <Route path="/student/writing-assessment/:dayId" element={<WritingAssessment />} />
             
-            {/* Tutor routes */}
+            {/* Tutor routes - hierarchical materials management */}
             <Route path="/tutor/dashboard" element={<TutorDashboard />} />
             <Route path="/tutor/cohorts" element={<TutorCohorts />} />
             <Route path="/tutor/students" element={<TutorStudents />} />
-            <Route path="/tutor/materials" element={<Materials />} />
+            <Route path="/tutor/materials" element={<CohortMaterials />} />
+            <Route path="/tutor/materials/cohort/:cohortId" element={<TrimesterMaterials />} />
+            <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId" element={<DaysList />} />
             <Route path="/tutor/upload" element={<Upload />} />
             <Route path="/tutor/day-editor/:dayId" element={<DayEditor />} />
             

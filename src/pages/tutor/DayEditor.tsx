@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -211,7 +210,7 @@ const DayEditor = () => {
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
             <Link to="/tutor/materials" className="hover:text-brand-blue">Materials</Link>
             <span>/</span>
-            <span className="font-medium">{trimester.title}</span>
+            <span className="font-medium">{trimester.name}</span>
             <span>/</span>
             <span className="font-medium text-brand-blue">Day {day.day_number}</span>
           </div>
@@ -219,7 +218,7 @@ const DayEditor = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-brand-blue">Edit Day {day.day_number}</h1>
-              <p className="text-gray-600 mt-1">{trimester.title} • Manage lesson content and assessments</p>
+              <p className="text-gray-600 mt-1">{trimester.name} • Manage lesson content and assessments</p>
             </div>
             
             <div className="flex gap-3">
@@ -288,7 +287,7 @@ const DayEditor = () => {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h3 className="font-medium mb-2">Lesson Context</h3>
                     <div className="space-y-2 text-sm text-gray-600">
-                      <p><span className="font-medium">Trimester:</span> {trimester.title}</p>
+                      <p><span className="font-medium">Trimester:</span> {trimester.name}</p>
                       <p><span className="font-medium">Day Number:</span> {day.day_number}</p>
                       <p><span className="font-medium">Current Status:</span> <Badge variant="secondary">Draft</Badge></p>
                     </div>
