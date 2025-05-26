@@ -166,14 +166,14 @@ const DayEditor = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar isLoggedIn={true} userRole="tutor" />
       
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+      <main className="flex-grow container mx-auto px-4 pt-8 pb-8">
+        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-brand-blue">Edit Day {day.day_number}</h1>
-            <p className="text-gray-600">Manage all learning materials for this day</p>
+            <p className="text-gray-600 mt-2">Manage all learning materials for this day</p>
           </div>
           
-          <div className="mt-4 md:mt-0 flex gap-4">
+          <div className="mt-6 md:mt-0 flex gap-4">
             <Button asChild variant="outline">
               <Link to={`/student/days/${dayId}`} target="_blank">
                 <Eye className="h-4 w-4 mr-2" />
@@ -187,17 +187,17 @@ const DayEditor = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="story">Story</TabsTrigger>
-            <TabsTrigger value="topic">Topic</TabsTrigger>
-            <TabsTrigger value="media">Media</TabsTrigger>
-            <TabsTrigger value="assessments">Assessments</TabsTrigger>
-            <TabsTrigger value="writing">Writing</TabsTrigger>
+        <Tabs defaultValue="overview" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-6 h-12">
+            <TabsTrigger value="overview" className="text-sm">Overview</TabsTrigger>
+            <TabsTrigger value="story" className="text-sm">Story</TabsTrigger>
+            <TabsTrigger value="topic" className="text-sm">Topic</TabsTrigger>
+            <TabsTrigger value="media" className="text-sm">Media</TabsTrigger>
+            <TabsTrigger value="assessments" className="text-sm">Assessments</TabsTrigger>
+            <TabsTrigger value="writing" className="text-sm">Writing</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
+          <TabsContent value="overview" className="space-y-6 mt-8">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -229,7 +229,7 @@ const DayEditor = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="story" className="space-y-6">
+          <TabsContent value="story" className="space-y-6 mt-8">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -259,7 +259,7 @@ const DayEditor = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="topic" className="space-y-6">
+          <TabsContent value="topic" className="space-y-6 mt-8">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -315,7 +315,7 @@ const DayEditor = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="media" className="space-y-6">
+          <TabsContent value="media" className="space-y-6 mt-8">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -381,7 +381,7 @@ const DayEditor = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="assessments" className="space-y-6">
+          <TabsContent value="assessments" className="space-y-6 mt-8">
             <div className="grid gap-6">
               {/* Vocabulary Assessment */}
               <Card>
@@ -475,7 +475,7 @@ const DayEditor = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="writing" className="space-y-6">
+          <TabsContent value="writing" className="space-y-6 mt-8">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
