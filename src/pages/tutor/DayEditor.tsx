@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -8,14 +7,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Save, Calendar, BookOpen, Video, PenTool, FileText, Eye, Plus, Trash2 } from 'lucide-react';
 import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
 import RichTextEditor from '@/components/RichTextEditor';
 import { toast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const DayEditor = () => {
   const { cohortId, trimesterId, dayId } = useParams();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   const cohort = MOCK_COHORTS.find(c => c.id === cohortId);
   const trimester = MOCK_TRIMESTERS.find(t => t.id === trimesterId);
@@ -30,6 +32,11 @@ const DayEditor = () => {
     topic_notes: '<p>Today we will learn about present tense verbs. Present tense describes actions happening now or habitual actions...</p>',
     british_audio_url: '',
     american_audio_url: ''
+  });
+
+  const [audioVersions, setAudioVersions] = useState({
+    includeBritish: true,
+    includeAmerican: true
   });
 
   const [glossaryTerms, setGlossaryTerms] = useState([
@@ -100,7 +107,6 @@ const DayEditor = () => {
   };
 
   const openQuestionEditor = (type: string) => {
-    // Navigate to question configuration page
     navigate(`/tutor/materials/cohort/${cohortId}/trimester/${trimesterId}/day/${dayId}/questions/${type}`);
   };
 
@@ -125,11 +131,12 @@ const DayEditor = () => {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="story" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="story">Story</TabsTrigger>
-                  <TabsTrigger value="topic">Topic Notes</TabsTrigger>
-                  <TabsTrigger value="media">Media</TabsTrigger>
-                  <TabsTrigger value="glossary">Glossary</TabsTrigger>
+                <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-4'}`}>
+                  <TabsTrigger value="story" className={isMobile ? 'text-xs px-2' : ''}>Story</TabsTrigger>
+                  <TabsTrigger value="topic" className={isMobile ? 'text-xs px-2' : ''}>Topic</TabsTrigger>
+                  {!isMobile && <TabsTrigger value="media">Media</TabsTrigger>}
+                  {!isMobile && <TabsTrigger value="glossary">Glossary</TabsTrigger>}
+                  {isMobile && <TabsTrigger value="more" className="text-xs px-2">More</TabsTrigger>}
                 </TabsList>
 
                 <TabsContent value="story" className="mt-6">
@@ -140,52 +147,114 @@ const DayEditor = () => {
                   <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: dayData.topic_notes }} />
                 </TabsContent>
 
-                <TabsContent value="media" className="mt-6">
-                  <div className="space-y-6">
-                    {dayData.british_audio_url && getYouTubeEmbedUrl(dayData.british_audio_url) && (
-                      <div>
-                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                          British Version <Badge variant="outline">UK</Badge>
-                        </h3>
-                        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                          <iframe
-                            src={getYouTubeEmbedUrl(dayData.british_audio_url)}
-                            className="w-full h-full"
-                            allowFullScreen
-                            title="British Version"
-                          />
-                        </div>
+                {!isMobile && (
+                  <>
+                    <TabsContent value="media" className="mt-6">
+                      <div className="space-y-6">
+                        {audioVersions.includeBritish && dayData.british_audio_url && getYouTubeEmbedUrl(dayData.british_audio_url) && (
+                          <div>
+                            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                              British Version <Badge variant="outline">UK</Badge>
+                            </h3>
+                            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                              <iframe
+                                src={getYouTubeEmbedUrl(dayData.british_audio_url)}
+                                className="w-full h-full"
+                                allowFullScreen
+                                title="British Version"
+                              />
+                            </div>
+                          </div>
+                        )}
+                        
+                        {audioVersions.includeAmerican && dayData.american_audio_url && getYouTubeEmbedUrl(dayData.american_audio_url) && (
+                          <div>
+                            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                              American Version <Badge variant="outline">US</Badge>
+                            </h3>
+                            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                              <iframe
+                                src={getYouTubeEmbedUrl(dayData.american_audio_url)}
+                                className="w-full h-full"
+                                allowFullScreen
+                                title="American Version"
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    
-                    {dayData.american_audio_url && getYouTubeEmbedUrl(dayData.american_audio_url) && (
-                      <div>
-                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                          American Version <Badge variant="outline">US</Badge>
-                        </h3>
-                        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                          <iframe
-                            src={getYouTubeEmbedUrl(dayData.american_audio_url)}
-                            className="w-full h-full"
-                            allowFullScreen
-                            title="American Version"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
+                    </TabsContent>
 
-                <TabsContent value="glossary" className="mt-6">
-                  <div className="space-y-4">
-                    {glossaryTerms.map(term => (
-                      <div key={term.id} className="border rounded-lg p-4">
-                        <h4 className="font-semibold text-lg">{term.term}</h4>
-                        <p className="text-gray-600 mt-1">{term.definition}</p>
+                    <TabsContent value="glossary" className="mt-6">
+                      <div className="space-y-4">
+                        {glossaryTerms.map(term => (
+                          <div key={term.id} className="border rounded-lg p-4">
+                            <h4 className="font-semibold text-lg">{term.term}</h4>
+                            <p className="text-gray-600 mt-1">{term.definition}</p>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </TabsContent>
+                    </TabsContent>
+                  </>
+                )}
+
+                {isMobile && (
+                  <TabsContent value="more" className="mt-6">
+                    <Tabs defaultValue="media" className="w-full">
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="media" className="text-xs">Media</TabsTrigger>
+                        <TabsTrigger value="glossary" className="text-xs">Glossary</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="media" className="mt-4">
+                        <div className="space-y-6">
+                          {audioVersions.includeBritish && dayData.british_audio_url && getYouTubeEmbedUrl(dayData.british_audio_url) && (
+                            <div>
+                              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                British Version <Badge variant="outline">UK</Badge>
+                              </h3>
+                              <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                <iframe
+                                  src={getYouTubeEmbedUrl(dayData.british_audio_url)}
+                                  className="w-full h-full"
+                                  allowFullScreen
+                                  title="British Version"
+                                />
+                              </div>
+                            </div>
+                          )}
+                          
+                          {audioVersions.includeAmerican && dayData.american_audio_url && getYouTubeEmbedUrl(dayData.american_audio_url) && (
+                            <div>
+                              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                American Version <Badge variant="outline">US</Badge>
+                              </h3>
+                              <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                <iframe
+                                  src={getYouTubeEmbedUrl(dayData.american_audio_url)}
+                                  className="w-full h-full"
+                                  allowFullScreen
+                                  title="American Version"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="glossary" className="mt-4">
+                        <div className="space-y-4">
+                          {glossaryTerms.map(term => (
+                            <div key={term.id} className="border rounded-lg p-4">
+                              <h4 className="font-semibold text-lg">{term.term}</h4>
+                              <p className="text-gray-600 mt-1">{term.definition}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  </TabsContent>
+                )}
               </Tabs>
             </CardContent>
           </Card>
@@ -259,27 +328,37 @@ const DayEditor = () => {
           
           <CardContent>
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="overview" className="flex items-center gap-2">
+              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-3' : 'grid-cols-5'}`}>
+                <TabsTrigger value="overview" className={`flex items-center gap-2 ${isMobile ? 'flex-col text-xs px-1' : ''}`}>
                   <FileText className="h-4 w-4" />
-                  Overview
+                  {!isMobile && 'Overview'}
                 </TabsTrigger>
-                <TabsTrigger value="content" className="flex items-center gap-2">
+                <TabsTrigger value="content" className={`flex items-center gap-2 ${isMobile ? 'flex-col text-xs px-1' : ''}`}>
                   <BookOpen className="h-4 w-4" />
-                  Content
+                  {!isMobile && 'Content'}
                 </TabsTrigger>
-                <TabsTrigger value="media" className="flex items-center gap-2">
-                  <Video className="h-4 w-4" />
-                  Media
-                </TabsTrigger>
-                <TabsTrigger value="glossary" className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4" />
-                  Glossary
-                </TabsTrigger>
-                <TabsTrigger value="assessments" className="flex items-center gap-2">
-                  <PenTool className="h-4 w-4" />
-                  Assessments
-                </TabsTrigger>
+                {!isMobile && (
+                  <>
+                    <TabsTrigger value="media" className="flex items-center gap-2">
+                      <Video className="h-4 w-4" />
+                      Media
+                    </TabsTrigger>
+                    <TabsTrigger value="glossary" className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4" />
+                      Glossary
+                    </TabsTrigger>
+                    <TabsTrigger value="assessments" className="flex items-center gap-2">
+                      <PenTool className="h-4 w-4" />
+                      Assessments
+                    </TabsTrigger>
+                  </>
+                )}
+                {isMobile && (
+                  <TabsTrigger value="more" className="flex items-center gap-2 flex-col text-xs px-1">
+                    <PenTool className="h-4 w-4" />
+                    More
+                  </TabsTrigger>
+                )}
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6 mt-6">
@@ -331,180 +410,434 @@ const DayEditor = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="media" className="space-y-6 mt-6">
-                <div>
-                  <Label className="text-lg font-semibold mb-4 block">Watch/Listen to the Speaker</Label>
-                  
-                  <div className="space-y-6">
-                    {/* British Version */}
-                    <div className="space-y-3">
-                      <div>
-                        <Label htmlFor="british" className="flex items-center gap-2">
-                          British Version
-                          <Badge variant="outline">UK</Badge>
-                        </Label>
-                        <Input
-                          id="british"
-                          value={dayData.british_audio_url}
-                          onChange={(e) => updateField('british_audio_url', e.target.value)}
-                          placeholder="https://www.youtube.com/watch?v=..."
-                        />
-                      </div>
-                      {dayData.british_audio_url && getYouTubeEmbedUrl(dayData.british_audio_url) && (
-                        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                          <iframe
-                            src={getYouTubeEmbedUrl(dayData.british_audio_url)}
-                            className="w-full h-full"
-                            allowFullScreen
-                            title="British Version"
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* American Version */}
-                    <div className="space-y-3">
-                      <div>
-                        <Label htmlFor="american" className="flex items-center gap-2">
-                          American Version
-                          <Badge variant="outline">US</Badge>
-                        </Label>
-                        <Input
-                          id="american"
-                          value={dayData.american_audio_url}
-                          onChange={(e) => updateField('american_audio_url', e.target.value)}
-                          placeholder="https://www.youtube.com/watch?v=..."
-                        />
-                      </div>
-                      {dayData.american_audio_url && getYouTubeEmbedUrl(dayData.american_audio_url) && (
-                        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                          <iframe
-                            src={getYouTubeEmbedUrl(dayData.american_audio_url)}
-                            className="w-full h-full"
-                            allowFullScreen
-                            title="American Version"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="glossary" className="space-y-6 mt-6">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
+              {!isMobile && (
+                <>
+                  <TabsContent value="media" className="space-y-6 mt-6">
                     <div>
-                      <Label className="text-lg font-semibold">Glossary Terms</Label>
-                      <p className="text-sm text-gray-600">Define important vocabulary for this lesson</p>
-                    </div>
-                    <Button onClick={addGlossaryTerm} size="sm">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Term
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {glossaryTerms.map((term) => (
-                      <Card key={term.id}>
-                        <CardContent className="pt-6">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Label className="text-lg font-semibold mb-4 block">Watch/Listen to the Speaker</Label>
+                      
+                      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <Label className="text-base font-medium mb-3 block">Audio Version Options</Label>
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id="british" 
+                              checked={audioVersions.includeBritish}
+                              onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeBritish: checked }))}
+                            />
+                            <Label htmlFor="british" className="flex items-center gap-2">
+                              Include British Version <Badge variant="outline">UK</Badge>
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id="american" 
+                              checked={audioVersions.includeAmerican}
+                              onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeAmerican: checked }))}
+                            />
+                            <Label htmlFor="american" className="flex items-center gap-2">
+                              Include American Version <Badge variant="outline">US</Badge>
+                            </Label>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-6">
+                        {audioVersions.includeBritish && (
+                          <div className="space-y-3">
                             <div>
-                              <Label htmlFor={`term-${term.id}`}>Term</Label>
+                              <Label htmlFor="british-url" className="flex items-center gap-2">
+                                British Version
+                                <Badge variant="outline">UK</Badge>
+                              </Label>
                               <Input
-                                id={`term-${term.id}`}
-                                value={term.term}
-                                onChange={(e) => updateGlossaryTerm(term.id, 'term', e.target.value)}
-                                placeholder="Enter vocabulary term..."
+                                id="british-url"
+                                value={dayData.british_audio_url}
+                                onChange={(e) => updateField('british_audio_url', e.target.value)}
+                                placeholder="https://www.youtube.com/watch?v=..."
                               />
                             </div>
-                            <div className="flex gap-2">
-                              <div className="flex-1">
-                                <Label htmlFor={`definition-${term.id}`}>Definition</Label>
-                                <Input
-                                  id={`definition-${term.id}`}
-                                  value={term.definition}
-                                  onChange={(e) => updateGlossaryTerm(term.id, 'definition', e.target.value)}
-                                  placeholder="Enter definition..."
+                            {dayData.british_audio_url && getYouTubeEmbedUrl(dayData.british_audio_url) && (
+                              <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                <iframe
+                                  src={getYouTubeEmbedUrl(dayData.british_audio_url)}
+                                  className="w-full h-full"
+                                  allowFullScreen
+                                  title="British Version"
                                 />
                               </div>
-                              <div className="flex items-end">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  onClick={() => removeGlossaryTerm(term.id)}
-                                  className="h-10"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                            )}
+                          </div>
+                        )}
+
+                        {audioVersions.includeAmerican && (
+                          <div className="space-y-3">
+                            <div>
+                              <Label htmlFor="american-url" className="flex items-center gap-2">
+                                American Version
+                                <Badge variant="outline">US</Badge>
+                              </Label>
+                              <Input
+                                id="american-url"
+                                value={dayData.american_audio_url}
+                                onChange={(e) => updateField('american_audio_url', e.target.value)}
+                                placeholder="https://www.youtube.com/watch?v=..."
+                              />
+                            </div>
+                            {dayData.american_audio_url && getYouTubeEmbedUrl(dayData.american_audio_url) && (
+                              <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                <iframe
+                                  src={getYouTubeEmbedUrl(dayData.american_audio_url)}
+                                  className="w-full h-full"
+                                  allowFullScreen
+                                  title="American Version"
+                                />
                               </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="glossary" className="space-y-6 mt-6">
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-lg font-semibold">Glossary Terms</Label>
+                          <p className="text-sm text-gray-600">Define important vocabulary for this lesson</p>
+                        </div>
+                        <Button onClick={addGlossaryTerm} size="sm">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Term
+                        </Button>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {glossaryTerms.map((term) => (
+                          <Card key={term.id}>
+                            <CardContent className="pt-6">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <Label htmlFor={`term-${term.id}`}>Term</Label>
+                                  <Input
+                                    id={`term-${term.id}`}
+                                    value={term.term}
+                                    onChange={(e) => updateGlossaryTerm(term.id, 'term', e.target.value)}
+                                    placeholder="Enter vocabulary term..."
+                                  />
+                                </div>
+                                <div className="flex gap-2">
+                                  <div className="flex-1">
+                                    <Label htmlFor={`definition-${term.id}`}>Definition</Label>
+                                    <Input
+                                      id={`definition-${term.id}`}
+                                      value={term.definition}
+                                      onChange={(e) => updateGlossaryTerm(term.id, 'definition', e.target.value)}
+                                      placeholder="Enter definition..."
+                                    />
+                                  </div>
+                                  <div className="flex items-end">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      onClick={() => removeGlossaryTerm(term.id)}
+                                      className="h-10"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="assessments" className="space-y-6 mt-6">
+                    <div className="space-y-6">
+                      <div>
+                        <Label className="text-lg font-semibold">Assessment Types</Label>
+                        <p className="text-sm text-gray-600 mb-4">Configure the three types of assessments for this day</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <Card>
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-base">Vocabulary & Comprehension Test</CardTitle>
+                              <CardDescription>Test vocabulary and reading comprehension</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <Button 
+                                variant="outline" 
+                                className="w-full"
+                                onClick={() => openQuestionEditor('vocabulary')}
+                              >
+                                Configure Questions
+                              </Button>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card>
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-base">Topic Test</CardTitle>
+                              <CardDescription>Test understanding of grammar topics</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <Button 
+                                variant="outline" 
+                                className="w-full"
+                                onClick={() => openQuestionEditor('topic')}
+                              >
+                                Configure Questions
+                              </Button>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card>
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-base">Writing Test</CardTitle>
+                              <CardDescription>Creative writing assignments</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <Button 
+                                variant="outline" 
+                                className="w-full"
+                                onClick={() => openQuestionEditor('writing')}
+                              >
+                                Configure Prompts
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </>
+              )}
+
+              {isMobile && (
+                <TabsContent value="more" className="space-y-6 mt-6">
+                  <Tabs defaultValue="media" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="media" className="text-xs">Media</TabsTrigger>
+                      <TabsTrigger value="glossary" className="text-xs">Glossary</TabsTrigger>
+                      <TabsTrigger value="assessments" className="text-xs">Tests</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="media" className="mt-4">
+                      <div>
+                        <Label className="text-lg font-semibold mb-4 block">Watch/Listen to the Speaker</Label>
+                        
+                        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                          <Label className="text-base font-medium mb-3 block">Audio Version Options</Label>
+                          <div className="space-y-3">
+                            <div className="flex items-center space-x-2">
+                              <Checkbox 
+                                id="british-mobile" 
+                                checked={audioVersions.includeBritish}
+                                onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeBritish: checked }))}
+                              />
+                              <Label htmlFor="british-mobile" className="flex items-center gap-2 text-sm">
+                                Include British Version <Badge variant="outline" className="text-xs">UK</Badge>
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox 
+                                id="american-mobile" 
+                                checked={audioVersions.includeAmerican}
+                                onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeAmerican: checked }))}
+                              />
+                              <Label htmlFor="american-mobile" className="flex items-center gap-2 text-sm">
+                                Include American Version <Badge variant="outline" className="text-xs">US</Badge>
+                              </Label>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
+                        </div>
+                        
+                        <div className="space-y-6">
+                          {audioVersions.includeBritish && (
+                            <div className="space-y-3">
+                              <div>
+                                <Label htmlFor="british-url-mobile" className="flex items-center gap-2 text-sm">
+                                  British Version
+                                  <Badge variant="outline" className="text-xs">UK</Badge>
+                                </Label>
+                                <Input
+                                  id="british-url-mobile"
+                                  value={dayData.british_audio_url}
+                                  onChange={(e) => updateField('british_audio_url', e.target.value)}
+                                  placeholder="https://www.youtube.com/watch?v=..."
+                                  className="text-sm"
+                                />
+                              </div>
+                              {dayData.british_audio_url && getYouTubeEmbedUrl(dayData.british_audio_url) && (
+                                <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                  <iframe
+                                    src={getYouTubeEmbedUrl(dayData.british_audio_url)}
+                                    className="w-full h-full"
+                                    allowFullScreen
+                                    title="British Version"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
 
-              <TabsContent value="assessments" className="space-y-6 mt-6">
-                <div className="space-y-6">
-                  <div>
-                    <Label className="text-lg font-semibold">Assessment Types</Label>
-                    <p className="text-sm text-gray-600 mb-4">Configure the three types of assessments for this day</p>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-base">Vocabulary & Comprehension Test</CardTitle>
-                          <CardDescription>Test vocabulary and reading comprehension</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <Button 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={() => openQuestionEditor('vocabulary')}
-                          >
-                            Configure Questions
+                          {audioVersions.includeAmerican && (
+                            <div className="space-y-3">
+                              <div>
+                                <Label htmlFor="american-url-mobile" className="flex items-center gap-2 text-sm">
+                                  American Version
+                                  <Badge variant="outline" className="text-xs">US</Badge>
+                                </Label>
+                                <Input
+                                  id="american-url-mobile"
+                                  value={dayData.american_audio_url}
+                                  onChange={(e) => updateField('american_audio_url', e.target.value)}
+                                  placeholder="https://www.youtube.com/watch?v=..."
+                                  className="text-sm"
+                                />
+                              </div>
+                              {dayData.american_audio_url && getYouTubeEmbedUrl(dayData.american_audio_url) && (
+                                <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                  <iframe
+                                    src={getYouTubeEmbedUrl(dayData.american_audio_url)}
+                                    className="w-full h-full"
+                                    allowFullScreen
+                                    title="American Version"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="glossary" className="mt-4">
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label className="text-base font-semibold">Glossary Terms</Label>
+                            <p className="text-xs text-gray-600">Define important vocabulary for this lesson</p>
+                          </div>
+                          <Button onClick={addGlossaryTerm} size="sm" className="text-xs">
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add
                           </Button>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-base">Topic Test</CardTitle>
-                          <CardDescription>Test understanding of grammar topics</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <Button 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={() => openQuestionEditor('topic')}
-                          >
-                            Configure Questions
-                          </Button>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-base">Writing Test</CardTitle>
-                          <CardDescription>Creative writing assignments</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <Button 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={() => openQuestionEditor('writing')}
-                          >
-                            Configure Prompts
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          {glossaryTerms.map((term) => (
+                            <Card key={term.id}>
+                              <CardContent className="pt-4">
+                                <div className="space-y-3">
+                                  <div>
+                                    <Label htmlFor={`term-mobile-${term.id}`} className="text-sm">Term</Label>
+                                    <Input
+                                      id={`term-mobile-${term.id}`}
+                                      value={term.term}
+                                      onChange={(e) => updateGlossaryTerm(term.id, 'term', e.target.value)}
+                                      placeholder="Enter vocabulary term..."
+                                      className="text-sm"
+                                    />
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <div className="flex-1">
+                                      <Label htmlFor={`definition-mobile-${term.id}`} className="text-sm">Definition</Label>
+                                      <Input
+                                        id={`definition-mobile-${term.id}`}
+                                        value={term.definition}
+                                        onChange={(e) => updateGlossaryTerm(term.id, 'definition', e.target.value)}
+                                        placeholder="Enter definition..."
+                                        className="text-sm"
+                                      />
+                                    </div>
+                                    <div className="flex items-end">
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        onClick={() => removeGlossaryTerm(term.id)}
+                                        className="h-8 w-8 p-0"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="assessments" className="mt-4">
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="text-base font-semibold">Assessment Types</Label>
+                          <p className="text-xs text-gray-600 mb-4">Configure the three types of assessments for this day</p>
+                          
+                          <div className="space-y-3">
+                            <Card>
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm">Vocabulary & Comprehension Test</CardTitle>
+                                <CardDescription className="text-xs">Test vocabulary and reading comprehension</CardDescription>
+                              </CardHeader>
+                              <CardContent className="pt-2">
+                                <Button 
+                                  variant="outline" 
+                                  className="w-full text-xs"
+                                  size="sm"
+                                  onClick={() => openQuestionEditor('vocabulary')}
+                                >
+                                  Configure Questions
+                                </Button>
+                              </CardContent>
+                            </Card>
+                            
+                            <Card>
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm">Topic Test</CardTitle>
+                                <CardDescription className="text-xs">Test understanding of grammar topics</CardDescription>
+                              </CardHeader>
+                              <CardContent className="pt-2">
+                                <Button 
+                                  variant="outline" 
+                                  className="w-full text-xs"
+                                  size="sm"
+                                  onClick={() => openQuestionEditor('topic')}
+                                >
+                                  Configure Questions
+                                </Button>
+                              </CardContent>
+                            </Card>
+                            
+                            <Card>
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm">Writing Test</CardTitle>
+                                <CardDescription className="text-xs">Creative writing assignments</CardDescription>
+                              </CardHeader>
+                              <CardContent className="pt-2">
+                                <Button 
+                                  variant="outline" 
+                                  className="w-full text-xs"
+                                  size="sm"
+                                  onClick={() => openQuestionEditor('writing')}
+                                >
+                                  Configure Prompts
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </TabsContent>
+              )}
             </Tabs>
           </CardContent>
         </Card>
