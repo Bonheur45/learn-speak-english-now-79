@@ -1,22 +1,22 @@
 
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Save } from 'lucide-react';
+import { ArrowLeft, Plus, Save, Edit, Calendar, BookOpen } from 'lucide-react';
 import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
-import DayContentEditor from '@/components/DayContentEditor';
 import { toast } from '@/hooks/use-toast';
 
 const DaysList = () => {
   const { cohortId, trimesterId } = useParams();
+  const navigate = useNavigate();
   
   const cohort = MOCK_COHORTS.find(c => c.id === cohortId);
   const trimester = MOCK_TRIMESTERS.find(t => t.id === trimesterId);
   
-  // Convert mock days to the format expected by DayContentEditor
+  // Convert mock days to the format expected by the editor
   const [daysData, setDaysData] = useState(
     trimester?.days.map(day => ({
       id: day.id,
@@ -47,12 +47,8 @@ const DaysList = () => {
     );
   }
 
-  const handleSaveDay = (dayData: any) => {
-    setDaysData(prev => 
-      prev.map(day => 
-        day.id === dayData.id ? dayData : day
-      )
-    );
+  const handleEditDay = (dayId: string) => {
+    navigate(`/tutor/materials/cohort/${cohortId}/trimester/${trimesterId}/day/${dayId}/edit`);
   };
 
   const handleSaveAll = () => {
@@ -138,25 +134,51 @@ const DaysList = () => {
           </div>
         </div>
 
-        {/* Day Content Editors */}
-        <div className="space-y-4">
+        {/* Days Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {daysData.length === 0 ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <p className="text-gray-500 mb-4">No days found for this trimester.</p>
-                <Button onClick={addNewDay}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Day
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="col-span-full">
+              <Card className="text-center py-12">
+                <CardContent>
+                  <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-500 mb-4">No days found for this trimester.</p>
+                  <Button onClick={addNewDay}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add First Day
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           ) : (
             daysData.map((day) => (
-              <DayContentEditor
-                key={day.id}
-                day={day}
-                onSave={handleSaveDay}
-              />
+              <Card key={day.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Day {day.day_number}</CardTitle>
+                      <CardDescription className="mt-1">{day.title}</CardDescription>
+                    </div>
+                    <Badge variant="secondary">Draft</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Calendar className="h-4 w-4" />
+                    <span>{new Date(day.date).toLocaleDateString()}</span>
+                  </div>
+                  
+                  <div className="pt-4 border-t">
+                    <Button 
+                      onClick={() => handleEditDay(day.id)}
+                      className="w-full"
+                      variant="outline"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Day
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))
           )}
         </div>
