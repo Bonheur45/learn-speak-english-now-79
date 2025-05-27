@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -9,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Save, Calendar, BookOpen, Video, PenTool, FileText, Eye, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, BookOpen, Video, PenTool, FileText, Eye, Plus, Trash2, Edit } from 'lucide-react';
 import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
 import RichTextEditor from '@/components/RichTextEditor';
 import { toast } from '@/hooks/use-toast';
@@ -119,10 +120,12 @@ const DayEditor = () => {
         <main className="flex-grow container mx-auto px-4 py-8 max-w-4xl">
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-2xl font-bold text-brand-blue">Preview: Day {dayData.day_number}</h1>
-            <Button onClick={() => setShowPreview(false)} variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Editor
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setShowPreview(false)} className="bg-brand-yellow text-brand-blue hover:brightness-95">
+                <Edit className="h-4 w-4 mr-2" />
+                Back to Editor
+              </Button>
+            </div>
           </div>
 
           <Card className="mb-6">
@@ -132,12 +135,12 @@ const DayEditor = () => {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="story" className="w-full">
-                <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-4'}`}>
-                  <TabsTrigger value="story" className={isMobile ? 'text-xs px-2' : ''}>Story</TabsTrigger>
-                  <TabsTrigger value="topic" className={isMobile ? 'text-xs px-2' : ''}>Topic</TabsTrigger>
-                  {!isMobile && <TabsTrigger value="media">Media</TabsTrigger>}
-                  {!isMobile && <TabsTrigger value="glossary">Glossary</TabsTrigger>}
-                  {isMobile && <TabsTrigger value="more" className="text-xs px-2">More</TabsTrigger>}
+                <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-4'} bg-gray-100`}>
+                  <TabsTrigger value="story" className={`${isMobile ? 'text-xs px-2' : ''} hover:bg-white rounded-md transition-colors`}>Story</TabsTrigger>
+                  <TabsTrigger value="topic" className={`${isMobile ? 'text-xs px-2' : ''} hover:bg-white rounded-md transition-colors`}>Topic</TabsTrigger>
+                  {!isMobile && <TabsTrigger value="media" className="hover:bg-white rounded-md transition-colors">Media</TabsTrigger>}
+                  {!isMobile && <TabsTrigger value="glossary" className="hover:bg-white rounded-md transition-colors">Glossary</TabsTrigger>}
+                  {isMobile && <TabsTrigger value="more" className="text-xs px-2 hover:bg-white rounded-md transition-colors">More</TabsTrigger>}
                 </TabsList>
 
                 <TabsContent value="story" className="mt-6">
@@ -202,9 +205,9 @@ const DayEditor = () => {
                 {isMobile && (
                   <TabsContent value="more" className="mt-6">
                     <Tabs defaultValue="media" className="w-full">
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="media" className="text-xs">Media</TabsTrigger>
-                        <TabsTrigger value="glossary" className="text-xs">Glossary</TabsTrigger>
+                      <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+                        <TabsTrigger value="media" className="text-xs hover:bg-white rounded-md transition-colors">Media</TabsTrigger>
+                        <TabsTrigger value="glossary" className="text-xs hover:bg-white rounded-md transition-colors">Glossary</TabsTrigger>
                       </TabsList>
                       
                       <TabsContent value="media" className="mt-4">
@@ -329,33 +332,33 @@ const DayEditor = () => {
           
           <CardContent>
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-3' : 'grid-cols-5'}`}>
-                <TabsTrigger value="overview" className={`flex items-center gap-2 ${isMobile ? 'flex-col text-xs px-1' : ''}`}>
+              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-3' : 'grid-cols-5'} bg-gray-100`}>
+                <TabsTrigger value="overview" className={`flex items-center gap-2 ${isMobile ? 'flex-col text-xs px-1' : ''} hover:bg-white rounded-md transition-colors`}>
                   <FileText className="h-4 w-4" />
                   {!isMobile && 'Overview'}
                 </TabsTrigger>
-                <TabsTrigger value="content" className={`flex items-center gap-2 ${isMobile ? 'flex-col text-xs px-1' : ''}`}>
+                <TabsTrigger value="content" className={`flex items-center gap-2 ${isMobile ? 'flex-col text-xs px-1' : ''} hover:bg-white rounded-md transition-colors`}>
                   <BookOpen className="h-4 w-4" />
                   {!isMobile && 'Content'}
                 </TabsTrigger>
                 {!isMobile && (
                   <>
-                    <TabsTrigger value="media" className="flex items-center gap-2">
+                    <TabsTrigger value="media" className="flex items-center gap-2 hover:bg-white rounded-md transition-colors">
                       <Video className="h-4 w-4" />
                       Media
                     </TabsTrigger>
-                    <TabsTrigger value="glossary" className="flex items-center gap-2">
+                    <TabsTrigger value="glossary" className="flex items-center gap-2 hover:bg-white rounded-md transition-colors">
                       <BookOpen className="h-4 w-4" />
                       Glossary
                     </TabsTrigger>
-                    <TabsTrigger value="assessments" className="flex items-center gap-2">
+                    <TabsTrigger value="assessments" className="flex items-center gap-2 hover:bg-white rounded-md transition-colors">
                       <PenTool className="h-4 w-4" />
                       Assessments
                     </TabsTrigger>
                   </>
                 )}
                 {isMobile && (
-                  <TabsTrigger value="more" className="flex items-center gap-2 flex-col text-xs px-1">
+                  <TabsTrigger value="more" className="flex items-center gap-2 flex-col text-xs px-1 hover:bg-white rounded-md transition-colors">
                     <PenTool className="h-4 w-4" />
                     More
                   </TabsTrigger>
@@ -621,10 +624,10 @@ const DayEditor = () => {
               {isMobile && (
                 <TabsContent value="more" className="space-y-6 mt-6">
                   <Tabs defaultValue="media" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="media" className="text-xs">Media</TabsTrigger>
-                      <TabsTrigger value="glossary" className="text-xs">Glossary</TabsTrigger>
-                      <TabsTrigger value="assessments" className="text-xs">Tests</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-3 bg-gray-100">
+                      <TabsTrigger value="media" className="text-xs hover:bg-white rounded-md transition-colors">Media</TabsTrigger>
+                      <TabsTrigger value="glossary" className="text-xs hover:bg-white rounded-md transition-colors">Glossary</TabsTrigger>
+                      <TabsTrigger value="assessments" className="text-xs hover:bg-white rounded-md transition-colors">Tests</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="media" className="mt-4">
