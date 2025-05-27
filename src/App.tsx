@@ -73,6 +73,7 @@ function App() {
             <Route path="/tutor/materials" element={<CohortMaterials />} />
             <Route path="/tutor/materials/cohort/:cohortId" element={<TrimesterMaterials />} />
             <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId" element={<DaysList />} />
+            <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/edit" element={<DayEditor />} />
             <Route path="/tutor/upload" element={<Upload />} />
             <Route path="/tutor/day-editor/:dayId" element={<DayEditor />} />
             
