@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Save, Calendar, BookOpen, Video, PenTool, FileText } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, BookOpen, Video, PenTool, FileText, Eye, Plus, Trash2 } from 'lucide-react';
 import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
 import RichTextEditor from '@/components/RichTextEditor';
 import { toast } from '@/hooks/use-toast';
@@ -31,6 +31,13 @@ const DayEditor = () => {
     british_audio_url: '',
     american_audio_url: ''
   });
+
+  const [glossaryTerms, setGlossaryTerms] = useState([
+    { id: '1', term: 'Present Tense', definition: 'A verb form that describes actions happening now or habitual actions.' },
+    { id: '2', term: 'Vocabulary', definition: 'The body of words used in a particular language.' }
+  ]);
+
+  const [showPreview, setShowPreview] = useState(false);
 
   if (!cohort || !trimester || !day) {
     return (
@@ -73,6 +80,126 @@ const DayEditor = () => {
     return url.includes('embed') ? url : '';
   };
 
+  const addGlossaryTerm = () => {
+    const newTerm = {
+      id: Date.now().toString(),
+      term: '',
+      definition: ''
+    };
+    setGlossaryTerms(prev => [...prev, newTerm]);
+  };
+
+  const updateGlossaryTerm = (id: string, field: string, value: string) => {
+    setGlossaryTerms(prev => prev.map(term => 
+      term.id === id ? { ...term, [field]: value } : term
+    ));
+  };
+
+  const removeGlossaryTerm = (id: string) => {
+    setGlossaryTerms(prev => prev.filter(term => term.id !== id));
+  };
+
+  const openQuestionEditor = (type: string) => {
+    // Navigate to question configuration page
+    navigate(`/tutor/materials/cohort/${cohortId}/trimester/${trimesterId}/day/${dayId}/questions/${type}`);
+  };
+
+  if (showPreview) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Navbar isLoggedIn={true} userRole="tutor" />
+        
+        <main className="flex-grow container mx-auto px-4 py-8 max-w-4xl">
+          <div className="mb-6 flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-brand-blue">Preview: Day {dayData.day_number}</h1>
+            <Button onClick={() => setShowPreview(false)} variant="outline">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Editor
+            </Button>
+          </div>
+
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Day {dayData.day_number} - {dayData.title}</CardTitle>
+              <CardDescription>{new Date(dayData.date).toLocaleDateString()}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="story" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="story">Story</TabsTrigger>
+                  <TabsTrigger value="topic">Topic Notes</TabsTrigger>
+                  <TabsTrigger value="media">Media</TabsTrigger>
+                  <TabsTrigger value="glossary">Glossary</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="story" className="mt-6">
+                  <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: dayData.story_text }} />
+                </TabsContent>
+
+                <TabsContent value="topic" className="mt-6">
+                  <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: dayData.topic_notes }} />
+                </TabsContent>
+
+                <TabsContent value="media" className="mt-6">
+                  <div className="space-y-6">
+                    {dayData.british_audio_url && getYouTubeEmbedUrl(dayData.british_audio_url) && (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                          British Version <Badge variant="outline">UK</Badge>
+                        </h3>
+                        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                          <iframe
+                            src={getYouTubeEmbedUrl(dayData.british_audio_url)}
+                            className="w-full h-full"
+                            allowFullScreen
+                            title="British Version"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    
+                    {dayData.american_audio_url && getYouTubeEmbedUrl(dayData.american_audio_url) && (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                          American Version <Badge variant="outline">US</Badge>
+                        </h3>
+                        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                          <iframe
+                            src={getYouTubeEmbedUrl(dayData.american_audio_url)}
+                            className="w-full h-full"
+                            allowFullScreen
+                            title="American Version"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="glossary" className="mt-6">
+                  <div className="space-y-4">
+                    {glossaryTerms.map(term => (
+                      <div key={term.id} className="border rounded-lg p-4">
+                        <h4 className="font-semibold text-lg">{term.term}</h4>
+                        <p className="text-gray-600 mt-1">{term.definition}</p>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </main>
+
+        <footer className="bg-white border-t py-6 mt-8">
+          <div className="container mx-auto px-4 text-center text-gray-600">
+            <p>© {new Date().getFullYear()} Let's Do It English. All rights reserved.</p>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar isLoggedIn={true} userRole="tutor" />
@@ -103,6 +230,10 @@ const DayEditor = () => {
                   Back to Days
                 </Link>
               </Button>
+              <Button onClick={() => setShowPreview(true)} variant="outline" size="sm">
+                <Eye className="h-4 w-4 mr-2" />
+                Preview
+              </Button>
               <Button onClick={handleSave} className="bg-brand-yellow text-brand-blue hover:brightness-95">
                 <Save className="h-4 w-4 mr-2" />
                 Save Changes
@@ -128,7 +259,7 @@ const DayEditor = () => {
           
           <CardContent>
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overview" className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   Overview
@@ -140,6 +271,10 @@ const DayEditor = () => {
                 <TabsTrigger value="media" className="flex items-center gap-2">
                   <Video className="h-4 w-4" />
                   Media
+                </TabsTrigger>
+                <TabsTrigger value="glossary" className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  Glossary
                 </TabsTrigger>
                 <TabsTrigger value="assessments" className="flex items-center gap-2">
                   <PenTool className="h-4 w-4" />
@@ -256,6 +391,62 @@ const DayEditor = () => {
                 </div>
               </TabsContent>
 
+              <TabsContent value="glossary" className="space-y-6 mt-6">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-lg font-semibold">Glossary Terms</Label>
+                      <p className="text-sm text-gray-600">Define important vocabulary for this lesson</p>
+                    </div>
+                    <Button onClick={addGlossaryTerm} size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Term
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {glossaryTerms.map((term) => (
+                      <Card key={term.id}>
+                        <CardContent className="pt-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor={`term-${term.id}`}>Term</Label>
+                              <Input
+                                id={`term-${term.id}`}
+                                value={term.term}
+                                onChange={(e) => updateGlossaryTerm(term.id, 'term', e.target.value)}
+                                placeholder="Enter vocabulary term..."
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <div className="flex-1">
+                                <Label htmlFor={`definition-${term.id}`}>Definition</Label>
+                                <Input
+                                  id={`definition-${term.id}`}
+                                  value={term.definition}
+                                  onChange={(e) => updateGlossaryTerm(term.id, 'definition', e.target.value)}
+                                  placeholder="Enter definition..."
+                                />
+                              </div>
+                              <div className="flex items-end">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => removeGlossaryTerm(term.id)}
+                                  className="h-10"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+
               <TabsContent value="assessments" className="space-y-6 mt-6">
                 <div className="space-y-6">
                   <div>
@@ -269,7 +460,13 @@ const DayEditor = () => {
                           <CardDescription>Test vocabulary and reading comprehension</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <Button variant="outline" className="w-full">Configure Questions</Button>
+                          <Button 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => openQuestionEditor('vocabulary')}
+                          >
+                            Configure Questions
+                          </Button>
                         </CardContent>
                       </Card>
                       
@@ -279,7 +476,13 @@ const DayEditor = () => {
                           <CardDescription>Test understanding of grammar topics</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <Button variant="outline" className="w-full">Configure Questions</Button>
+                          <Button 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => openQuestionEditor('topic')}
+                          >
+                            Configure Questions
+                          </Button>
                         </CardContent>
                       </Card>
                       
@@ -289,7 +492,13 @@ const DayEditor = () => {
                           <CardDescription>Creative writing assignments</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <Button variant="outline" className="w-full">Configure Prompts</Button>
+                          <Button 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => openQuestionEditor('writing')}
+                          >
+                            Configure Prompts
+                          </Button>
                         </CardContent>
                       </Card>
                     </div>

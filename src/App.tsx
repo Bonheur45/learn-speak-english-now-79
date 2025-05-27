@@ -33,6 +33,9 @@ import TrimesterMaterials from "./pages/tutor/TrimesterMaterials";
 import DaysList from "./pages/tutor/DaysList";
 import Upload from "./pages/tutor/Upload";
 import DayEditor from "./pages/tutor/DayEditor";
+import VocabularyQuestionEditor from "./pages/tutor/VocabularyQuestionEditor";
+import TopicQuestionEditor from "./pages/tutor/TopicQuestionEditor";
+import WritingPromptEditor from "./pages/tutor/WritingPromptEditor";
 
 // Assessment pages
 import EmbeddedAssessment from "./pages/EmbeddedAssessment";
@@ -74,6 +77,9 @@ function App() {
             <Route path="/tutor/materials/cohort/:cohortId" element={<TrimesterMaterials />} />
             <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId" element={<DaysList />} />
             <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/edit" element={<DayEditor />} />
+            <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/questions/vocabulary" element={<VocabularyQuestionEditor />} />
+            <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/questions/topic" element={<TopicQuestionEditor />} />
+            <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/questions/writing" element={<WritingPromptEditor />} />
             <Route path="/tutor/upload" element={<Upload />} />
             <Route path="/tutor/day-editor/:dayId" element={<DayEditor />} />
             
