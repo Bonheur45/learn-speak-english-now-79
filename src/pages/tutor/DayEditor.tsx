@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -121,7 +119,10 @@ const DayEditor = () => {
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-2xl font-bold text-brand-blue">Preview: Day {dayData.day_number}</h1>
             <div className="flex gap-2">
-              <Button onClick={() => setShowPreview(false)} className="bg-brand-yellow text-brand-blue hover:brightness-95">
+              <Button 
+                onClick={() => setShowPreview(false)} 
+                className="bg-brand-yellow text-brand-blue hover:bg-yellow-400"
+              >
                 <Edit className="h-4 w-4 mr-2" />
                 Back to Editor
               </Button>
@@ -136,11 +137,11 @@ const DayEditor = () => {
             <CardContent>
               <Tabs defaultValue="story" className="w-full">
                 <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-4'} bg-gray-100`}>
-                  <TabsTrigger value="story" className={`${isMobile ? 'text-xs px-2' : ''} hover:bg-white rounded-md transition-colors`}>Story</TabsTrigger>
-                  <TabsTrigger value="topic" className={`${isMobile ? 'text-xs px-2' : ''} hover:bg-white rounded-md transition-colors`}>Topic</TabsTrigger>
-                  {!isMobile && <TabsTrigger value="media" className="hover:bg-white rounded-md transition-colors">Media</TabsTrigger>}
-                  {!isMobile && <TabsTrigger value="glossary" className="hover:bg-white rounded-md transition-colors">Glossary</TabsTrigger>}
-                  {isMobile && <TabsTrigger value="more" className="text-xs px-2 hover:bg-white rounded-md transition-colors">More</TabsTrigger>}
+                  <TabsTrigger value="story" className={`${isMobile ? 'text-xs px-2' : ''} data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors`}>Story</TabsTrigger>
+                  <TabsTrigger value="topic" className={`${isMobile ? 'text-xs px-2' : ''} data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors`}>Topic</TabsTrigger>
+                  {!isMobile && <TabsTrigger value="media" className="data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors">Media</TabsTrigger>}
+                  {!isMobile && <TabsTrigger value="glossary" className="data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors">Glossary</TabsTrigger>}
+                  {isMobile && <TabsTrigger value="more" className="text-xs px-2 data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors">More</TabsTrigger>}
                 </TabsList>
 
                 <TabsContent value="story" className="mt-6">
@@ -206,8 +207,8 @@ const DayEditor = () => {
                   <TabsContent value="more" className="mt-6">
                     <Tabs defaultValue="media" className="w-full">
                       <TabsList className="grid w-full grid-cols-2 bg-gray-100">
-                        <TabsTrigger value="media" className="text-xs hover:bg-white rounded-md transition-colors">Media</TabsTrigger>
-                        <TabsTrigger value="glossary" className="text-xs hover:bg-white rounded-md transition-colors">Glossary</TabsTrigger>
+                        <TabsTrigger value="media" className="text-xs data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors">Media</TabsTrigger>
+                        <TabsTrigger value="glossary" className="text-xs data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors">Glossary</TabsTrigger>
                       </TabsList>
                       
                       <TabsContent value="media" className="mt-4">
@@ -307,7 +308,7 @@ const DayEditor = () => {
                 <Eye className="h-4 w-4 mr-2" />
                 Preview
               </Button>
-              <Button onClick={handleSave} className="bg-brand-yellow text-brand-blue hover:brightness-95">
+              <Button onClick={handleSave} className="bg-brand-yellow text-brand-blue hover:bg-yellow-400">
                 <Save className="h-4 w-4 mr-2" />
                 Save Changes
               </Button>
@@ -333,32 +334,32 @@ const DayEditor = () => {
           <CardContent>
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className={`grid w-full ${isMobile ? 'grid-cols-3' : 'grid-cols-5'} bg-gray-100`}>
-                <TabsTrigger value="overview" className={`flex items-center gap-2 ${isMobile ? 'flex-col text-xs px-1' : ''} hover:bg-white rounded-md transition-colors`}>
+                <TabsTrigger value="overview" className={`flex items-center gap-2 ${isMobile ? 'flex-col text-xs px-1' : ''} data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors`}>
                   <FileText className="h-4 w-4" />
                   {!isMobile && 'Overview'}
                 </TabsTrigger>
-                <TabsTrigger value="content" className={`flex items-center gap-2 ${isMobile ? 'flex-col text-xs px-1' : ''} hover:bg-white rounded-md transition-colors`}>
+                <TabsTrigger value="content" className={`flex items-center gap-2 ${isMobile ? 'flex-col text-xs px-1' : ''} data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors`}>
                   <BookOpen className="h-4 w-4" />
                   {!isMobile && 'Content'}
                 </TabsTrigger>
                 {!isMobile && (
                   <>
-                    <TabsTrigger value="media" className="flex items-center gap-2 hover:bg-white rounded-md transition-colors">
+                    <TabsTrigger value="media" className="flex items-center gap-2 data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors">
                       <Video className="h-4 w-4" />
                       Media
                     </TabsTrigger>
-                    <TabsTrigger value="glossary" className="flex items-center gap-2 hover:bg-white rounded-md transition-colors">
+                    <TabsTrigger value="glossary" className="flex items-center gap-2 data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors">
                       <BookOpen className="h-4 w-4" />
                       Glossary
                     </TabsTrigger>
-                    <TabsTrigger value="assessments" className="flex items-center gap-2 hover:bg-white rounded-md transition-colors">
+                    <TabsTrigger value="assessments" className="flex items-center gap-2 data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors">
                       <PenTool className="h-4 w-4" />
                       Assessments
                     </TabsTrigger>
                   </>
                 )}
                 {isMobile && (
-                  <TabsTrigger value="more" className="flex items-center gap-2 flex-col text-xs px-1 hover:bg-white rounded-md transition-colors">
+                  <TabsTrigger value="more" className="flex items-center gap-2 flex-col text-xs px-1 data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors">
                     <PenTool className="h-4 w-4" />
                     More
                   </TabsTrigger>
@@ -427,7 +428,7 @@ const DayEditor = () => {
                             <Checkbox 
                               id="british" 
                               checked={audioVersions.includeBritish}
-                              onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeBritish: Boolean(checked) }))}
+                              onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeBritish: !!checked }))}
                             />
                             <Label htmlFor="british" className="flex items-center gap-2">
                               Include British Version <Badge variant="outline">UK</Badge>
@@ -437,7 +438,7 @@ const DayEditor = () => {
                             <Checkbox 
                               id="american" 
                               checked={audioVersions.includeAmerican}
-                              onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeAmerican: Boolean(checked) }))}
+                              onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeAmerican: !!checked }))}
                             />
                             <Label htmlFor="american" className="flex items-center gap-2">
                               Include American Version <Badge variant="outline">US</Badge>
@@ -625,9 +626,9 @@ const DayEditor = () => {
                 <TabsContent value="more" className="space-y-6 mt-6">
                   <Tabs defaultValue="media" className="w-full">
                     <TabsList className="grid w-full grid-cols-3 bg-gray-100">
-                      <TabsTrigger value="media" className="text-xs hover:bg-white rounded-md transition-colors">Media</TabsTrigger>
-                      <TabsTrigger value="glossary" className="text-xs hover:bg-white rounded-md transition-colors">Glossary</TabsTrigger>
-                      <TabsTrigger value="assessments" className="text-xs hover:bg-white rounded-md transition-colors">Tests</TabsTrigger>
+                      <TabsTrigger value="media" className="text-xs data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors">Media</TabsTrigger>
+                      <TabsTrigger value="glossary" className="text-xs data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors">Glossary</TabsTrigger>
+                      <TabsTrigger value="assessments" className="text-xs data-[state=active]:bg-white hover:bg-gray-200 rounded-md transition-colors">Tests</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="media" className="mt-4">
@@ -641,7 +642,7 @@ const DayEditor = () => {
                               <Checkbox 
                                 id="british-mobile" 
                                 checked={audioVersions.includeBritish}
-                                onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeBritish: Boolean(checked) }))}
+                                onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeBritish: !!checked }))}
                               />
                               <Label htmlFor="british-mobile" className="flex items-center gap-2 text-sm">
                                 Include British Version <Badge variant="outline" className="text-xs">UK</Badge>
@@ -651,7 +652,7 @@ const DayEditor = () => {
                               <Checkbox 
                                 id="american-mobile" 
                                 checked={audioVersions.includeAmerican}
-                                onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeAmerican: Boolean(checked) }))}
+                                onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeAmerican: !!checked }))}
                               />
                               <Label htmlFor="american-mobile" className="flex items-center gap-2 text-sm">
                                 Include American Version <Badge variant="outline" className="text-xs">US</Badge>
