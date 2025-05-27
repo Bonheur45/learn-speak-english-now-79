@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -423,7 +424,7 @@ const DayEditor = () => {
                             <Checkbox 
                               id="british" 
                               checked={audioVersions.includeBritish}
-                              onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeBritish: checked }))}
+                              onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeBritish: Boolean(checked) }))}
                             />
                             <Label htmlFor="british" className="flex items-center gap-2">
                               Include British Version <Badge variant="outline">UK</Badge>
@@ -433,7 +434,7 @@ const DayEditor = () => {
                             <Checkbox 
                               id="american" 
                               checked={audioVersions.includeAmerican}
-                              onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeAmerican: checked }))}
+                              onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeAmerican: Boolean(checked) }))}
                             />
                             <Label htmlFor="american" className="flex items-center gap-2">
                               Include American Version <Badge variant="outline">US</Badge>
@@ -637,7 +638,7 @@ const DayEditor = () => {
                               <Checkbox 
                                 id="british-mobile" 
                                 checked={audioVersions.includeBritish}
-                                onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeBritish: checked }))}
+                                onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeBritish: Boolean(checked) }))}
                               />
                               <Label htmlFor="british-mobile" className="flex items-center gap-2 text-sm">
                                 Include British Version <Badge variant="outline" className="text-xs">UK</Badge>
@@ -647,7 +648,7 @@ const DayEditor = () => {
                               <Checkbox 
                                 id="american-mobile" 
                                 checked={audioVersions.includeAmerican}
-                                onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeAmerican: checked }))}
+                                onCheckedChange={(checked) => setAudioVersions(prev => ({ ...prev, includeAmerican: Boolean(checked) }))}
                               />
                               <Label htmlFor="american-mobile" className="flex items-center gap-2 text-sm">
                                 Include American Version <Badge variant="outline" className="text-xs">US</Badge>
