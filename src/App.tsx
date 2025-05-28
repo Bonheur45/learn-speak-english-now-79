@@ -100,13 +100,18 @@ function App() {
             <Route path="/tutor/curriculum/:curriculumId/trimester/:trimesterId" element={<CurriculumDays />} />
             <Route path="/tutor/curriculum/:curriculumId/trimester/:trimesterId/day/:dayId/edit" element={<CurriculumDayEditor />} />
             
+            {/* Curriculum Question editor routes */}
+            <Route path="/tutor/curriculum/:curriculumId/trimester/:trimesterId/day/:dayId/vocabulary-questions" element={<VocabularyQuestionEditor />} />
+            <Route path="/tutor/curriculum/:curriculumId/trimester/:trimesterId/day/:dayId/topic-questions" element={<TopicQuestionEditor />} />
+            <Route path="/tutor/curriculum/:curriculumId/trimester/:trimesterId/day/:dayId/writing-prompts" element={<WritingPromptEditor />} />
+            
             {/* Cohort Management routes */}
             <Route path="/tutor/materials" element={<CohortMaterials />} />
             <Route path="/tutor/materials/cohort/:cohortId" element={<TrimesterMaterials />} />
             <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId" element={<DaysList />} />
             <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/edit" element={<DayEditor />} />
             
-            {/* Question editor routes */}
+            {/* Cohort Question editor routes */}
             <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/questions/vocabulary" element={<VocabularyQuestionEditor />} />
             <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/questions/topic" element={<TopicQuestionEditor />} />
             <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/questions/writing" element={<WritingPromptEditor />} />
