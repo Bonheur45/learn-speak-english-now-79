@@ -326,7 +326,7 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
                     </div>
                   </div>
                   <Button asChild variant="outline" className="w-full">
-                    <Link to={`/tutor/materials/cohort/${curriculumId}/trimester/${trimesterId}/day/${dayId}/vocabulary-questions`}>
+                    <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}/day/${dayId}/vocabulary-questions`}>
                       Configure Questions
                     </Link>
                   </Button>
@@ -342,7 +342,7 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
                     </div>
                   </div>
                   <Button asChild variant="outline" className="w-full">
-                    <Link to={`/tutor/materials/cohort/${curriculumId}/trimester/${trimesterId}/day/${dayId}/topic-questions`}>
+                    <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}/day/${dayId}/topic-questions`}>
                       Configure Questions
                     </Link>
                   </Button>
@@ -358,7 +358,7 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
                     </div>
                   </div>
                   <Button asChild variant="outline" className="w-full">
-                    <Link to={`/tutor/materials/cohort/${curriculumId}/trimester/${trimesterId}/day/${dayId}/writing-prompts`}>
+                    <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}/day/${dayId}/writing-prompts`}>
                       Configure Prompts
                     </Link>
                   </Button>
