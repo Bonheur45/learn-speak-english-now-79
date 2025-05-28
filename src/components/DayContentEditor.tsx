@@ -112,24 +112,24 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
 
       {/* Navigation Tabs */}
       <Tabs defaultValue="content" className="w-full">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
-          <TabsTrigger value="content" className="flex flex-col items-center p-4 h-auto">
-            <FileText className="h-6 w-6 mb-2" />
-            <span className="text-sm">Content</span>
+        <TabsList className="grid w-full grid-cols-4 bg-gray-100">
+          <TabsTrigger value="content" className="flex items-center gap-2 data-[state=active]:bg-white">
+            <FileText className="h-4 w-4" />
+            Content
           </TabsTrigger>
-          <TabsTrigger value="media" className="flex flex-col items-center p-4 h-auto">
-            <Play className="h-6 w-6 mb-2" />
-            <span className="text-sm">Media</span>
+          <TabsTrigger value="media" className="flex items-center gap-2 data-[state=active]:bg-white">
+            <Play className="h-4 w-4" />
+            Media
           </TabsTrigger>
-          <TabsTrigger value="glossary" className="flex flex-col items-center p-4 h-auto">
-            <BookOpen className="h-6 w-6 mb-2" />
-            <span className="text-sm">Glossary</span>
+          <TabsTrigger value="glossary" className="flex items-center gap-2 data-[state=active]:bg-white">
+            <BookOpen className="h-4 w-4" />
+            Glossary
           </TabsTrigger>
-          <TabsTrigger value="tests" className="flex flex-col items-center p-4 h-auto">
-            <TestTube className="h-6 w-6 mb-2" />
-            <span className="text-sm">Tests</span>
+          <TabsTrigger value="tests" className="flex items-center gap-2 data-[state=active]:bg-white">
+            <TestTube className="h-4 w-4" />
+            Tests
           </TabsTrigger>
-        </div>
+        </TabsList>
 
         {/* Basic Information Tab */}
         <TabsContent value="content">
