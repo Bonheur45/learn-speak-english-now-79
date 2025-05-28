@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Save, Calendar, BookOpen, Video, PenTool, FileText, Eye, Plus, Trash2, Edit } from 'lucide-react';
 import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
+import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
 import RichTextEditor from '@/components/RichTextEditor';
 import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -21,17 +22,27 @@ const DayEditor = () => {
   
   const cohort = MOCK_COHORTS.find(c => c.id === cohortId);
   const trimester = MOCK_TRIMESTERS.find(t => t.id === trimesterId);
-  const day = trimester?.days.find(d => d.id === dayId);
+  
+  // Get day from curriculum template
+  const getDay = () => {
+    if (!trimester) return null;
+    const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
+      ct => ct.id === trimester.curriculum_trimester_id
+    );
+    return curriculumTrimester?.days.find(d => d.id === dayId) || null;
+  };
+  
+  const day = getDay();
   
   const [dayData, setDayData] = useState({
     id: day?.id || '',
     day_number: day?.day_number || 1,
     title: day?.title || '',
-    date: day?.date || new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split('T')[0], // Use current date for cohort-specific days
     story_text: day?.story_text || '<p>Enter the story content here...</p>',
-    topic_notes: '<p>Today we will learn about present tense verbs. Present tense describes actions happening now or habitual actions...</p>',
-    british_audio_url: '',
-    american_audio_url: ''
+    topic_notes: day?.topic_notes || '<p>Today we will learn about present tense verbs. Present tense describes actions happening now or habitual actions...</p>',
+    british_audio_url: day?.british_audio_url || '',
+    american_audio_url: day?.american_audio_url || ''
   });
 
   const [audioVersions, setAudioVersions] = useState({
