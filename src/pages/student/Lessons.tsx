@@ -41,8 +41,9 @@ const Lessons = () => {
 
   // Helper function to get days from curriculum template
   const getTrimesterDays = (trimester: any) => {
+    // Find the curriculum trimester that matches this cohort trimester
     const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
-      ct => ct.id === trimester.curriculum_trimester_id
+      ct => ct.curriculum_id === currentCohort.curriculum_template_id && ct.number === trimester.number
     );
     return curriculumTrimester?.days || [];
   };
@@ -215,7 +216,7 @@ const Lessons = () => {
                                   } ${!isAccessible ? 'opacity-50' : ''} flex-shrink-0`}
                                   size="sm"
                                 >
-                                  <Link to={`/student/days/${day.id}`} className="text-xs sm:text-sm">
+                                  <Link to={`/student/day/${day.id}`} className="text-xs sm:text-sm">
                                     {!isAccessible ? 'Locked' :
                                      status === 'completed' || dayProgress.totalCompleted === dayProgress.total ? 'Review' : 'Study'}
                                   </Link>

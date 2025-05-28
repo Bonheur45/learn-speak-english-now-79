@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MOCK_COHORTS, MOCK_TRIMESTERS, Trimester, ProficiencyLevel, getCurriculumDayContent } from '@/lib/types';
+import { MOCK_COHORTS, MOCK_TRIMESTERS, Trimester, ProficiencyLevel } from '@/lib/types';
 import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
 import { ArrowRight, BookOpen, Calendar, Check, CheckCircle, CircleDashed, Clock } from 'lucide-react';
 
@@ -29,12 +29,12 @@ const Trimesters = () => {
       setTrimesters(cohortTrimesters);
       
       // Get curriculum template content based on cohort's curriculum_template_id
-      const curriculumTemplate = MOCK_CURRICULUM_TRIMESTERS.find(
-        ct => ct.id === cohort.curriculum_template_id || ct.curriculum_id === cohort.curriculum_template_id
+      const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
+        ct => ct.curriculum_id === cohort.curriculum_template_id
       );
       
-      if (curriculumTemplate) {
-        setCurriculumDays(curriculumTemplate.days || []);
+      if (curriculumTrimester) {
+        setCurriculumDays(curriculumTrimester.days || []);
       }
     }
   }, [cohortId]);
@@ -79,7 +79,7 @@ const Trimesters = () => {
   };
 
   // Get days for each trimester from curriculum template
-  const getTrimestarDays = (trimesterNumber: number) => {
+  const getTrimesterDays = (trimesterNumber: number) => {
     const startIndex = (trimesterNumber - 1) * 24;
     const endIndex = startIndex + 24;
     return curriculumDays.slice(startIndex, endIndex);
@@ -144,7 +144,7 @@ const Trimesters = () => {
             const isCompleted = progress === 100;
             const isInProgress = selectedCohort.current_trimester === trimester.number;
             const isUpcoming = selectedCohort.current_trimester < trimester.number;
-            const trimesterDays = getTrimestarDays(trimester.number);
+            const trimesterDays = getTrimesterDays(trimester.number);
             
             return (
               <Card 
@@ -211,16 +211,17 @@ const Trimesters = () => {
                                 className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 
                                   ${isDayCompleted ? 'bg-green-100' : isDayInProgress ? 'bg-blue-100' : 'bg-gray-100'}`}
                               >
-                                <span className="font-medium 
-                                  ${isDayCompleted ? 'text-green-700' : isDayInProgress ? 'text-blue-700' : 'text-gray-700'}">
+                                <span className={`font-medium text-sm
+                                  ${isDayCompleted ? 'text-green-700' : isDayInProgress ? 'text-blue-700' : 'text-gray-700'}`}>
                                   {globalDayNumber}
                                 </span>
                               </div>
                               <div>
-                                <h4 className="font-medium">{day.title}</h4>
+                                <h4 className="font-medium text-base truncate">{day.title}</h4>
                                 <p className="text-sm text-gray-600 truncate max-w-[200px]">{day.description}</p>
                               </div>
                             </div>
+                            
                             <Button 
                               asChild 
                               variant="ghost" 
