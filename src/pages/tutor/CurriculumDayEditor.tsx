@@ -39,7 +39,7 @@ const CurriculumDayEditor = () => {
     id: curriculumDay.id,
     day_number: curriculumDay.day_number,
     title: curriculumDay.title,
-    date: new Date().toISOString().split('T')[0], // Templates don't have specific dates
+    description: curriculumDay.description || 'Lesson description for curriculum template',
     story_text: curriculumDay.story_text,
     topic_notes: curriculumDay.topic_notes,
     british_audio_url: curriculumDay.british_audio_url,
@@ -81,8 +81,8 @@ const CurriculumDayEditor = () => {
           
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-brand-blue">Edit Template: Day {curriculumDay.day_number}</h1>
-              <p className="text-gray-600 mt-1">Editing master curriculum template for {curriculum.level} level</p>
+              <h1 className="text-3xl font-bold text-brand-blue">Edit Day {curriculumDay.day_number}</h1>
+              <p className="text-gray-600 mt-1">Update lesson content and materials</p>
             </div>
             
             <div className="flex flex-wrap gap-3">
@@ -92,13 +92,14 @@ const CurriculumDayEditor = () => {
                   Back to Days
                 </Link>
               </Button>
+              <Button variant="outline" size="sm">
+                <Eye className="h-4 w-4 mr-2" />
+                Preview
+              </Button>
               <Button onClick={handleSaveAndExit} className="bg-brand-yellow text-brand-blue hover:brightness-95">
                 <Save className="h-4 w-4 mr-2" />
-                Save & Exit
+                Save Changes
               </Button>
-              <Badge variant="secondary" className="h-9 px-3 flex items-center">
-                Template: {curriculum.level}
-              </Badge>
             </div>
           </div>
 
