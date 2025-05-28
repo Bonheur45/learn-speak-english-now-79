@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Plus, Save, Edit, Calendar, BookOpen } from 'lucide-react';
 import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
+import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
 import { toast } from '@/hooks/use-toast';
 
 const DaysList = () => {
@@ -16,18 +17,27 @@ const DaysList = () => {
   const cohort = MOCK_COHORTS.find(c => c.id === cohortId);
   const trimester = MOCK_TRIMESTERS.find(t => t.id === trimesterId);
   
-  // Convert mock days to the format expected by the editor
+  // Get days from curriculum template
+  const getTrimesterDays = () => {
+    if (!trimester) return [];
+    const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
+      ct => ct.id === trimester.curriculum_trimester_id
+    );
+    return curriculumTrimester?.days || [];
+  };
+  
+  // Convert curriculum days to the format expected by the editor
   const [daysData, setDaysData] = useState(
-    trimester?.days.map(day => ({
+    getTrimesterDays().map(day => ({
       id: day.id,
       day_number: day.day_number,
       title: day.title,
-      date: day.date,
+      date: new Date().toISOString().split('T')[0], // Use current date for cohort-specific days
       story_text: day.story_text || '<p>Enter the story content here...</p>',
-      topic_notes: '<p>Today we will learn about present tense verbs. Present tense describes actions happening now or habitual actions...</p>',
-      british_audio_url: '',
-      american_audio_url: ''
-    })) || []
+      topic_notes: day.topic_notes || '<p>Today we will learn about present tense verbs. Present tense describes actions happening now or habitual actions...</p>',
+      british_audio_url: day.british_audio_url || '',
+      american_audio_url: day.american_audio_url || ''
+    }))
   );
 
   if (!cohort || !trimester) {

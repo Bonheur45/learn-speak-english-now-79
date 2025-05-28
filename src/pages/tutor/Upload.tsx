@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -18,6 +17,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
+import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
 import { toast } from '@/hooks/use-toast';
 import { Upload, File, Check } from 'lucide-react';
 
@@ -37,9 +37,15 @@ const UploadPage = () => {
     [];
     
   // Filter available days based on selected trimester
-  const availableDays = trimesterId ? 
-    MOCK_TRIMESTERS.find(t => t.id === trimesterId)?.days || [] : 
-    [];
+  const availableDays = trimesterId ? (() => {
+    const trimester = MOCK_TRIMESTERS.find(t => t.id === trimesterId);
+    if (!trimester) return [];
+    
+    const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
+      ct => ct.id === trimester.curriculum_trimester_id
+    );
+    return curriculumTrimester?.days || [];
+  })() : [];
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -371,11 +377,8 @@ const UploadPage = () => {
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <h3 className="text-blue-800 font-medium mb-2">Need Help?</h3>
                   <p className="text-sm text-blue-700">
-                    If you're having trouble uploading materials or have questions about the process, please refer to our tutor guide or contact technical support.
+                    If you're having trouble uploading materials or have questions about file formats, contact support.
                   </p>
-                  <Button variant="link" className="p-0 h-auto mt-2 text-blue-600">
-                    View Upload Tutorial
-                  </Button>
                 </div>
               </CardContent>
             </Card>

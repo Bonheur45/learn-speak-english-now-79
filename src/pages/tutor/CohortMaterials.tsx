@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Calendar, BookOpen, ArrowRight, Settings, Database, Template } from 'lucide-react';
+import { Users, Calendar, BookOpen, ArrowRight, Settings, Database, FileText } from 'lucide-react';
 import { MOCK_COHORTS } from '@/lib/types';
 
 const CohortMaterials = () => {
@@ -28,7 +27,7 @@ const CohortMaterials = () => {
               </p>
               <Button asChild variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
                 <Link to="/tutor/curriculum">
-                  <Template className="h-4 w-4 mr-2" />
+                  <FileText className="h-4 w-4 mr-2" />
                   Edit Curriculum Templates
                 </Link>
               </Button>

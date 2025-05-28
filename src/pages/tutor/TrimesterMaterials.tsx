@@ -7,12 +7,21 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, BookOpen, ArrowRight } from 'lucide-react';
 import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
+import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
 
 const TrimesterMaterials = () => {
   const { cohortId } = useParams();
   
   const cohort = MOCK_COHORTS.find(c => c.id === cohortId);
   const trimesters = MOCK_TRIMESTERS.filter(t => t.cohort_id === cohortId);
+
+  // Helper function to get days count from curriculum template
+  const getTrimesterDaysCount = (trimester: any) => {
+    const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
+      ct => ct.id === trimester.curriculum_trimester_id
+    );
+    return curriculumTrimester?.days?.length || 0;
+  };
 
   if (!cohort) {
     return (
@@ -59,32 +68,36 @@ const TrimesterMaterials = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {trimesters.map((trimester) => (
-            <Card key={trimester.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-lg">{trimester.name}</CardTitle>
-                <CardDescription>
-                  Trimester {trimester.number} • {trimester.days.length} days
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Calendar className="h-4 w-4" />
-                  <span>{new Date(trimester.start_date).toLocaleDateString()} - {new Date(trimester.end_date).toLocaleDateString()}</span>
-                </div>
-                
-                <div className="pt-4 border-t">
-                  <Button asChild className="w-full" variant="outline">
-                    <Link to={`/tutor/materials/cohort/${cohortId}/trimester/${trimester.id}`}>
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      View Days ({trimester.days.length})
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {trimesters.map((trimester) => {
+            const daysCount = getTrimesterDaysCount(trimester);
+            
+            return (
+              <Card key={trimester.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-lg">{trimester.name}</CardTitle>
+                  <CardDescription>
+                    Trimester {trimester.number} • {daysCount} days
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Calendar className="h-4 w-4" />
+                    <span>{new Date(trimester.start_date).toLocaleDateString()} - {new Date(trimester.end_date).toLocaleDateString()}</span>
+                  </div>
+                  
+                  <div className="pt-4 border-t">
+                    <Button asChild className="w-full" variant="outline">
+                      <Link to={`/tutor/materials/cohort/${cohortId}/trimester/${trimester.id}`}>
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        View Days ({daysCount})
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </main>
       

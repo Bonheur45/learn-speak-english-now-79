@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { MOCK_TRIMESTERS, MOCK_COHORTS } from '@/lib/types';
+import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
 import { 
   ChevronDown, 
   ChevronRight, 
@@ -36,6 +37,14 @@ const Lessons = () => {
       ...prev,
       [trimesterId]: !prev[trimesterId]
     }));
+  };
+
+  // Helper function to get days from curriculum template
+  const getTrimesterDays = (trimester: any) => {
+    const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
+      ct => ct.id === trimester.curriculum_trimester_id
+    );
+    return curriculumTrimester?.days || [];
   };
 
   const getDayProgress = (dayNumber: number) => {
@@ -91,6 +100,7 @@ const Lessons = () => {
             const isOpen = openTrimesters[trimester.id] || false;
             const progress = getTrimesterProgress(trimester);
             const status = getTrimesterStatus(trimester);
+            const trimesterDays = getTrimesterDays(trimester);
             
             return (
               <Card key={trimester.id} className={`transition-all duration-200 ${
@@ -154,7 +164,7 @@ const Lessons = () => {
                       <div className="mt-4 sm:mt-6">
                         <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">Days in this Trimester</h3>
                         <div className="space-y-2 sm:space-y-3">
-                          {trimester.days.map((day, dayIndex) => {
+                          {trimesterDays.map((day, dayIndex) => {
                             const dayProgress = getDayProgress(day.day_number);
                             const isAccessible = status !== 'upcoming';
                             
