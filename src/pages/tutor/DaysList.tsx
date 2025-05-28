@@ -5,7 +5,22 @@ import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Save, Edit, Calendar, BookOpen } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { 
+  ArrowLeft, 
+  Calendar, 
+  BookOpen, 
+  Lock, 
+  Unlock, 
+  ChevronDown, 
+  ChevronRight,
+  CheckCircle,
+  CircleDashed,
+  Settings,
+  Users
+} from 'lucide-react';
 import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
 import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
 import { toast } from '@/hooks/use-toast';
@@ -26,19 +41,10 @@ const DaysList = () => {
     return curriculumTrimester?.days || [];
   };
   
-  // Convert curriculum days to the format expected by the editor
-  const [daysData, setDaysData] = useState(
-    getTrimesterDays().map(day => ({
-      id: day.id,
-      day_number: day.day_number,
-      title: day.title,
-      date: new Date().toISOString().split('T')[0], // Use current date for cohort-specific days
-      story_text: day.story_text || '<p>Enter the story content here...</p>',
-      topic_notes: day.topic_notes || '<p>Today we will learn about present tense verbs. Present tense describes actions happening now or habitual actions...</p>',
-      british_audio_url: day.british_audio_url || '',
-      american_audio_url: day.american_audio_url || ''
-    }))
-  );
+  const [dayAccessControl, setDayAccessControl] = useState<Record<string, boolean>>({});
+  const [isExpanded, setIsExpanded] = useState(true);
+  
+  const trimesterDays = getTrimesterDays();
 
   if (!cohort || !trimester) {
     return (
@@ -57,29 +63,33 @@ const DaysList = () => {
     );
   }
 
-  const handleEditDay = (dayId: string) => {
-    navigate(`/tutor/materials/cohort/${cohortId}/trimester/${trimesterId}/day/${dayId}/edit`);
-  };
-
-  const handleSaveAll = () => {
+  const toggleDayAccess = (dayId: string) => {
+    setDayAccessControl(prev => ({
+      ...prev,
+      [dayId]: !prev[dayId]
+    }));
     toast({
-      title: "All Changes Saved",
-      description: `All day content for ${trimester.name} has been saved successfully.`,
+      title: "Day Access Updated",
+      description: `Day access has been ${dayAccessControl[dayId] ? 'unlocked' : 'locked'} for students.`,
     });
   };
 
-  const addNewDay = () => {
-    const newDay = {
-      id: `day_${Date.now()}`,
-      day_number: daysData.length + 1,
-      title: `New Lesson ${daysData.length + 1}`,
-      date: new Date().toISOString().split('T')[0],
-      story_text: '<p>Enter the story content here...</p>',
-      topic_notes: '<p>Enter topic notes here...</p>',
-      british_audio_url: '',
-      american_audio_url: ''
-    };
-    setDaysData(prev => [...prev, newDay]);
+  const calculateProgress = () => {
+    const currentDay = cohort.current_day_position || 0;
+    const totalDays = trimesterDays.length;
+    return totalDays > 0 ? Math.min((currentDay / totalDays) * 100, 100) : 0;
+  };
+
+  const isDayCompleted = (dayNumber: number) => {
+    return (cohort.current_day_position || 0) >= dayNumber;
+  };
+
+  const isDayInProgress = (dayNumber: number) => {
+    return (cohort.current_day_position || 0) === dayNumber - 1;
+  };
+
+  const isDayLocked = (dayId: string) => {
+    return dayAccessControl[dayId] === true;
   };
 
   return (
@@ -99,8 +109,8 @@ const DaysList = () => {
           
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-brand-blue">{trimester.name} - Daily Materials</h1>
-              <p className="text-gray-600 mt-1">Manage lesson content for each day in this trimester</p>
+              <h1 className="text-3xl font-bold text-brand-blue">{trimester.name}</h1>
+              <p className="text-gray-600 mt-1">Manage day access and track student progress</p>
             </div>
             
             <div className="flex flex-wrap gap-3">
@@ -110,25 +120,11 @@ const DaysList = () => {
                   Back to Trimesters
                 </Link>
               </Button>
-              <Button onClick={addNewDay} variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Add New Day
-              </Button>
-              <Button onClick={handleSaveAll} className="bg-brand-yellow text-brand-blue hover:brightness-95">
-                <Save className="h-4 w-4 mr-2" />
-                Save All Changes
-              </Button>
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardDescription>Total Days</CardDescription>
-                <CardTitle className="text-2xl">{daysData.length}</CardTitle>
-              </CardHeader>
-            </Card>
+          {/* Cohort Info */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription>Cohort</CardDescription>
@@ -137,61 +133,140 @@ const DaysList = () => {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardDescription>Trimester</CardDescription>
-                <CardTitle className="text-lg">{trimester.name}</CardTitle>
+                <CardDescription>Students</CardDescription>
+                <CardTitle className="text-2xl flex items-center">
+                  <Users className="h-5 w-5 mr-2" />
+                  {cohort.enrolled_students}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription>Progress</CardDescription>
+                <CardTitle className="text-2xl">{Math.round(calculateProgress())}%</CardTitle>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription>Total Days</CardDescription>
+                <CardTitle className="text-2xl">{trimesterDays.length}</CardTitle>
               </CardHeader>
             </Card>
           </div>
         </div>
 
-        {/* Days Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {daysData.length === 0 ? (
-            <div className="col-span-full">
-              <Card className="text-center py-12">
-                <CardContent>
-                  <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-500 mb-4">No days found for this trimester.</p>
-                  <Button onClick={addNewDay}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add First Day
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          ) : (
-            daysData.map((day) => (
-              <Card key={day.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-lg">Day {day.day_number}</CardTitle>
-                      <CardDescription className="mt-1">{day.title}</CardDescription>
+        {/* Days organized like student interface */}
+        <Card className="overflow-hidden">
+          <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-gray-50/50 transition-colors bg-blue-50/30">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {isExpanded ? (
+                      <ChevronDown className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                    ) : (
+                      <ChevronRight className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="flex items-center gap-2 text-xl">
+                        <CircleDashed className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                        <span className="truncate">{trimester.name}</span>
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-1 mt-1">
+                        <Calendar className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-sm truncate">
+                          {new Date(trimester.start_date).toLocaleDateString()} - {new Date(trimester.end_date).toLocaleDateString()}
+                        </span>
+                      </CardDescription>
                     </div>
-                    <Badge variant="secondary">Draft</Badge>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Calendar className="h-4 w-4" />
-                    <span>{new Date(day.date).toLocaleDateString()}</span>
+                  <div className="flex items-center gap-4 flex-shrink-0">
+                    <div className="text-right">
+                      <div className="text-sm text-gray-600">Progress</div>
+                      <div className="text-lg font-semibold">{Math.round(calculateProgress())}%</div>
+                    </div>
+                    <Badge className="bg-blue-100 text-blue-800">
+                      In Progress
+                    </Badge>
                   </div>
-                  
-                  <div className="pt-4 border-t">
-                    <Button 
-                      onClick={() => handleEditDay(day.id)}
-                      className="w-full"
-                      variant="outline"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Day
-                    </Button>
+                </div>
+                <div className="mt-3">
+                  <Progress value={calculateProgress()} className="h-2" />
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent>
+              <CardContent className="pt-0 px-6">
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Day Access Control
+                  </h3>
+                  <div className="space-y-3">
+                    {trimesterDays.map((day, dayIndex) => {
+                      const globalDayNumber = dayIndex + 1;
+                      const isCompleted = isDayCompleted(globalDayNumber);
+                      const isInProgress = isDayInProgress(globalDayNumber);
+                      const isLocked = isDayLocked(day.id);
+                      
+                      return (
+                        <div key={day.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div 
+                              className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+                                ${isCompleted ? 'bg-green-100' : isInProgress ? 'bg-blue-100' : 'bg-gray-100'}`}
+                            >
+                              <span className={`font-medium text-sm
+                                ${isCompleted ? 'text-green-700' : isInProgress ? 'text-blue-700' : 'text-gray-700'}`}>
+                                {globalDayNumber}
+                              </span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h4 className="font-medium text-base truncate">{day.title}</h4>
+                              <p className="text-sm text-gray-600 truncate">{day.description}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            {isCompleted && (
+                              <Badge variant="outline" className="text-green-600 border-green-200">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Completed
+                              </Badge>
+                            )}
+                            {isInProgress && (
+                              <Badge variant="outline" className="text-blue-600 border-blue-200">
+                                <CircleDashed className="h-3 w-3 mr-1" />
+                                In Progress
+                              </Badge>
+                            )}
+                            
+                            <div className="flex items-center gap-2">
+                              {isLocked ? (
+                                <Lock className="h-4 w-4 text-red-500" />
+                              ) : (
+                                <Unlock className="h-4 w-4 text-green-500" />
+                              )}
+                              <Switch
+                                checked={!isLocked}
+                                onCheckedChange={() => toggleDayAccess(day.id)}
+                                aria-label={`Toggle access for ${day.title}`}
+                              />
+                              <span className="text-sm text-gray-600 min-w-[60px]">
+                                {isLocked ? 'Locked' : 'Unlocked'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
       </main>
       
       <footer className="bg-white border-t py-6 mt-8">
