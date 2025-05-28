@@ -1,101 +1,141 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+
+interface LoginData {
+  email: string;
+  programId: string;
+}
 
 const LoginForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('student');
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginData>();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // This would connect to your backend API in a real app
-    console.log('Login attempt:', { email, password, role });
-    // Redirect based on role (would use a proper auth system in a real app)
-    window.location.href = role === 'student' ? '/student/dashboard' : '/tutor/dashboard';
+  const onSubmit = async (data: LoginData) => {
+    setIsLoading(true);
+
+    try {
+      // First, find the user by program ID to get their email
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, program_id, role')
+        .eq('program_id', data.programId)
+        .single();
+
+      if (profileError || !profileData) {
+        throw new Error('Invalid Program ID. Please check your credentials.');
+      }
+
+      // Sign in with email and program ID as password
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.programId,
+      });
+
+      if (authError) {
+        throw new Error('Invalid email or Program ID. Please check your credentials.');
+      }
+
+      // Check if the authenticated user matches the profile
+      if (authData.user?.id !== profileData.id) {
+        await supabase.auth.signOut();
+        throw new Error('Email and Program ID do not match.');
+      }
+
+      toast({
+        title: "Login Successful",
+        description: "Welcome back to Let's Do It English Program!",
+      });
+
+      // Redirect based on user role
+      if (profileData.role === 'student') {
+        navigate('/student/dashboard');
+      } else if (profileData.role === 'tutor') {
+        navigate('/tutor/dashboard');
+      } else {
+        navigate('/admin/dashboard');
+      }
+
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login Failed",
+        description: error.message || "Invalid credentials. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
-        <CardDescription className="text-center">
-          Enter your credentials to access your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
+          <CardDescription className="text-center">
+            Sign in to Let's Do It English Program
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register('email', { required: 'Email is required' })}
+                placeholder="Enter your email address"
               />
+              {errors.email && (
+                <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
+              )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+
+            <div>
+              <Label htmlFor="programId">Program ID</Label>
               <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                id="programId"
+                {...register('programId', { required: 'Program ID is required' })}
+                placeholder="Enter your Program ID (e.g., ENG25-001)"
               />
+              {errors.programId && (
+                <p className="text-sm text-red-600 mt-1">{errors.programId.message}</p>
+              )}
+              <p className="text-sm text-gray-500 mt-1">
+                Your Program ID was sent to your email after registration
+              </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">I am a</Label>
-              <div className="flex space-x-4">
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="studentRole"
-                    name="role"
-                    value="student"
-                    checked={role === 'student'}
-                    onChange={() => setRole('student')}
-                    className="mr-2"
-                  />
-                  <Label htmlFor="studentRole">Student</Label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="tutorRole"
-                    name="role"
-                    value="tutor"
-                    checked={role === 'tutor'}
-                    onChange={() => setRole('tutor')}
-                    className="mr-2"
-                  />
-                  <Label htmlFor="tutorRole">Tutor</Label>
-                </div>
-              </div>
-            </div>
-            <Button type="submit" className="w-full bg-brand-yellow text-brand-blue hover:brightness-95">
-              Login
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex justify-center">
-        <p className="text-sm text-gray-600">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-brand-blue hover:underline">
-            Register
-          </Link>
-        </p>
-      </CardFooter>
-    </Card>
+
+            <div className="text-center mt-4">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto"
+                  onClick={() => navigate('/register')}
+                >
+                  Register here
+                </Button>
+              </p>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
