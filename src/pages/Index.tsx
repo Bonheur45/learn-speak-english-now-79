@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -18,7 +19,7 @@ const Index = () => {
   return (
     <Layout isLoggedIn={false} fullWidth={true}>
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-white to-gray-100 py-8 md:py-16 flex-grow">
+      <section className="bg-white py-8 md:py-16 flex-grow">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 px-4 md:pr-8 mb-8 md:mb-0">
