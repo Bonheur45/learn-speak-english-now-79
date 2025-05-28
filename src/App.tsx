@@ -80,8 +80,8 @@ function App() {
             {/* Student routes */}
             <Route path="/student/dashboard" element={<StudentDashboard />} />
             <Route path="/student/cohorts" element={<StudentCohorts />} />
-            <Route path="/student/trimesters/:cohortId" element={<StudentTrimesters />} />
-            <Route path="/student/lessons/:cohortId/:trimesterId" element={<StudentLessons />} />
+            <Route path="/student/trimesters" element={<StudentTrimesters />} />
+            <Route path="/student/lessons" element={<StudentLessons />} />
             <Route path="/student/day/:dayId" element={<StudentDayContent />} />
             <Route path="/student/assessments" element={<StudentAssessments />} />
             <Route path="/student/vocabulary-test/:dayId" element={<VocabularyTest />} />
@@ -116,7 +116,7 @@ function App() {
             <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/questions/topic" element={<TopicQuestionEditor />} />
             <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/questions/writing" element={<WritingPromptEditor />} />
 
-            {/* 404 */}
+            {/* 404 - This must be last */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

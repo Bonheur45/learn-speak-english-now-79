@@ -13,9 +13,18 @@ const CurriculumDayEditor = () => {
   const { curriculumId, trimesterId, dayId } = useParams();
   const navigate = useNavigate();
   
+  // Debug logging
+  console.log('CurriculumDayEditor params:', { curriculumId, trimesterId, dayId });
+  console.log('Available curricula:', MOCK_CURRICULA.map(c => ({ id: c.id, level: c.level })));
+  console.log('Available trimesters:', MOCK_CURRICULUM_TRIMESTERS.map(t => ({ id: t.id, curriculum_id: t.curriculum_id, name: t.name })));
+  
   const curriculum = MOCK_CURRICULA.find(c => c.id === curriculumId);
   const trimester = MOCK_CURRICULUM_TRIMESTERS.find(t => t.id === trimesterId);
   const curriculumDay = trimester?.days.find(d => d.id === dayId);
+  
+  console.log('Found curriculum:', curriculum);
+  console.log('Found trimester:', trimester);
+  console.log('Found day:', curriculumDay);
   
   if (!curriculum || !trimester || !curriculumDay) {
     return (
@@ -25,6 +34,15 @@ const CurriculumDayEditor = () => {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-red-600">Content Not Found</h1>
             <p className="mt-2 text-gray-600">The requested curriculum content could not be found.</p>
+            <div className="mt-4 text-left bg-gray-100 p-4 rounded">
+              <p><strong>Debug Info:</strong></p>
+              <p>Looking for curriculum ID: {curriculumId}</p>
+              <p>Looking for trimester ID: {trimesterId}</p>
+              <p>Looking for day ID: {dayId}</p>
+              <p>Found curriculum: {curriculum ? 'Yes' : 'No'}</p>
+              <p>Found trimester: {trimester ? 'Yes' : 'No'}</p>
+              <p>Found day: {curriculumDay ? 'Yes' : 'No'}</p>
+            </div>
             <Button asChild className="mt-4">
               <Link to="/tutor/curriculum">Back to Curricula</Link>
             </Button>
