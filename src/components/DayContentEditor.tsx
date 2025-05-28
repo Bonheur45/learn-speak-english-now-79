@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,6 +43,13 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
     { id: '1', term: 'Present Tense', definition: 'A verb form that describes actions happening now or habitual actions' },
     { id: '2', term: 'Vocabulary', definition: 'The body of words used in a particular language' }
   ]);
+
+  // Extract route parameters from current URL
+  const currentPath = window.location.pathname;
+  const pathParts = currentPath.split('/');
+  const curriculumId = pathParts[3];
+  const trimesterId = pathParts[5];
+  const dayId = pathParts[7];
 
   const handleSave = () => {
     onSave(dayData);
@@ -318,8 +325,10 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
                       <p className="text-sm text-gray-600">Test vocabulary and reading comprehension</p>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full">
-                    Configure Questions
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to={`/tutor/materials/cohort/${curriculumId}/trimester/${trimesterId}/day/${dayId}/vocabulary-questions`}>
+                      Configure Questions
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -332,8 +341,10 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
                       <p className="text-sm text-gray-600">Test understanding of grammar topics</p>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full">
-                    Configure Questions
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to={`/tutor/materials/cohort/${curriculumId}/trimester/${trimesterId}/day/${dayId}/topic-questions`}>
+                      Configure Questions
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -346,8 +357,10 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
                       <p className="text-sm text-gray-600">Creative writing assignments</p>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full">
-                    Configure Prompts
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to={`/tutor/materials/cohort/${curriculumId}/trimester/${trimesterId}/day/${dayId}/writing-prompts`}>
+                      Configure Prompts
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
