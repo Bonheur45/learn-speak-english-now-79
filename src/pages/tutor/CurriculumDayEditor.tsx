@@ -35,7 +35,7 @@ const CurriculumDayEditor = () => {
   }
 
   // Convert curriculum day to the format expected by DayContentEditor
-  const dayData = {
+  const [dayData, setDayData] = useState({
     id: curriculumDay.id,
     day_number: curriculumDay.day_number,
     title: curriculumDay.title,
@@ -44,13 +44,22 @@ const CurriculumDayEditor = () => {
     topic_notes: curriculumDay.topic_notes,
     british_audio_url: curriculumDay.british_audio_url,
     american_audio_url: curriculumDay.american_audio_url
-  };
+  });
 
   const handleSave = (updatedDayData: any) => {
+    setDayData(updatedDayData);
     toast({
       title: "Curriculum Template Saved",
       description: `Day ${updatedDayData.day_number} template has been updated successfully.`,
     });
+  };
+
+  const handleSaveAndExit = () => {
+    toast({
+      title: "Template Saved",
+      description: `All changes to Day ${dayData.day_number} have been saved.`,
+    });
+    navigate(`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}`);
   };
 
   return (
@@ -82,6 +91,10 @@ const CurriculumDayEditor = () => {
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Days
                 </Link>
+              </Button>
+              <Button onClick={handleSaveAndExit} className="bg-brand-yellow text-brand-blue hover:brightness-95">
+                <Save className="h-4 w-4 mr-2" />
+                Save & Exit
               </Button>
               <Badge variant="secondary" className="h-9 px-3 flex items-center">
                 Template: {curriculum.level}
