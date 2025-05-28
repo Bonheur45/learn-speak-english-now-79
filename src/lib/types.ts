@@ -12,6 +12,7 @@ export interface User {
   proficiency_level?: ProficiencyLevel;
 }
 
+// Updated Cohort interface to reference curriculum templates
 export interface Cohort {
   id: string;
   name: string;
@@ -23,27 +24,62 @@ export interface Cohort {
   enrolled_students: number;
   capacity: number;
   tutor_id?: string;
+  curriculum_template_id: string; // Reference to curriculum template
+  current_day_position?: number; // Track progress in curriculum
+  cohort_customizations?: CohortCustomization[]; // Cohort-specific modifications
 }
 
+// New interface for cohort-specific customizations
+export interface CohortCustomization {
+  id: string;
+  cohort_id: string;
+  day_id: string;
+  field: 'title' | 'description' | 'story_text' | 'topic_notes' | 'british_audio_url' | 'american_audio_url';
+  custom_value: string;
+  created_at: string;
+}
+
+// Updated Trimester interface to work with curriculum templates
 export interface Trimester {
   id: string;
   cohort_id: string;
+  curriculum_trimester_id: string; // Reference to curriculum template trimester
   name: string;
   number: number;
   start_date: string;
   end_date: string;
-  days: Day[];
+  completed_days: string[]; // Track which days are completed
 }
 
+// Updated Day interface for cohort-specific instances
 export interface Day {
   id: string;
   trimester_id: string;
+  curriculum_day_id: string; // Reference to curriculum template day
   title: string;
   description: string;
   date: string;
   story_text: string;
   day_number: number;
   materials: DayMaterial[];
+  is_completed?: boolean;
+  completion_date?: string;
+}
+
+// Progress tracking for individual students
+export interface StudentProgress {
+  id: string;
+  user_id: string;
+  cohort_id: string;
+  curriculum_day_id: string;
+  completed_activities: string[];
+  score_summary: {
+    vocabulary: number;
+    topic: number;
+    listening?: number;
+    writing?: number;
+  };
+  completed_at?: string;
 }
 
 export interface DayMaterial {
@@ -69,7 +105,8 @@ export type MaterialType =
   | 'listening_challenge' 
   | 'listening_transcript' 
   | 'listening_test' 
-  | 'writing_challenge';
+  | 'writing_challenge' 
+  | 'writing_assessment';
 
 export interface GlossaryItem {
   id: string;
@@ -125,6 +162,12 @@ export interface WritingSubmission {
   score?: number;
   feedback?: string;
   reviewed_at?: string;
+  cefrLevel?: string;
+  vocabularyScore?: number;
+  grammarScore?: number;
+  coherenceScore?: number;
+  complexityScore?: number;
+  taskAchievementScore?: number;
 }
 
 export interface UploadedMaterial {
@@ -140,19 +183,6 @@ export interface UploadedMaterial {
   upload_date: string;
 }
 
-export interface Progress {
-  id: string;
-  user_id: string;
-  day_id: string;
-  completed_activities: string[];
-  score_summary: {
-    vocabulary: number;
-    topic: number;
-    listening?: number;
-    writing?: number;
-  };
-}
-
 export interface LiveClass {
   id: string;
   cohort_id: string;
@@ -165,7 +195,6 @@ export interface LiveClass {
   tutor_id: string;
 }
 
-// Mock data for demonstration
 export const PROFICIENCY_DESCRIPTIONS = {
   'A1-A2': {
     name: 'Beginner to Elementary',
@@ -202,7 +231,7 @@ export const PROFICIENCY_DESCRIPTIONS = {
   }
 };
 
-// Mock data for demonstration
+// Updated mock data to use curriculum template references
 export const MOCK_COHORTS: Cohort[] = [
   {
     id: '1',
@@ -213,7 +242,9 @@ export const MOCK_COHORTS: Cohort[] = [
     status: 'active',
     proficiency_level: 'A1-A2',
     enrolled_students: 26,
-    capacity: 30
+    capacity: 30,
+    curriculum_template_id: 'curr_a1_a2',
+    current_day_position: 3
   },
   {
     id: '2',
@@ -224,7 +255,9 @@ export const MOCK_COHORTS: Cohort[] = [
     status: 'upcoming',
     proficiency_level: 'A1-A2',
     enrolled_students: 14,
-    capacity: 30
+    capacity: 30,
+    curriculum_template_id: 'curr_a1_a2',
+    current_day_position: 0
   },
   {
     id: '3',
@@ -235,7 +268,9 @@ export const MOCK_COHORTS: Cohort[] = [
     status: 'upcoming',
     proficiency_level: 'A1-A2',
     enrolled_students: 5,
-    capacity: 30
+    capacity: 30,
+    curriculum_template_id: 'curr_a1_a2',
+    current_day_position: 0
   },
   {
     id: '4',
@@ -246,7 +281,9 @@ export const MOCK_COHORTS: Cohort[] = [
     status: 'upcoming',
     proficiency_level: 'B1-B2',
     enrolled_students: 22,
-    capacity: 30
+    capacity: 30,
+    curriculum_template_id: 'curr_b1_b2',
+    current_day_position: 0
   },
   {
     id: '5',
@@ -257,7 +294,9 @@ export const MOCK_COHORTS: Cohort[] = [
     status: 'upcoming',
     proficiency_level: 'B1-B2',
     enrolled_students: 10,
-    capacity: 30
+    capacity: 30,
+    curriculum_template_id: 'curr_b1_b2',
+    current_day_position: 0
   },
   {
     id: '6',
@@ -268,7 +307,9 @@ export const MOCK_COHORTS: Cohort[] = [
     status: 'upcoming',
     proficiency_level: 'C1-C2',
     enrolled_students: 15,
-    capacity: 30
+    capacity: 30,
+    curriculum_template_id: 'curr_c1_c2',
+    current_day_position: 0
   },
   {
     id: '7',
@@ -279,7 +320,9 @@ export const MOCK_COHORTS: Cohort[] = [
     status: 'upcoming',
     proficiency_level: 'C1-C2',
     enrolled_students: 8,
-    capacity: 30
+    capacity: 30,
+    curriculum_template_id: 'curr_c1_c2',
+    current_day_position: 0
   },
   {
     id: '8',
@@ -290,7 +333,9 @@ export const MOCK_COHORTS: Cohort[] = [
     status: 'upcoming',
     proficiency_level: 'C1-C2',
     enrolled_students: 2,
-    capacity: 30
+    capacity: 30,
+    curriculum_template_id: 'curr_c1_c2',
+    current_day_position: 0
   },
   {
     id: '9',
@@ -301,7 +346,9 @@ export const MOCK_COHORTS: Cohort[] = [
     status: 'completed',
     proficiency_level: 'B1-B2',
     enrolled_students: 30,
-    capacity: 30
+    capacity: 30,
+    curriculum_template_id: 'curr_b1_b2',
+    current_day_position: 72
   },
   {
     id: '10',
@@ -312,117 +359,158 @@ export const MOCK_COHORTS: Cohort[] = [
     status: 'active',
     proficiency_level: 'A1-A2',
     enrolled_students: 28,
-    capacity: 30
+    capacity: 30,
+    curriculum_template_id: 'curr_a1_a2',
+    current_day_position: 28
   }
 ];
 
+// Updated MOCK_TRIMESTERS to reference curriculum templates
 export const MOCK_TRIMESTERS: Trimester[] = [
   {
     id: '1',
     cohort_id: '1',
+    curriculum_trimester_id: 'curr_trim_1_a1_a2',
     name: 'Trimester 1: Fundamentals',
     number: 1,
     start_date: '2025-01-15',
     end_date: '2025-04-15',
-    days: Array.from({ length: 24 }, (_, i) => ({
-      id: `${i + 1}`,
-      trimester_id: '1',
-      title: `Day ${i + 1}: ${getDayTitle(i + 1)}`,
-      description: getDayDescription(i + 1),
-      date: new Date(2025, 0, 15 + i * 3).toISOString().split('T')[0], // Every 3 days
-      story_text: `Story content for day ${i + 1}...`,
-      day_number: i + 1,
-      materials: []
-    }))
+    completed_days: ['1', '2']
   },
   {
     id: '2',
     cohort_id: '1',
+    curriculum_trimester_id: 'curr_trim_2_a1_a2',
     name: 'Trimester 2: Intermediate Skills',
     number: 2,
     start_date: '2025-04-16',
     end_date: '2025-08-15',
-    days: Array.from({ length: 24 }, (_, i) => ({
-      id: `${i + 25}`,
-      trimester_id: '2',
-      title: `Day ${i + 25}: ${getDayTitle(i + 25)}`,
-      description: getDayDescription(i + 25),
-      date: new Date(2025, 3, 16 + i * 4).toISOString().split('T')[0], // Every 4 days
-      story_text: `Story content for day ${i + 25}...`,
-      day_number: i + 25,
-      materials: []
-    }))
+    completed_days: []
   },
   {
     id: '3',
     cohort_id: '1',
+    curriculum_trimester_id: 'curr_trim_3_a1_a2',
     name: 'Trimester 3: Advanced Topics',
     number: 3,
     start_date: '2025-08-16',
     end_date: '2025-12-15',
-    days: Array.from({ length: 24 }, (_, i) => ({
-      id: `${i + 49}`,
-      trimester_id: '3',
-      title: `Day ${i + 49}: ${getDayTitle(i + 49)}`,
-      description: getDayDescription(i + 49),
-      date: new Date(2025, 7, 16 + i * 4).toISOString().split('T')[0], // Every 4 days
-      story_text: `Story content for day ${i + 49}...`,
-      day_number: i + 49,
-      materials: []
-    }))
+    completed_days: []
   }
 ];
 
-// Helper functions for generating day content
-function getDayTitle(dayNumber: number): string {
-  const titles = [
-    'Introduction to English', 'Common Greetings', 'Basic Conversation', 'Present Tense Verbs',
-    'Family & Friends', 'Daily Routines', 'Food & Drinks', 'Shopping Basics',
-    'Directions & Places', 'Weather & Seasons', 'Hobbies & Interests', 'Past Tense Introduction',
-    'Travel & Transportation', 'Health & Body', 'Work & Professions', 'Technology Basics',
-    'Future Plans', 'Cultural Differences', 'Entertainment', 'Environmental Issues',
-    'Advanced Grammar', 'Business English', 'Academic Writing', 'Review & Assessment'
-  ];
-  return titles[(dayNumber - 1) % 24] || `Lesson ${dayNumber}`;
-}
+// Helper function to get curriculum content for a cohort day
+export const getCurriculumDayContent = (cohortId: string, curriculumDayId: string) => {
+  // In a real app, this would fetch from curriculum templates
+  // For now, we'll use mock data from curriculum types
+  return {
+    id: curriculumDayId,
+    title: 'Introduction to English',
+    description: 'Get started with basic English concepts',
+    story_text: '<p>Once upon a time, there was a student eager to learn English...</p>',
+    topic_notes: '<p>This lesson covers basic English fundamentals...</p>',
+    british_audio_url: '',
+    american_audio_url: '',
+    day_number: 1
+  };
+};
 
-function getDayDescription(dayNumber: number): string {
-  const descriptions = [
-    'Get started with basic English concepts', 'Learn everyday English greetings', 'Practice basic English conversations', 'Understanding present tense verbs',
-    'Talking about family and relationships', 'Describing daily activities', 'Vocabulary for food and dining', 'Essential shopping phrases',
-    'Asking for and giving directions', 'Weather vocabulary and seasons', 'Discussing personal interests', 'Introduction to past tense',
-    'Travel vocabulary and phrases', 'Health-related vocabulary', 'Job titles and workplace language', 'Technology in daily life',
-    'Expressing future intentions', 'Understanding cultural norms', 'Movies, music, and leisure', 'Environmental awareness',
-    'Complex grammatical structures', 'Professional communication', 'Writing skills development', 'Comprehensive review session'
-  ];
-  return descriptions[(dayNumber - 1) % 24] || `Learning objectives for day ${dayNumber}`;
-}
+// Helper function to apply cohort customizations
+export const applyCohortCustomizations = (curriculumContent: any, cohortId: string) => {
+  // In a real app, this would apply any cohort-specific customizations
+  // For now, return the curriculum content as-is
+  return curriculumContent;
+};
 
-// Mock data for demonstration
+// Keep existing MOCK_DAYS and MOCK_PROGRESS for backward compatibility
 export const MOCK_DAYS: Day[] = [
-  ...MOCK_TRIMESTERS[0].days,
-  ...MOCK_TRIMESTERS[1].days.slice(0, 1)
+  {
+    id: '1',
+    trimester_id: '1',
+    curriculum_day_id: 'curr_day_1_a1_a2',
+    title: 'Introduction to English',
+    description: 'Get started with basic English concepts',
+    date: '2025-01-15',
+    story_text: 'Once upon a time, there was a student eager to learn English...',
+    day_number: 1,
+    materials: [],
+    is_completed: true,
+    completion_date: '2025-01-15'
+  },
+  {
+    id: '2',
+    trimester_id: '1',
+    curriculum_day_id: 'curr_day_2_a1_a2',
+    title: 'Common Greetings',
+    description: 'Learn everyday English greetings',
+    date: '2025-01-18',
+    story_text: 'Sarah walked into her new office on her first day...',
+    day_number: 2,
+    materials: [],
+    is_completed: true,
+    completion_date: '2025-01-18'
+  }
 ];
 
-export const MOCK_PROGRESS: Progress[] = [
+export const MOCK_PROGRESS: StudentProgress[] = [
   {
     id: '1',
     user_id: '1',
-    day_id: '1',
-    completed_activities: ['reading', 'listening', 'vocabulary'],
+    cohort_id: '1',
+    curriculum_day_id: 'curr_day_1_a1_a2',
+    completed_activities: ['reading', 'listening', 'vocabulary', 'writing'],
     score_summary: {
       vocabulary: 85,
-      topic: 90
-    }
+      topic: 90,
+      writing: 78
+    },
+    completed_at: '2025-01-15T18:00:00Z'
   },
   {
     id: '2',
     user_id: '1',
-    day_id: '2',
+    cohort_id: '1', 
+    curriculum_day_id: 'curr_day_2_a1_a2',
     completed_activities: ['reading', 'listening'],
     score_summary: {
       vocabulary: 75,
       topic: 0
     }
+  }
+];
+
+// Sample writing submissions
+export const MOCK_WRITING_SUBMISSIONS: WritingSubmission[] = [
+  {
+    id: '1',
+    user_id: '1',
+    day_id: '1',
+    content: 'My daily routine starts with breakfast at 7am...',
+    submitted_at: '2025-05-20T10:30:00Z',
+    reviewed: true,
+    score: 78,
+    cefrLevel: 'B1',
+    vocabularyScore: 80,
+    grammarScore: 75,
+    coherenceScore: 82,
+    complexityScore: 70,
+    taskAchievementScore: 85,
+    feedback: 'Good use of vocabulary with some minor grammar errors.'
+  },
+  {
+    id: '2',
+    user_id: '2',
+    day_id: '2',
+    content: 'Technology has greatly improved our learning experience...',
+    submitted_at: '2025-05-21T14:45:00Z',
+    reviewed: true,
+    score: 85,
+    cefrLevel: 'B2',
+    vocabularyScore: 88,
+    grammarScore: 82,
+    coherenceScore: 85,
+    complexityScore: 80,
+    taskAchievementScore: 90,
+    feedback: 'Well-structured essay with good vocabulary range.'
   }
 ];

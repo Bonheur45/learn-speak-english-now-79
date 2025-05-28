@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Calendar, BookOpen, ArrowRight, Settings } from 'lucide-react';
+import { Users, Calendar, BookOpen, ArrowRight, Settings, Database, Template } from 'lucide-react';
 import { MOCK_COHORTS } from '@/lib/types';
 
 const CohortMaterials = () => {
@@ -28,7 +28,7 @@ const CohortMaterials = () => {
               </p>
               <Button asChild variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
                 <Link to="/tutor/curriculum">
-                  <BookOpen className="h-4 w-4 mr-2" />
+                  <Template className="h-4 w-4 mr-2" />
                   Edit Curriculum Templates
                 </Link>
               </Button>
@@ -61,6 +61,20 @@ const CohortMaterials = () => {
                     <span>{new Date(cohort.start_date).getFullYear()}</span>
                   </div>
                 </div>
+
+                {/* Show curriculum template reference */}
+                <div className="p-3 bg-gray-50 rounded-lg border">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Database className="h-4 w-4 text-gray-500" />
+                    <span className="text-gray-600">Curriculum Template:</span>
+                  </div>
+                  <div className="font-medium text-sm mt-1">
+                    {cohort.curriculum_template_id}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Position: Day {cohort.current_day_position || 0}
+                  </div>
+                </div>
                 
                 <div className="pt-4 border-t">
                   <Button asChild className="w-full" variant="outline">
@@ -77,12 +91,14 @@ const CohortMaterials = () => {
         </div>
 
         <div className="mt-12 p-6 bg-gray-50 rounded-lg border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Cohort vs Curriculum Management</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">New Cohort Architecture</h2>
           <div className="text-gray-700 space-y-2 text-sm">
-            <p>• <strong>Cohort Management:</strong> Adjust schedules, pacing, and cohort-specific customizations</p>
-            <p>• <strong>Curriculum Templates:</strong> Edit master content that serves as the foundation for all cohorts</p>
-            <p>• <strong>Independence:</strong> Each cohort maintains its own copy of content and can be customized individually</p>
-            <p>• <strong>Template Updates:</strong> Changes to curriculum templates don't automatically affect existing cohorts</p>
+            <p>• <strong>Curriculum Templates:</strong> Master content organized by proficiency level (A1-A2, B1-B2, C1-C2)</p>
+            <p>• <strong>Cohort References:</strong> Each cohort references a curriculum template instead of storing duplicate content</p>
+            <p>• <strong>Storage Efficiency:</strong> Content is stored once in templates and referenced by multiple cohorts</p>
+            <p>• <strong>Progress Tracking:</strong> Each cohort tracks its position in the curriculum template independently</p>
+            <p>• <strong>Customizations:</strong> Cohort-specific modifications are stored separately and applied on top of template content</p>
+            <p>• <strong>Template Updates:</strong> Changes to curriculum templates can optionally propagate to cohorts using them</p>
           </div>
         </div>
       </main>

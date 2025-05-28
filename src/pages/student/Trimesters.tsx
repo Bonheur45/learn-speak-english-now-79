@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MOCK_COHORTS, MOCK_TRIMESTERS, Trimester, ProficiencyLevel } from '@/lib/types';
+import { MOCK_COHORTS, MOCK_TRIMESTERS, Trimester, ProficiencyLevel, getCurriculumDayContent } from '@/lib/types';
+import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
 import { ArrowRight, BookOpen, Calendar, Check, CheckCircle, CircleDashed, Clock } from 'lucide-react';
 
 const Trimesters = () => {
@@ -16,14 +17,26 @@ const Trimesters = () => {
   
   const [selectedCohort, setSelectedCohort] = useState(MOCK_COHORTS.find(c => c.id === cohortId));
   const [trimesters, setTrimesters] = useState<Trimester[]>([]);
+  const [curriculumDays, setCurriculumDays] = useState<any[]>([]);
   
   useEffect(() => {
-    // Filter trimesters by cohort ID
-    const cohortTrimesters = MOCK_TRIMESTERS.filter(trim => trim.cohort_id === cohortId);
-    setTrimesters(cohortTrimesters);
-    
     const cohort = MOCK_COHORTS.find(c => c.id === cohortId);
     setSelectedCohort(cohort);
+    
+    if (cohort) {
+      // Get cohort's trimesters
+      const cohortTrimesters = MOCK_TRIMESTERS.filter(trim => trim.cohort_id === cohortId);
+      setTrimesters(cohortTrimesters);
+      
+      // Get curriculum template content based on cohort's curriculum_template_id
+      const curriculumTemplate = MOCK_CURRICULUM_TRIMESTERS.find(
+        ct => ct.id === cohort.curriculum_template_id || ct.curriculum_id === cohort.curriculum_template_id
+      );
+      
+      if (curriculumTemplate) {
+        setCurriculumDays(curriculumTemplate.days || []);
+      }
+    }
   }, [cohortId]);
   
   if (!selectedCohort) {
@@ -43,11 +56,10 @@ const Trimesters = () => {
   }
   
   const calculateTrimesterProgress = (trimester: Trimester) => {
-    // In a real app, this would calculate based on user's actual progress
     if (selectedCohort!.current_trimester > trimester.number) {
       return 100; // Past trimester, fully completed
     } else if (selectedCohort!.current_trimester === trimester.number) {
-      return 60; // Current trimester, partially completed
+      return Math.min((selectedCohort!.current_day_position || 0) / 24 * 100, 100);
     } else {
       return 0; // Future trimester, not started
     }
@@ -64,6 +76,13 @@ const Trimesters = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  // Get days for each trimester from curriculum template
+  const getTrimestarDays = (trimesterNumber: number) => {
+    const startIndex = (trimesterNumber - 1) * 24;
+    const endIndex = startIndex + 24;
+    return curriculumDays.slice(startIndex, endIndex);
   };
   
   return (
@@ -96,7 +115,10 @@ const Trimesters = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-medium">Your Learning Journey</h2>
-                <p className="text-gray-600">Each trimester consists of 12 days of learning materials</p>
+                <p className="text-gray-600">Each trimester consists of 24 days of learning materials from your curriculum template</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Using {selectedCohort.proficiency_level} curriculum template
+                </p>
               </div>
               <div className="flex items-center gap-4 bg-white p-3 rounded-lg border border-blue-100 shadow-sm">
                 <div className="flex items-center">
@@ -122,6 +144,7 @@ const Trimesters = () => {
             const isCompleted = progress === 100;
             const isInProgress = selectedCohort.current_trimester === trimester.number;
             const isUpcoming = selectedCohort.current_trimester < trimester.number;
+            const trimesterDays = getTrimestarDays(trimester.number);
             
             return (
               <Card 
@@ -168,7 +191,7 @@ const Trimesters = () => {
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-sm text-gray-600">Progress</span>
-                      <span className="text-sm font-medium">{progress}%</span>
+                      <span className="text-sm font-medium">{Math.round(progress)}%</span>
                     </div>
                     <Progress value={progress} className="h-2" />
                   </div>
@@ -176,36 +199,42 @@ const Trimesters = () => {
                   <div className="mt-6">
                     <h3 className="text-lg font-medium mb-4">Days in this Trimester</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-                      {trimester.days.map((day, dayIndex) => (
-                        <div key={day.id} className="flex items-center justify-between border-b pb-3">
-                          <div className="flex items-center">
-                            <div 
-                              className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 
-                                ${isCompleted ? 'bg-green-100' : isInProgress ? 'bg-blue-100' : 'bg-gray-100'}`}
+                      {trimesterDays.map((day, dayIndex) => {
+                        const globalDayNumber = (trimester.number - 1) * 24 + dayIndex + 1;
+                        const isDayCompleted = (selectedCohort.current_day_position || 0) >= globalDayNumber;
+                        const isDayInProgress = (selectedCohort.current_day_position || 0) === globalDayNumber - 1;
+                        
+                        return (
+                          <div key={day.id} className="flex items-center justify-between border-b pb-3">
+                            <div className="flex items-center">
+                              <div 
+                                className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 
+                                  ${isDayCompleted ? 'bg-green-100' : isDayInProgress ? 'bg-blue-100' : 'bg-gray-100'}`}
+                              >
+                                <span className="font-medium 
+                                  ${isDayCompleted ? 'text-green-700' : isDayInProgress ? 'text-blue-700' : 'text-gray-700'}">
+                                  {globalDayNumber}
+                                </span>
+                              </div>
+                              <div>
+                                <h4 className="font-medium">{day.title}</h4>
+                                <p className="text-sm text-gray-600 truncate max-w-[200px]">{day.description}</p>
+                              </div>
+                            </div>
+                            <Button 
+                              asChild 
+                              variant="ghost" 
+                              disabled={isUpcoming} 
+                              className={isDayCompleted ? "text-green-600" : "text-blue-600"}
+                              size="sm"
                             >
-                              <span className="font-medium 
-                                ${isCompleted ? 'text-green-700' : isInProgress ? 'text-blue-700' : 'text-gray-700'}">
-                                {day.day_number}
-                              </span>
-                            </div>
-                            <div>
-                              <h4 className="font-medium">{day.title}</h4>
-                              <p className="text-sm text-gray-600 truncate max-w-[200px]">{day.description}</p>
-                            </div>
+                              <Link to={`/student/day/${day.id}`}>
+                                {isDayCompleted ? 'Review' : 'Study'} <ArrowRight className="ml-1 h-4 w-4" />
+                              </Link>
+                            </Button>
                           </div>
-                          <Button 
-                            asChild 
-                            variant="ghost" 
-                            disabled={isUpcoming} 
-                            className={isCompleted ? "text-green-600" : "text-blue-600"}
-                            size="sm"
-                          >
-                            <Link to={`/student/days/${day.id}`}>
-                              {isCompleted ? 'Review' : 'Study'} <ArrowRight className="ml-1 h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </CardContent>
@@ -214,12 +243,12 @@ const Trimesters = () => {
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center text-sm text-gray-600">
                       <BookOpen className="h-4 w-4 mr-1" />
-                      <span>{trimester.days.length} Days</span>
+                      <span>{trimesterDays.length} Days</span>
                     </div>
                     
                     {isInProgress && (
                       <Button asChild>
-                        <Link to={`/student/days/${trimester.days[0].id}`}>
+                        <Link to={`/student/day/${trimesterDays[0]?.id || ''}`}>
                           Continue Learning
                         </Link>
                       </Button>
