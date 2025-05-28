@@ -92,10 +92,10 @@ const StudentRegistrationForm = () => {
         return;
       }
 
-      // Create auth user
+      // Create auth user with a temporary password (will be replaced with program ID)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
-        password: 'temp-password', // Will be replaced with program ID
+        password: 'temp-password-123', // Temporary password, will use program ID for login
       });
 
       if (authError) {
@@ -184,7 +184,7 @@ const StudentRegistrationForm = () => {
         <CardHeader>
           <CardTitle className="text-2xl text-center">Join Let's Do It English Program</CardTitle>
           <CardDescription className="text-center">
-            Complete your registration to start your English learning journey
+            Complete your registration to start your English learning journey. You'll receive a Program ID for login after approval.
           </CardDescription>
         </CardHeader>
         <CardContent>
