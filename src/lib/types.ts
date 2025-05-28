@@ -396,6 +396,36 @@ export const MOCK_TRIMESTERS: Trimester[] = [
     start_date: '2025-08-16',
     end_date: '2025-12-15',
     completed_days: []
+  },
+  {
+    id: '4',
+    cohort_id: '2',
+    curriculum_trimester_id: 'curr_trim_1_a1_a2',
+    name: 'Trimester 1: Fundamentals',
+    number: 1,
+    start_date: '2025-05-01',
+    end_date: '2025-08-01',
+    completed_days: []
+  },
+  {
+    id: '5',
+    cohort_id: '2',
+    curriculum_trimester_id: 'curr_trim_2_a1_a2',
+    name: 'Trimester 2: Intermediate Skills',
+    number: 2,
+    start_date: '2025-08-02',
+    end_date: '2025-12-01',
+    completed_days: []
+  },
+  {
+    id: '6',
+    cohort_id: '2',
+    curriculum_trimester_id: 'curr_trim_3_a1_a2',
+    name: 'Trimester 3: Advanced Topics',
+    number: 3,
+    start_date: '2025-12-02',
+    end_date: '2026-04-01',
+    completed_days: []
   }
 ];
 

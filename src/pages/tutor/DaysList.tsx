@@ -34,12 +34,47 @@ const DaysList = () => {
   const cohort = MOCK_COHORTS.find(c => c.id === cohortId);
   const trimester = MOCK_TRIMESTERS.find(t => t.id === trimesterId);
   
+  // Debug logging
+  console.log('DaysList Debug:', {
+    cohortId,
+    trimesterId,
+    foundCohort: cohort?.name,
+    foundTrimester: trimester?.name,
+    curriculumTrimesterId: trimester?.curriculum_trimester_id
+  });
+  
   // Get days from curriculum template
   const getTrimesterDays = () => {
-    if (!trimester) return [];
+    if (!trimester) {
+      console.log('No trimester found');
+      return [];
+    }
+    
     const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
       ct => ct.id === trimester.curriculum_trimester_id
     );
+    
+    console.log('Curriculum lookup:', {
+      looking_for: trimester.curriculum_trimester_id,
+      available: MOCK_CURRICULUM_TRIMESTERS.map(ct => ct.id),
+      found: curriculumTrimester?.name
+    });
+    
+    if (!curriculumTrimester) {
+      // Fallback: create sample days for demonstration
+      console.log('Creating fallback days for demonstration');
+      return Array.from({ length: 24 }, (_, index) => ({
+        id: `fallback_day_${index + 1}`,
+        day_number: index + 1,
+        title: `Day ${index + 1}: Sample Lesson`,
+        description: `Sample lesson content for day ${index + 1}`,
+        story_text: '<p>Sample story content...</p>',
+        topic_notes: '<p>Sample topic notes...</p>',
+        british_audio_url: '',
+        american_audio_url: ''
+      }));
+    }
+    
     return curriculumTrimester?.days || [];
   };
   
@@ -55,6 +90,11 @@ const DaysList = () => {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-red-600">Content Not Found</h1>
             <p className="mt-2 text-gray-600">The requested content could not be found.</p>
+            <div className="mt-4 p-4 bg-gray-100 rounded text-left">
+              <p><strong>Debug Info:</strong></p>
+              <p>Cohort ID: {cohortId} - Found: {cohort ? 'Yes' : 'No'}</p>
+              <p>Trimester ID: {trimesterId} - Found: {trimester ? 'Yes' : 'No'}</p>
+            </div>
             <Button asChild className="mt-4">
               <Link to="/tutor/materials">Back to Materials</Link>
             </Button>
@@ -138,6 +178,18 @@ const DaysList = () => {
           </div>
         </div>
 
+        {/* Debug info for development */}
+        {trimesterDays.length === 0 && (
+          <Card className="mb-6 border-orange-200 bg-orange-50">
+            <CardContent className="pt-6">
+              <p className="text-orange-800">
+                <strong>Debug:</strong> No days found for trimester. 
+                Curriculum trimester ID: {trimester.curriculum_trimester_id}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card>
@@ -198,87 +250,48 @@ const DaysList = () => {
           </CardContent>
         </Card>
 
-        {/* Main trimester card - matching student design */}
-        <Card className={`overflow-hidden transition-all border-blue-500 shadow-md`}>
-          <CardHeader className="bg-blue-50">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <CardTitle className="flex items-center">
-                  <CircleDashed className="w-5 h-5 text-blue-500 mr-2" />
-                  {trimester.name}
-                </CardTitle>
-                <CardDescription className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-1" />
-                  {new Date(trimester.start_date).toLocaleDateString()} - {new Date(trimester.end_date).toLocaleDateString()}
-                </CardDescription>
-              </div>
-              <div className="mt-2 md:mt-0">
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  Managing
-                </span>
-              </div>
-            </div>
-          </CardHeader>
-          
-          <CardContent className="pt-6">
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-sm text-gray-600">Progress</span>
-                <span className="text-sm font-medium">{Math.round(calculateProgress())}%</span>
-              </div>
-              <Progress value={calculateProgress()} className="h-2" />
-            </div>
-            
-            <div className="mt-6">
-              <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Days in this Trimester
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                {trimesterDays.map((day, dayIndex) => {
-                  const dayProgress = getDayProgress(day.day_number);
-                  const globalDayNumber = dayIndex + 1;
-                  const isCompleted = isDayCompleted(globalDayNumber);
-                  const isInProgress = isDayInProgress(globalDayNumber);
-                  const isLocked = isDayLocked(day.id);
-                  
-                  return (
-                    <div key={day.id} className="flex items-center justify-between border-b pb-4">
-                      <div className="flex items-center min-w-0 flex-1">
-                        <div 
-                          className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0
-                            ${isCompleted ? 'bg-green-100' : isInProgress ? 'bg-blue-100' : 'bg-gray-100'}`}
-                        >
-                          <span className={`font-medium text-sm
-                            ${isCompleted ? 'text-green-700' : isInProgress ? 'text-blue-700' : 'text-gray-700'}`}>
+        {/* Days Grid - Student-style layout */}
+        {trimesterDays.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+            {trimesterDays.map((day, dayIndex) => {
+              const dayProgress = getDayProgress(day.day_number);
+              const globalDayNumber = dayIndex + 1;
+              const isCompleted = isDayCompleted(globalDayNumber);
+              const isInProgress = isDayInProgress(globalDayNumber);
+              const isLocked = isDayLocked(day.id);
+              
+              return (
+                <Card 
+                  key={day.id} 
+                  className={`transition-all duration-200 hover:shadow-md border-2 ${
+                    isCompleted 
+                      ? 'border-green-200 bg-green-50/30' 
+                      : isInProgress 
+                        ? 'border-blue-200 bg-blue-50/30' 
+                        : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
+                          isCompleted ? 'bg-green-100' : isInProgress ? 'bg-blue-100' : 'bg-gray-100'
+                        }`}>
+                          <span className={`font-medium text-sm ${
+                            isCompleted ? 'text-green-700' : isInProgress ? 'text-blue-700' : 'text-gray-700'
+                          }`}>
                             {globalDayNumber}
                           </span>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="font-medium text-base truncate">{day.title}</h4>
-                          <p className="text-sm text-gray-600 truncate">{day.description}</p>
-                          
-                          {/* Activity icons - same as student view */}
-                          <div className="flex items-center gap-1 mt-1">
-                            <BookOpen className={`h-3 w-3 ${dayProgress.reading ? 'text-green-500' : 'text-gray-400'}`} />
-                            <Headphones className={`h-3 w-3 ${dayProgress.listeningAmerican ? 'text-green-500' : 'text-gray-400'}`} />
-                            <Headphones className={`h-3 w-3 ${dayProgress.listeningBritish ? 'text-green-500' : 'text-gray-400'}`} />
-                            <FileCheck className={`h-3 w-3 ${dayProgress.vocabulary ? 'text-green-500' : 'text-gray-400'}`} />
-                            <FileCheck className={`h-3 w-3 ${dayProgress.topic ? 'text-green-500' : 'text-gray-400'}`} />
-                          </div>
-                          
-                          {/* Progress bar - same as student view */}
-                          <div className="mt-2">
-                            <Progress 
-                              value={(dayProgress.totalCompleted / dayProgress.total) * 100} 
-                              className="h-1.5 w-32" 
-                            />
-                          </div>
-                        </div>
+                        {isLocked ? (
+                          <Lock className="h-4 w-4 text-red-500" />
+                        ) : (
+                          <Unlock className="h-4 w-4 text-green-500" />
+                        )}
                       </div>
                       
-                      {/* Tutor controls */}
-                      <div className="flex items-center gap-3 flex-shrink-0">
+                      {/* Status badges */}
+                      <div className="flex gap-1">
                         {isCompleted && (
                           <Badge variant="outline" className="text-green-600 border-green-200 text-xs">
                             <CheckCircle className="h-3 w-3 mr-1" />
@@ -291,41 +304,98 @@ const DaysList = () => {
                             Active
                           </Badge>
                         )}
-                        
-                        {/* Access Control */}
-                        <div className="flex items-center gap-1">
-                          {isLocked ? (
-                            <Lock className="h-4 w-4 text-red-500" />
-                          ) : (
-                            <Unlock className="h-4 w-4 text-green-500" />
-                          )}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <CardTitle className="text-base font-medium line-clamp-2">
+                        {day.title}
+                      </CardTitle>
+                      <CardDescription className="text-xs line-clamp-2 mt-1">
+                        {day.description}
+                      </CardDescription>
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent className="pt-0">
+                    {/* Activity icons - same as student view */}
+                    <div className="flex items-center gap-1 mb-3">
+                      <BookOpen className={`h-3 w-3 ${dayProgress.reading ? 'text-green-500' : 'text-gray-400'}`} />
+                      <Headphones className={`h-3 w-3 ${dayProgress.listeningAmerican ? 'text-green-500' : 'text-gray-400'}`} />
+                      <Headphones className={`h-3 w-3 ${dayProgress.listeningBritish ? 'text-green-500' : 'text-gray-400'}`} />
+                      <FileCheck className={`h-3 w-3 ${dayProgress.vocabulary ? 'text-green-500' : 'text-gray-400'}`} />
+                      <FileCheck className={`h-3 w-3 ${dayProgress.topic ? 'text-green-500' : 'text-gray-400'}`} />
+                    </div>
+                    
+                    {/* Progress bar */}
+                    <div className="mb-4">
+                      <Progress 
+                        value={(dayProgress.totalCompleted / dayProgress.total) * 100} 
+                        className="h-1.5" 
+                      />
+                    </div>
+                    
+                    {/* Tutor controls */}
+                    <div className="flex flex-col gap-2">
+                      {/* Access Control */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-600">Student Access:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs">{isLocked ? 'Locked' : 'Unlocked'}</span>
                           <Switch
                             checked={!isLocked}
                             onCheckedChange={() => toggleDayAccess(day.id)}
                             aria-label={`Toggle access for ${day.title}`}
                           />
                         </div>
-                        
-                        {/* Edit Button */}
+                      </div>
+                      
+                      {/* Action buttons */}
+                      <div className="flex gap-2">
                         <Button 
                           asChild 
-                          variant="ghost" 
-                          className="text-blue-600 flex-shrink-0"
+                          variant="outline" 
+                          className="flex-1 text-xs"
+                          size="sm"
+                        >
+                          <Link to={`/student/day/${day.id}`}>
+                            <Eye className="h-3 w-3 mr-1" />
+                            Preview
+                          </Link>
+                        </Button>
+                        <Button 
+                          asChild 
+                          variant="default" 
+                          className="flex-1 text-xs"
                           size="sm"
                         >
                           <Link to={`/tutor/materials/cohort/${cohortId}/trimester/${trimesterId}/day/${day.id}/edit`}>
-                            <Edit className="h-4 w-4 mr-1" />
+                            <Edit className="h-3 w-3 mr-1" />
                             Edit
                           </Link>
                         </Button>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        ) : (
+          <Card className="text-center py-12">
+            <CardContent>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Days Available</h3>
+              <p className="text-gray-600 mb-4">
+                This trimester doesn't have any days configured yet.
+              </p>
+              <Button asChild>
+                <Link to={`/tutor/curriculum`}>
+                  Set Up Curriculum
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Back button */}
         <div className="mt-8">
