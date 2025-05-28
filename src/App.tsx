@@ -80,6 +80,8 @@ function App() {
             <Route path="/student/cohorts" element={<StudentCohorts />} />
             <Route path="/student/trimesters" element={<StudentTrimesters />} />
             <Route path="/student/lessons" element={<StudentLessons />} />
+            <Route path="/student/days" element={<StudentLessons />} />
+            <Route path="/student/days/:dayId" element={<StudentDayContent />} />
             <Route path="/student/day/:dayId" element={<StudentDayContent />} />
             <Route path="/student/assessments" element={<StudentAssessments />} />
             <Route path="/student/vocabulary-test/:dayId" element={<VocabularyTest />} />
