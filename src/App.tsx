@@ -49,22 +49,20 @@ import VocabularyQuestionEditor from '@/pages/tutor/VocabularyQuestionEditor';
 import TopicQuestionEditor from '@/pages/tutor/TopicQuestionEditor';
 import WritingPromptEditor from '@/pages/tutor/WritingPromptEditor';
 
-const queryClient = new QueryClient();
-
-function QueryProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
-}
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
   return (
-    <QueryProvider>
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <div className="min-h-screen bg-gray-50">
-          <Toaster />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Index />} />
@@ -119,9 +117,10 @@ function App() {
             {/* 404 - This must be last */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <Toaster />
         </div>
       </BrowserRouter>
-    </QueryProvider>
+    </QueryClientProvider>
   );
 }
 
