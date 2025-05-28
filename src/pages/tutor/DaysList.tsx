@@ -21,7 +21,8 @@ import {
   FileCheck,
   Edit,
   GraduationCap,
-  ArrowRight
+  ArrowRight,
+  Eye
 } from 'lucide-react';
 import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
 import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
