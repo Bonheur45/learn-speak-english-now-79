@@ -45,7 +45,7 @@ const StudentRegistrationForm = () => {
 
   const onSubmit = async (data: RegistrationData) => {
     setIsLoading(true);
-    console.log('Starting registration process...');
+    console.log('Starting registration process for:', data.email);
 
     try {
       // Validate passwords match
@@ -78,8 +78,8 @@ const StudentRegistrationForm = () => {
         return;
       }
 
-      console.log('Creating auth user...');
-      // Create auth user
+      console.log('Creating auth user with email:', data.email);
+      // Create auth user with explicit data
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email.trim(),
         password: data.password,
@@ -87,7 +87,6 @@ const StudentRegistrationForm = () => {
           data: {
             full_name: data.fullName,
             username: data.username,
-            role: 'student'
           }
         }
       });
@@ -106,10 +105,20 @@ const StudentRegistrationForm = () => {
       }
 
       if (!authData.user) {
-        throw new Error('User creation failed');
+        throw new Error('User creation failed - no user returned');
       }
 
       console.log('Auth user created successfully:', authData.user.id);
+
+      // Check if email confirmation is required
+      if (!authData.session) {
+        toast({
+          title: "Check Your Email",
+          description: "Please check your email and click the confirmation link to activate your account, then try logging in.",
+        });
+        navigate('/login');
+        return;
+      }
 
       // Upload certificate if provided
       let certificateUrl = null;
@@ -133,17 +142,36 @@ const StudentRegistrationForm = () => {
         }
       }
 
-      // Create student profile using the secure function
+      // Create profile first
+      console.log('Creating user profile...');
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          full_name: data.fullName,
+          username: data.username,
+          role: 'student'
+        });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        throw new Error(`Profile creation failed: ${profileError.message}`);
+      }
+
+      // Create student profile
       console.log('Creating student profile...');
-      const { error: studentError } = await supabase.rpc('create_student_profile', {
-        user_id: authData.user.id,
-        study_exp: data.studyExperience,
-        goals: data.learningGoals,
-        took_test: data.tookProficiencyTest,
-        level: data.currentLevel,
-        test_score_val: data.testScore || null,
-        cert_url: certificateUrl
-      });
+      const { error: studentError } = await supabase
+        .from('student_profiles')
+        .insert({
+          id: authData.user.id,
+          study_experience: data.studyExperience,
+          learning_goals: data.learningGoals,
+          took_proficiency_test: data.tookProficiencyTest,
+          current_level: data.currentLevel,
+          test_score: data.testScore || null,
+          certificate_url: certificateUrl,
+          status: 'pending_approval'
+        });
 
       if (studentError) {
         console.error('Student profile creation error:', studentError);
@@ -371,6 +399,19 @@ const StudentRegistrationForm = () => {
             >
               {isLoading ? 'Creating Account...' : 'Complete Registration'}
             </Button>
+
+            <div className="text-center mt-4">
+              <p className="text-sm text-gray-600">
+                Already have an account?{' '}
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto"
+                  onClick={() => navigate('/login')}
+                >
+                  Sign in here
+                </Button>
+              </p>
+            </div>
           </form>
         </CardContent>
       </Card>
