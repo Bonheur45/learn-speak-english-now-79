@@ -238,6 +238,18 @@ export type Database = {
         }
         Returns: string
       }
+      create_student_profile: {
+        Args: {
+          user_id: string
+          study_exp: string
+          goals: string
+          took_test: boolean
+          level?: Database["public"]["Enums"]["proficiency_level"]
+          test_score_val?: string
+          cert_url?: string
+        }
+        Returns: undefined
+      }
       generate_program_id: {
         Args: Record<PropertyKey, never>
         Returns: string

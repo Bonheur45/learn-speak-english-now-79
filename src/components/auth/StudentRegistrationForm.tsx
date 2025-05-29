@@ -95,7 +95,7 @@ const StudentRegistrationForm = () => {
       }
 
       console.log('Creating auth user...');
-      // Create auth user
+      // Create auth user with metadata - the trigger will create the profile automatically
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: 'temp-password-123', // Temporary password
@@ -149,46 +149,17 @@ const StudentRegistrationForm = () => {
         }
       }
 
-      // Create profile and student profile using the service role (bypassing RLS temporarily)
-      console.log('Creating profile and student profile...');
-      
-      // Use a more direct approach - create both records in sequence
-      const profileData = {
-        id: authData.user.id,
-        full_name: data.fullName,
-        username: data.username,
-        role: 'student' as const
-      };
-
-      const studentProfileData = {
-        id: authData.user.id,
-        current_level: data.currentLevel,
-        study_experience: data.studyExperience,
-        learning_goals: data.learningGoals,
-        took_proficiency_test: data.tookProficiencyTest,
-        test_type: 'external' as const,
-        test_score: data.testScore || null,
-        certificate_url: certificateUrl,
-        test_timestamp: new Date().toISOString(),
-        used_in_app_test: false
-      };
-
-      // Insert profile first
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert(profileData);
-
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
-        throw new Error(`Profile creation failed: ${profileError.message}`);
-      }
-
-      console.log('Profile created successfully');
-
-      // Insert student profile
-      const { error: studentError } = await supabase
-        .from('student_profiles')
-        .insert(studentProfileData);
+      // Use the secure function to create student profile
+      console.log('Creating student profile...');
+      const { error: studentError } = await supabase.rpc('create_student_profile', {
+        user_id: authData.user.id,
+        study_exp: data.studyExperience,
+        goals: data.learningGoals,
+        took_test: data.tookProficiencyTest,
+        level: data.currentLevel,
+        test_score_val: data.testScore || null,
+        cert_url: certificateUrl
+      });
 
       if (studentError) {
         console.error('Student profile creation error:', studentError);
