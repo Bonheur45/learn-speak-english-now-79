@@ -19,9 +19,9 @@ const Index = () => {
   return (
     <Layout isLoggedIn={false} fullWidth={true}>
       {/* Hero Section */}
-      <section className="bg-white py-8 md:py-16 flex-grow">
+      <section className="bg-white py-16 md:py-20 flex-grow">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center">
+          <div className="flex flex-col md:flex-row items-center bg-white">
             <div className="md:w-1/2 px-4 md:pr-8 mb-8 md:mb-0">
               <h1 className="text-4xl md:text-5xl font-bold text-brand-blue mb-4">
                 Master English the <span className="text-brand-yellow">Right Way</span>
