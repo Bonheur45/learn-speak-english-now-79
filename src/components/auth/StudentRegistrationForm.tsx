@@ -79,13 +79,25 @@ const StudentRegistrationForm = () => {
       }
 
       console.log('Checking for existing users...');
-      // Check for unique email and username
-      const { data: existingUsers } = await supabase
-        .from('profiles')
-        .select('username, id')
-        .or(`username.eq.${data.username}`);
+      // Check for unique email and username using auth.users
+      const { data: existingUsers } = await supabase.auth.admin.listUsers();
+      
+      if (existingUsers?.users?.some(user => user.email === data.email)) {
+        toast({
+          title: "Registration Failed",
+          description: "Email already exists. Please use a different email address.",
+          variant: "destructive"
+        });
+        return;
+      }
 
-      if (existingUsers && existingUsers.length > 0) {
+      // Check username in profiles table without RLS issues
+      const { data: existingProfiles } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', data.username);
+
+      if (existingProfiles && existingProfiles.length > 0) {
         toast({
           title: "Registration Failed",
           description: "Username already exists. Please choose a different one.",
@@ -95,10 +107,17 @@ const StudentRegistrationForm = () => {
       }
 
       console.log('Creating auth user...');
-      // Create auth user with a temporary password (will be replaced with program ID)
+      // Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
-        password: 'temp-password-123', // Temporary password, will use program ID for login
+        password: 'temp-password-123', // Temporary password
+        options: {
+          data: {
+            full_name: data.fullName,
+            username: data.username,
+            role: 'student'
+          }
+        }
       });
 
       if (authError) {
@@ -112,11 +131,22 @@ const StudentRegistrationForm = () => {
 
       console.log('Auth user created successfully:', authData.user.id);
 
-      // Wait a moment to ensure the auth user is fully created
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Sign in the user first to establish the session for RLS
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: 'temp-password-123'
+      });
+
+      if (signInError) {
+        console.error('Sign in error:', signInError);
+        // Continue without signing in for now
+      }
+
+      // Wait a moment to ensure the auth session is established
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       console.log('Creating profile...');
-      // Create profile with explicit user ID
+      // Create profile
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -184,7 +214,10 @@ const StudentRegistrationForm = () => {
         description: "Your account has been created. Please check your email for your Program ID and further instructions.",
       });
 
-      // Redirect to a success page or login
+      // Sign out the user since they were signed in temporarily
+      await supabase.auth.signOut();
+
+      // Redirect to login page
       navigate('/login');
 
     } catch (error: any) {
