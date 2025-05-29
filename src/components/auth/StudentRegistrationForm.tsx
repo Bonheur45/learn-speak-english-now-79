@@ -29,7 +29,6 @@ interface RegistrationData {
 const StudentRegistrationForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [tookTest, setTookTest] = useState<boolean | null>(null);
   const [certificateFile, setCertificateFile] = useState<File | null>(null);
   
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<RegistrationData>();
@@ -44,20 +43,9 @@ const StudentRegistrationForm = () => {
     }
   };
 
-  const redirectToPlacementTest = () => {
-    // Store form data temporarily and redirect to placement test
-    const formData = new FormData();
-    const form = document.getElementById('registration-form') as HTMLFormElement;
-    if (form) {
-      const data = new FormData(form);
-      localStorage.setItem('pendingRegistration', JSON.stringify(Object.fromEntries(data)));
-    }
-    navigate('/assessment');
-  };
-
   const onSubmit = async (data: RegistrationData) => {
     setIsLoading(true);
-    console.log('Starting registration process with data:', data);
+    console.log('Starting registration process...');
 
     try {
       // Validate passwords match
@@ -77,11 +65,10 @@ const StudentRegistrationForm = () => {
           description: "Please complete the placement test to determine your English level.",
           variant: "destructive"
         });
-        redirectToPlacementTest();
         return;
       }
 
-      // Validate required fields
+      // Validate required fields for test takers
       if (!data.currentLevel) {
         toast({
           title: "Error",
@@ -91,26 +78,10 @@ const StudentRegistrationForm = () => {
         return;
       }
 
-      console.log('Checking for existing users...');
-      // Check username in profiles table
-      const { data: existingProfiles } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', data.username);
-
-      if (existingProfiles && existingProfiles.length > 0) {
-        toast({
-          title: "Registration Failed",
-          description: "Username already exists. Please choose a different one.",
-          variant: "destructive"
-        });
-        return;
-      }
-
       console.log('Creating auth user...');
-      // Create auth user with proper password
+      // Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
+        email: data.email.trim(),
         password: data.password,
         options: {
           data: {
@@ -126,7 +97,7 @@ const StudentRegistrationForm = () => {
         if (authError.message.includes('User already registered')) {
           toast({
             title: "Registration Failed",
-            description: "Email already exists. Please use a different email address.",
+            description: "This email is already registered. Please use a different email or try logging in.",
             variant: "destructive"
           });
           return;
@@ -162,7 +133,7 @@ const StudentRegistrationForm = () => {
         }
       }
 
-      // Use the secure function to create student profile
+      // Create student profile using the secure function
       console.log('Creating student profile...');
       const { error: studentError } = await supabase.rpc('create_student_profile', {
         user_id: authData.user.id,
@@ -179,11 +150,11 @@ const StudentRegistrationForm = () => {
         throw new Error(`Student profile creation failed: ${studentError.message}`);
       }
 
-      console.log('Student profile created successfully');
+      console.log('Registration completed successfully');
 
       toast({
         title: "Registration Successful!",
-        description: "Your account has been created. Please check your email to confirm your account before signing in.",
+        description: "Your account has been created successfully. You can now log in.",
       });
 
       // Redirect to login page
@@ -211,7 +182,7 @@ const StudentRegistrationForm = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form id="registration-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Personal Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Personal Information</h3>
@@ -329,7 +300,6 @@ const StudentRegistrationForm = () => {
               <RadioGroup 
                 onValueChange={(value) => {
                   const boolValue = value === 'true';
-                  setTookTest(boolValue);
                   setValue('tookProficiencyTest', boolValue);
                 }}
               >
