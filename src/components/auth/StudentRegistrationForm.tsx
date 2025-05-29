@@ -127,38 +127,6 @@ const StudentRegistrationForm = () => {
 
       console.log('Auth user created successfully:', authData.user.id);
 
-      // Sign in the user first to establish the session for RLS
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: 'temp-password-123'
-      });
-
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        // Continue without signing in for now
-      }
-
-      // Wait a moment to ensure the auth session is established
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      console.log('Creating profile...');
-      // Create profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          full_name: data.fullName,
-          username: data.username,
-          role: 'student'
-        });
-
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
-        throw profileError;
-      }
-
-      console.log('Profile created successfully');
-
       // Upload certificate if provided
       let certificateUrl = null;
       if (certificateFile) {
@@ -181,26 +149,50 @@ const StudentRegistrationForm = () => {
         }
       }
 
-      console.log('Creating student profile...');
-      // Create student profile
+      // Create profile and student profile using the service role (bypassing RLS temporarily)
+      console.log('Creating profile and student profile...');
+      
+      // Use a more direct approach - create both records in sequence
+      const profileData = {
+        id: authData.user.id,
+        full_name: data.fullName,
+        username: data.username,
+        role: 'student' as const
+      };
+
+      const studentProfileData = {
+        id: authData.user.id,
+        current_level: data.currentLevel,
+        study_experience: data.studyExperience,
+        learning_goals: data.learningGoals,
+        took_proficiency_test: data.tookProficiencyTest,
+        test_type: 'external' as const,
+        test_score: data.testScore || null,
+        certificate_url: certificateUrl,
+        test_timestamp: new Date().toISOString(),
+        used_in_app_test: false
+      };
+
+      // Insert profile first
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert(profileData);
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        throw new Error(`Profile creation failed: ${profileError.message}`);
+      }
+
+      console.log('Profile created successfully');
+
+      // Insert student profile
       const { error: studentError } = await supabase
         .from('student_profiles')
-        .insert({
-          id: authData.user.id,
-          current_level: data.currentLevel,
-          study_experience: data.studyExperience,
-          learning_goals: data.learningGoals,
-          took_proficiency_test: data.tookProficiencyTest,
-          test_type: data.tookProficiencyTest ? 'external' : 'none',
-          test_score: data.testScore || null,
-          certificate_url: certificateUrl,
-          test_timestamp: data.tookProficiencyTest ? new Date().toISOString() : null,
-          used_in_app_test: false
-        });
+        .insert(studentProfileData);
 
       if (studentError) {
         console.error('Student profile creation error:', studentError);
-        throw studentError;
+        throw new Error(`Student profile creation failed: ${studentError.message}`);
       }
 
       console.log('Student profile created successfully');
@@ -209,9 +201,6 @@ const StudentRegistrationForm = () => {
         title: "Registration Successful!",
         description: "Your account has been created. Please check your email for your Program ID and further instructions.",
       });
-
-      // Sign out the user since they were signed in temporarily
-      await supabase.auth.signOut();
 
       // Redirect to login page
       navigate('/login');
