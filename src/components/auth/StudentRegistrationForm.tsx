@@ -54,6 +54,7 @@ const StudentRegistrationForm = () => {
 
   const onSubmit = async (data: RegistrationData) => {
     setIsLoading(true);
+    console.log('Starting registration process with data:', data);
 
     try {
       // Check if user needs to take placement test
@@ -77,6 +78,7 @@ const StudentRegistrationForm = () => {
         return;
       }
 
+      console.log('Checking for existing users...');
       // Check for unique email and username
       const { data: existingUsers } = await supabase
         .from('profiles')
@@ -92,6 +94,7 @@ const StudentRegistrationForm = () => {
         return;
       }
 
+      console.log('Creating auth user...');
       // Create auth user with a temporary password (will be replaced with program ID)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
@@ -99,6 +102,7 @@ const StudentRegistrationForm = () => {
       });
 
       if (authError) {
+        console.error('Auth error:', authError);
         throw authError;
       }
 
@@ -106,7 +110,13 @@ const StudentRegistrationForm = () => {
         throw new Error('User creation failed');
       }
 
-      // Create profile
+      console.log('Auth user created successfully:', authData.user.id);
+
+      // Wait a moment to ensure the auth user is fully created
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      console.log('Creating profile...');
+      // Create profile with explicit user ID
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -117,12 +127,16 @@ const StudentRegistrationForm = () => {
         });
 
       if (profileError) {
+        console.error('Profile creation error:', profileError);
         throw profileError;
       }
+
+      console.log('Profile created successfully');
 
       // Upload certificate if provided
       let certificateUrl = null;
       if (certificateFile) {
+        console.log('Uploading certificate...');
         const fileExt = certificateFile.name.split('.').pop();
         const fileName = `${authData.user.id}/certificate.${fileExt}`;
         
@@ -135,9 +149,13 @@ const StudentRegistrationForm = () => {
             .from('certificates')
             .getPublicUrl(fileName);
           certificateUrl = publicUrl;
+          console.log('Certificate uploaded successfully');
+        } else {
+          console.warn('Certificate upload failed:', uploadError);
         }
       }
 
+      console.log('Creating student profile...');
       // Create student profile
       const { error: studentError } = await supabase
         .from('student_profiles')
@@ -155,8 +173,11 @@ const StudentRegistrationForm = () => {
         });
 
       if (studentError) {
+        console.error('Student profile creation error:', studentError);
         throw studentError;
       }
+
+      console.log('Student profile created successfully');
 
       toast({
         title: "Registration Successful!",
