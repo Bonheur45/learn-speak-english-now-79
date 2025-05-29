@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LoginData {
   email: string;
@@ -17,6 +17,7 @@ interface LoginData {
 const LoginForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
   
   const { register, handleSubmit, formState: { errors } } = useForm<LoginData>();
 
@@ -25,47 +26,25 @@ const LoginForm = () => {
     console.log('Attempting login with email:', data.email);
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: data.email.trim(),
-        password: data.password,
-      });
+      const { user, error } = await signIn(data.email.trim(), data.password);
 
-      if (authError) {
-        console.error('Login error:', authError);
-        throw authError;
+      if (error) {
+        throw error;
       }
 
-      if (!authData.user) {
-        throw new Error('No user data returned');
-      }
-
-      console.log('Login successful for user:', authData.user.id);
+      console.log('Login successful for user:', user?.id);
 
       toast({
         title: "Login Successful",
         description: "Welcome back!",
       });
 
-      // Get user profile to determine redirect
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', authData.user.id)
-        .single();
-
-      if (profileError) {
-        console.error('Profile fetch error:', profileError);
-        // Default redirect if profile fetch fails
-        navigate('/');
-        return;
-      }
-
       // Redirect based on user role
-      if (profile?.role === 'student') {
+      if (user?.role === 'student') {
         navigate('/student/dashboard');
-      } else if (profile?.role === 'tutor') {
+      } else if (user?.role === 'tutor') {
         navigate('/tutor/dashboard');
-      } else if (profile?.role === 'admin') {
+      } else if (user?.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
         navigate('/');
@@ -74,19 +53,9 @@ const LoginForm = () => {
     } catch (error: any) {
       console.error('Login error:', error);
       
-      let errorMessage = 'Login failed. Please try again.';
-      
-      if (error.message?.includes('Invalid login credentials')) {
-        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-      } else if (error.message?.includes('Email not confirmed')) {
-        errorMessage = 'Please check your email and confirm your account before signing in.';
-      } else if (error.message?.includes('Too many requests')) {
-        errorMessage = 'Too many login attempts. Please wait a moment and try again.';
-      }
-      
       toast({
         title: "Login Failed",
-        description: errorMessage,
+        description: "Invalid email or password. Please check your credentials and try again.",
         variant: "destructive"
       });
     } finally {

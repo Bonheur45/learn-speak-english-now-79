@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 interface RegistrationData {
   fullName: string;
@@ -30,6 +30,7 @@ const StudentRegistrationForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [certificateFile, setCertificateFile] = useState<File | null>(null);
+  const { signUp } = useAuth();
   
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<RegistrationData>();
   
@@ -78,104 +79,23 @@ const StudentRegistrationForm = () => {
         return;
       }
 
-      console.log('Creating auth user with email:', data.email);
-      // Create auth user with explicit data
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      console.log('Creating user account...');
+      
+      const { user, error } = await signUp({
         email: data.email.trim(),
         password: data.password,
-        options: {
-          data: {
-            full_name: data.fullName,
-            username: data.username,
-          }
-        }
+        fullName: data.fullName,
+        username: data.username,
+        studyExperience: data.studyExperience,
+        learningGoals: data.learningGoals,
+        tookProficiencyTest: data.tookProficiencyTest,
+        currentLevel: data.currentLevel,
+        testScore: data.testScore,
+        certificateFile: certificateFile
       });
 
-      if (authError) {
-        console.error('Auth error:', authError);
-        if (authError.message.includes('User already registered')) {
-          toast({
-            title: "Registration Failed",
-            description: "This email is already registered. Please use a different email or try logging in.",
-            variant: "destructive"
-          });
-          return;
-        }
-        throw authError;
-      }
-
-      if (!authData.user) {
-        throw new Error('User creation failed - no user returned');
-      }
-
-      console.log('Auth user created successfully:', authData.user.id);
-
-      // Check if email confirmation is required
-      if (!authData.session) {
-        toast({
-          title: "Check Your Email",
-          description: "Please check your email and click the confirmation link to activate your account, then try logging in.",
-        });
-        navigate('/login');
-        return;
-      }
-
-      // Upload certificate if provided
-      let certificateUrl = null;
-      if (certificateFile) {
-        console.log('Uploading certificate...');
-        const fileExt = certificateFile.name.split('.').pop();
-        const fileName = `${authData.user.id}/certificate.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('certificates')
-          .upload(fileName, certificateFile);
-
-        if (!uploadError) {
-          const { data: { publicUrl } } = supabase.storage
-            .from('certificates')
-            .getPublicUrl(fileName);
-          certificateUrl = publicUrl;
-          console.log('Certificate uploaded successfully');
-        } else {
-          console.warn('Certificate upload failed:', uploadError);
-        }
-      }
-
-      // Create profile first
-      console.log('Creating user profile...');
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          full_name: data.fullName,
-          username: data.username,
-          role: 'student'
-        });
-
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
-        throw new Error(`Profile creation failed: ${profileError.message}`);
-      }
-
-      // Create student profile
-      console.log('Creating student profile...');
-      const { error: studentError } = await supabase
-        .from('student_profiles')
-        .insert({
-          id: authData.user.id,
-          study_experience: data.studyExperience,
-          learning_goals: data.learningGoals,
-          took_proficiency_test: data.tookProficiencyTest,
-          current_level: data.currentLevel,
-          test_score: data.testScore || null,
-          certificate_url: certificateUrl,
-          status: 'pending_approval'
-        });
-
-      if (studentError) {
-        console.error('Student profile creation error:', studentError);
-        throw new Error(`Student profile creation failed: ${studentError.message}`);
+      if (error) {
+        throw error;
       }
 
       console.log('Registration completed successfully');

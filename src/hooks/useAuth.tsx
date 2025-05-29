@@ -1,7 +1,5 @@
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthUser {
   id: string;
@@ -13,113 +11,69 @@ interface AuthUser {
 
 export const useAuth = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        setSession(session);
-        
-        if (session?.user) {
-          // Defer profile loading to prevent recursion
-          setTimeout(() => {
-            fetchUserProfile(session.user);
-          }, 0);
-        } else {
-          setUser(null);
-          setLoading(false);
-        }
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.id);
-      setSession(session);
-      
-      if (session?.user) {
-        fetchUserProfile(session.user);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    // Check for stored user in localStorage
+    const storedUser = localStorage.getItem('auth_user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setLoading(false);
   }, []);
 
-  const fetchUserProfile = async (authUser: User) => {
-    try {
-      console.log('Fetching profile for user:', authUser.id);
-      
-      // Get user profile with error handling
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authUser.id)
-        .single();
-
-      if (profileError) {
-        console.error('Profile fetch error:', profileError);
-        // If profile doesn't exist, user might need to complete registration
-        setUser({
-          id: authUser.id,
-          email: authUser.email!,
-          role: 'student' // default role
-        });
-        setLoading(false);
-        return;
+  const signIn = (email: string, password: string) => {
+    // Mock authentication - in a real app this would call your backend
+    const mockUser: AuthUser = {
+      id: '1',
+      email: email,
+      role: 'student',
+      profile: {
+        full_name: 'Test User',
+        username: email.split('@')[0]
+      },
+      studentProfile: {
+        status: 'approved'
       }
-
-      console.log('Profile loaded:', profile);
-
-      let studentProfile = null;
-      if (profile.role === 'student') {
-        const { data, error } = await supabase
-          .from('student_profiles')
-          .select('*, cohorts(*)')
-          .eq('id', authUser.id)
-          .single();
-
-        if (!error && data) {
-          studentProfile = data;
-          console.log('Student profile loaded:', studentProfile);
-        }
-      }
-
-      setUser({
-        id: authUser.id,
-        email: authUser.email!,
-        role: profile.role,
-        profile,
-        studentProfile
-      });
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-      // Set basic user info even if profile fetch fails
-      setUser({
-        id: authUser.id,
-        email: authUser.email!,
-        role: 'student'
-      });
-    } finally {
-      setLoading(false);
-    }
+    };
+    
+    setUser(mockUser);
+    localStorage.setItem('auth_user', JSON.stringify(mockUser));
+    return Promise.resolve({ user: mockUser, error: null });
   };
 
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Error signing out:', error);
-    }
+  const signUp = (userData: any) => {
+    // Mock registration
+    const mockUser: AuthUser = {
+      id: Math.random().toString(),
+      email: userData.email,
+      role: 'student',
+      profile: {
+        full_name: userData.fullName,
+        username: userData.username
+      },
+      studentProfile: {
+        status: 'pending_approval'
+      }
+    };
+    
+    setUser(mockUser);
+    localStorage.setItem('auth_user', JSON.stringify(mockUser));
+    return Promise.resolve({ user: mockUser, error: null });
+  };
+
+  const signOut = () => {
+    setUser(null);
+    localStorage.removeItem('auth_user');
+    return Promise.resolve();
   };
 
   return {
     user,
-    session,
+    session: user ? { user } : null,
     loading,
+    signIn,
+    signUp,
     signOut,
     isAuthenticated: !!user,
     isStudent: user?.role === 'student',

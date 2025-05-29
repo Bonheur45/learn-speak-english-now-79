@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 interface StudentProfile {
   id: string;
@@ -43,45 +42,42 @@ const StudentApprovalDashboard = () => {
   }, [students, statusFilter, levelFilter, searchTerm]);
 
   const fetchStudents = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('student_profiles')
-        .select(`
-          *,
-          profiles!inner(full_name, username),
-          cohorts(name)
-        `)
-        .order('created_at', { ascending: false });
+    // Mock data for demonstration
+    const mockStudents: StudentProfile[] = [
+      {
+        id: '1',
+        full_name: 'John Doe',
+        username: 'johndoe',
+        email: 'john@example.com',
+        current_level: 'B1-B2',
+        study_experience: '2 years of English study',
+        learning_goals: 'Improve speaking skills',
+        took_proficiency_test: true,
+        test_score: 'IELTS 6.0',
+        status: 'pending_approval',
+        assigned_cohort_id: '',
+        created_at: new Date().toISOString(),
+        cohort: { name: 'Intermediate Group A' }
+      },
+      {
+        id: '2',
+        full_name: 'Jane Smith',
+        username: 'janesmith',
+        email: 'jane@example.com',
+        current_level: 'A1-A2',
+        study_experience: '6 months of English study',
+        learning_goals: 'Basic conversation skills',
+        took_proficiency_test: false,
+        test_score: 'N/A',
+        status: 'approved',
+        assigned_cohort_id: '',
+        created_at: new Date().toISOString(),
+        cohort: { name: 'Beginner Group B' }
+      }
+    ];
 
-      if (error) throw error;
-
-      const formattedStudents = data?.map(student => ({
-        id: student.id,
-        full_name: student.profiles.full_name,
-        username: student.profiles.username,
-        email: '', // Will need to get from auth.users if needed
-        current_level: student.current_level,
-        study_experience: student.study_experience,
-        learning_goals: student.learning_goals,
-        took_proficiency_test: student.took_proficiency_test,
-        test_score: student.test_score || 'N/A',
-        status: student.status,
-        assigned_cohort_id: student.assigned_cohort_id,
-        created_at: student.created_at,
-        cohort: student.cohorts
-      })) || [];
-
-      setStudents(formattedStudents);
-    } catch (error: any) {
-      console.error('Error fetching students:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load students. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+    setStudents(mockStudents);
+    setLoading(false);
   };
 
   const filterStudents = () => {
@@ -106,29 +102,17 @@ const StudentApprovalDashboard = () => {
   };
 
   const updateStudentStatus = async (studentId: string, newStatus: 'approved' | 'rejected') => {
-    try {
-      const { error } = await supabase.rpc('update_student_status', {
-        student_id: studentId,
-        new_status: newStatus
-      });
+    // Mock update - in a real app this would call your backend
+    setStudents(prev => prev.map(student => 
+      student.id === studentId 
+        ? { ...student, status: newStatus }
+        : student
+    ));
 
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: `Student ${newStatus} successfully.`,
-      });
-
-      // Refresh the students list
-      fetchStudents();
-    } catch (error: any) {
-      console.error('Error updating student status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update student status. Please try again.",
-        variant: "destructive"
-      });
-    }
+    toast({
+      title: "Success",
+      description: `Student ${newStatus} successfully.`,
+    });
   };
 
   const getStatusBadgeVariant = (status: string) => {
