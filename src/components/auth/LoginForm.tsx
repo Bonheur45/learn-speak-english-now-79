@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface LoginData {
   email: string;
-  programId: string;
+  password: string;
 }
 
 const LoginForm = () => {
@@ -22,54 +22,62 @@ const LoginForm = () => {
 
   const onSubmit = async (data: LoginData) => {
     setIsLoading(true);
+    console.log('Attempting login with:', data.email);
 
     try {
-      // First, find the user by program ID to get their email
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, program_id, role')
-        .eq('program_id', data.programId)
-        .single();
-
-      if (profileError || !profileData) {
-        throw new Error('Invalid Program ID. Please check your credentials.');
-      }
-
-      // Sign in with email and program ID as password
+      // Use email and password for login
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: data.email,
-        password: data.programId,
+        password: data.password,
       });
 
       if (authError) {
-        throw new Error('Invalid email or Program ID. Please check your credentials.');
+        console.error('Login error:', authError);
+        throw new Error(authError.message);
       }
 
-      // Check if the authenticated user matches the profile
-      if (authData.user?.id !== profileData.id) {
-        await supabase.auth.signOut();
-        throw new Error('Email and Program ID do not match.');
+      if (!authData.user) {
+        throw new Error('No user data returned');
       }
+
+      console.log('Login successful:', authData.user.id);
 
       toast({
         title: "Login Successful",
         description: "Welcome back to Let's Do It English Program!",
       });
 
+      // Get user profile to determine redirect
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', authData.user.id)
+        .single();
+
       // Redirect based on user role
-      if (profileData.role === 'student') {
+      if (profile?.role === 'student') {
         navigate('/student/dashboard');
-      } else if (profileData.role === 'tutor') {
+      } else if (profile?.role === 'tutor') {
         navigate('/tutor/dashboard');
-      } else {
+      } else if (profile?.role === 'admin') {
         navigate('/admin/dashboard');
+      } else {
+        navigate('/'); // fallback
       }
 
     } catch (error: any) {
       console.error('Login error:', error);
+      let errorMessage = 'Invalid credentials. Please check your email and password.';
+      
+      if (error.message.includes('Invalid login credentials')) {
+        errorMessage = 'Invalid email or password. Please try again.';
+      } else if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'Please check your email and confirm your account before signing in.';
+      }
+      
       toast({
         title: "Login Failed",
-        description: error.message || "Invalid credentials. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -93,7 +101,13 @@ const LoginForm = () => {
               <Input
                 id="email"
                 type="email"
-                {...register('email', { required: 'Email is required' })}
+                {...register('email', { 
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Invalid email address'
+                  }
+                })}
                 placeholder="Enter your email address"
               />
               {errors.email && (
@@ -102,17 +116,18 @@ const LoginForm = () => {
             </div>
 
             <div>
-              <Label htmlFor="programId">Program ID</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
-                id="programId"
-                {...register('programId', { required: 'Program ID is required' })}
-                placeholder="Enter your Program ID (e.g., ENG25-001)"
+                id="password"
+                type="password"
+                {...register('password', { required: 'Password is required' })}
+                placeholder="Enter your password"
               />
-              {errors.programId && (
-                <p className="text-sm text-red-600 mt-1">{errors.programId.message}</p>
+              {errors.password && (
+                <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>
               )}
               <p className="text-sm text-gray-500 mt-1">
-                Your Program ID was sent to your email after registration
+                Use your Program ID as your password if you registered through the system
               </p>
             </div>
 

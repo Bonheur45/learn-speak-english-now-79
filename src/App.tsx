@@ -16,8 +16,8 @@ import EmbeddedAssessment from '@/pages/EmbeddedAssessment';
 import NotFound from '@/pages/NotFound';
 
 // Auth pages
-import Login from '@/pages/auth/Login';
-import Register from '@/pages/auth/Register';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
 import PendingApproval from '@/pages/auth/PendingApproval';
 
 // Student pages

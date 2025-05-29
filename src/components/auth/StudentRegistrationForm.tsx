@@ -16,6 +16,8 @@ interface RegistrationData {
   fullName: string;
   username: string;
   email: string;
+  password: string;
+  confirmPassword: string;
   studyExperience: string;
   learningGoals: string;
   tookProficiencyTest: boolean;
@@ -33,6 +35,7 @@ const StudentRegistrationForm = () => {
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<RegistrationData>();
   
   const watchedTookTest = watch('tookProficiencyTest');
+  const watchedPassword = watch('password');
 
   const handleCertificateUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -57,6 +60,16 @@ const StudentRegistrationForm = () => {
     console.log('Starting registration process with data:', data);
 
     try {
+      // Validate passwords match
+      if (data.password !== data.confirmPassword) {
+        toast({
+          title: "Error",
+          description: "Passwords do not match.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       // Check if user needs to take placement test
       if (!data.tookProficiencyTest) {
         toast({
@@ -95,10 +108,10 @@ const StudentRegistrationForm = () => {
       }
 
       console.log('Creating auth user...');
-      // Create auth user with metadata - the trigger will create the profile automatically
+      // Create auth user with proper password
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
-        password: 'temp-password-123', // Temporary password
+        password: data.password,
         options: {
           data: {
             full_name: data.fullName,
@@ -170,7 +183,7 @@ const StudentRegistrationForm = () => {
 
       toast({
         title: "Registration Successful!",
-        description: "Your account has been created. Please check your email for your Program ID and further instructions.",
+        description: "Your account has been created. Please check your email to confirm your account before signing in.",
       });
 
       // Redirect to login page
@@ -194,7 +207,7 @@ const StudentRegistrationForm = () => {
         <CardHeader>
           <CardTitle className="text-2xl text-center">Join Let's Do It English Program</CardTitle>
           <CardDescription className="text-center">
-            Complete your registration to start your English learning journey. You'll receive a Program ID for login after approval.
+            Complete your registration to start your English learning journey
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -232,11 +245,52 @@ const StudentRegistrationForm = () => {
                 <Input
                   id="email"
                   type="email"
-                  {...register('email', { required: 'Email is required' })}
+                  {...register('email', { 
+                    required: 'Email is required',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Invalid email address'
+                    }
+                  })}
                   placeholder="Enter your email address"
                 />
                 {errors.email && (
                   <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="password">Password *</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  {...register('password', { 
+                    required: 'Password is required',
+                    minLength: {
+                      value: 6,
+                      message: 'Password must be at least 6 characters'
+                    }
+                  })}
+                  placeholder="Create a password (min 6 characters)"
+                />
+                {errors.password && (
+                  <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  {...register('confirmPassword', { 
+                    required: 'Please confirm your password',
+                    validate: value => value === watchedPassword || 'Passwords do not match'
+                  })}
+                  placeholder="Confirm your password"
+                />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-600 mt-1">{errors.confirmPassword.message}</p>
                 )}
               </div>
             </div>
