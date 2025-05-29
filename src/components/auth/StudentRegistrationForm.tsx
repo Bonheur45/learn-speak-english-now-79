@@ -79,19 +79,7 @@ const StudentRegistrationForm = () => {
       }
 
       console.log('Checking for existing users...');
-      // Check for unique email and username using auth.users
-      const { data: existingUsers } = await supabase.auth.admin.listUsers();
-      
-      if (existingUsers?.users?.some(user => user.email === data.email)) {
-        toast({
-          title: "Registration Failed",
-          description: "Email already exists. Please use a different email address.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Check username in profiles table without RLS issues
+      // Check username in profiles table
       const { data: existingProfiles } = await supabase
         .from('profiles')
         .select('username')
@@ -122,6 +110,14 @@ const StudentRegistrationForm = () => {
 
       if (authError) {
         console.error('Auth error:', authError);
+        if (authError.message.includes('User already registered')) {
+          toast({
+            title: "Registration Failed",
+            description: "Email already exists. Please use a different email address.",
+            variant: "destructive"
+          });
+          return;
+        }
         throw authError;
       }
 
