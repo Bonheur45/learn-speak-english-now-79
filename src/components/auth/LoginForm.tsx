@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,31 +13,33 @@ import { useAuth } from '@/hooks/useAuth';
 interface LoginData {
   email: string;
   password: string;
+  role: 'student' | 'tutor' | 'admin';
 }
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<'student' | 'tutor' | 'admin'>('student');
   const { signIn } = useAuth();
   
   const { register, handleSubmit, formState: { errors } } = useForm<LoginData>();
 
   const onSubmit = async (data: LoginData) => {
     setIsLoading(true);
-    console.log('Attempting login with email:', data.email);
+    console.log('Attempting login with email:', data.email, 'as role:', selectedRole);
 
     try {
-      const { user, error } = await signIn(data.email.trim(), data.password);
+      const { user, error } = await signIn(data.email.trim(), data.password, selectedRole);
 
       if (error) {
         throw error;
       }
 
-      console.log('Login successful for user:', user?.id);
+      console.log('Login successful for user:', user?.id, 'with role:', user?.role);
 
       toast({
         title: "Login Successful",
-        description: "Welcome back!",
+        description: `Welcome back! Logging in as ${selectedRole}.`,
       });
 
       // Redirect based on user role
@@ -55,7 +58,7 @@ const LoginForm = () => {
       
       toast({
         title: "Login Failed",
-        description: "Invalid email or password. Please check your credentials and try again.",
+        description: "Something went wrong. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -74,6 +77,20 @@ const LoginForm = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <Label htmlFor="role">Login as</Label>
+              <Select value={selectedRole} onValueChange={(value: 'student' | 'tutor' | 'admin') => setSelectedRole(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="tutor">Tutor</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div>
               <Label htmlFor="email">Email Address</Label>
               <Input
@@ -107,7 +124,7 @@ const LoginForm = () => {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? 'Signing in...' : `Sign In as ${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}`}
             </Button>
 
             <div className="text-center mt-4">

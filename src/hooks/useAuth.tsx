@@ -22,19 +22,20 @@ export const useAuth = () => {
     setLoading(false);
   }, []);
 
-  const signIn = (email: string, password: string) => {
+  const signIn = (email: string, password: string, role?: 'student' | 'tutor' | 'admin') => {
     // Mock authentication - in a real app this would call your backend
+    const selectedRole = role || 'student';
     const mockUser: AuthUser = {
-      id: '1',
+      id: Math.random().toString(),
       email: email,
-      role: 'student',
+      role: selectedRole,
       profile: {
-        full_name: 'Test User',
+        full_name: selectedRole === 'student' ? 'Test Student' : selectedRole === 'tutor' ? 'Test Tutor' : 'Test Admin',
         username: email.split('@')[0]
       },
-      studentProfile: {
+      studentProfile: selectedRole === 'student' ? {
         status: 'approved'
-      }
+      } : undefined
     };
     
     setUser(mockUser);
@@ -43,7 +44,7 @@ export const useAuth = () => {
   };
 
   const signUp = (userData: any) => {
-    // Mock registration
+    // Mock registration - always creates a student by default
     const mockUser: AuthUser = {
       id: Math.random().toString(),
       email: userData.email,
@@ -53,7 +54,7 @@ export const useAuth = () => {
         username: userData.username
       },
       studentProfile: {
-        status: 'pending_approval'
+        status: 'approved'
       }
     };
     
