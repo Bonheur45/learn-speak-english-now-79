@@ -1,7 +1,7 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, Medal, Award, TrendingUp } from 'lucide-react';
+import api from '@/lib/api';
 
 interface Student {
   id: string;
@@ -12,118 +12,82 @@ interface Student {
   weeklyChange?: number;
 }
 
-interface WeeklyRankingsProps {
-  students: Student[];
-  currentUserId: string;
-}
+const WeeklyRankings = () => {
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
 
-const WeeklyRankings = ({ students, currentUserId }: WeeklyRankingsProps) => {
-  const sortedStudents = [...students].sort((a, b) => b.score - a.score);
-  
-  const getRankIcon = (position: number) => {
-    switch (position) {
-      case 1:
-        return <Trophy className="h-5 w-5 text-yellow-500" />;
-      case 2:
-        return <Medal className="h-5 w-5 text-gray-400" />;
-      case 3:
-        return <Award className="h-5 w-5 text-amber-600" />;
-      default:
-        return <span className="text-sm font-bold text-gray-500">#{position}</span>;
+  useEffect(() => {
+    fetchRankings();
+  }, []);
+
+  const fetchRankings = async () => {
+    try {
+      const response = await api.analytics.getAnalytics();
+      // Transform the analytics data into the format we need
+      const rankings = response.data.map((student: any) => ({
+        id: student.id,
+        name: student.full_name,
+        username: student.username,
+        score: student.weekly_score,
+        avatar: student.avatar_url,
+        weeklyChange: student.weekly_change
+      }));
+      setStudents(rankings);
+    } catch (error) {
+      console.error('Failed to fetch rankings:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getPositionColor = (position: number) => {
-    switch (position) {
-      case 1:
-        return 'bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200';
-      case 2:
-        return 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200';
-      case 3:
-        return 'bg-gradient-to-r from-amber-50 to-amber-100 border-amber-200';
-      default:
-        return 'bg-white border-gray-200';
-    }
-  };
-
-  const getChangeIndicator = (change?: number) => {
-    if (!change) return null;
-    
-    const isPositive = change > 0;
+  if (loading) {
     return (
-      <div className={`flex items-center text-xs ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-        <TrendingUp className={`h-3 w-3 mr-1 ${!isPositive ? 'rotate-180' : ''}`} />
-        {Math.abs(change)}
+      <div className="flex items-center justify-center min-h-[200px]">
+        <div className="text-lg">Loading rankings...</div>
       </div>
     );
-  };
+  }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-brand-yellow" />
-          Weekly Cohort Rankings
+          <Trophy className="h-5 w-5 text-yellow-500" />
+          Weekly Rankings
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {sortedStudents.map((student, index) => {
-            const position = index + 1;
-            const isCurrentUser = student.id === currentUserId;
-            
-            return (
-              <div
-                key={student.id}
-                className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 ${getPositionColor(position)} ${
-                  isCurrentUser ? 'ring-2 ring-brand-blue shadow-md' : ''
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8">
-                    {getRankIcon(position)}
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-brand-blue rounded-full flex items-center justify-center text-white font-semibold">
-                      {student.avatar ? (
-                        <img
-                          src={student.avatar}
-                          alt={student.name}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        student.name.charAt(0).toUpperCase()
-                      )}
-                    </div>
-                    
-                    <div>
-                      <p className={`font-medium ${isCurrentUser ? 'text-brand-blue' : ''}`}>
-                        {student.name} {isCurrentUser && '(You)'}
-                      </p>
-                      <p className="text-sm text-gray-500">@{student.username}</p>
-                    </div>
-                  </div>
+        <div className="space-y-4">
+          {students.map((student, index) => (
+            <div key={student.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100">
+                  {index === 0 ? (
+                    <Trophy className="h-4 w-4 text-yellow-500" />
+                  ) : index === 1 ? (
+                    <Medal className="h-4 w-4 text-gray-400" />
+                  ) : index === 2 ? (
+                    <Award className="h-4 w-4 text-amber-600" />
+                  ) : (
+                    <span className="text-sm font-medium">{index + 1}</span>
+                  )}
                 </div>
-                
-                <div className="text-right">
-                  <div className="flex items-center gap-2">
-                    <div>
-                      <p className="font-bold text-lg">{student.score}</p>
-                      <p className="text-xs text-gray-500">points</p>
-                    </div>
-                    {getChangeIndicator(student.weeklyChange)}
-                  </div>
+                <div>
+                  <p className="font-medium">{student.name}</p>
+                  <p className="text-sm text-gray-500">@{student.username}</p>
                 </div>
               </div>
-            );
-          })}
-        </div>
-        
-        <div className="mt-4 pt-3 border-t border-gray-200">
-          <p className="text-xs text-gray-500 text-center">
-            Rankings update weekly based on assessment scores and participation
-          </p>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{student.score} pts</span>
+                {student.weeklyChange && (
+                  <div className={`flex items-center ${student.weeklyChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <TrendingUp className="h-4 w-4" />
+                    <span className="text-sm">{Math.abs(student.weeklyChange)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

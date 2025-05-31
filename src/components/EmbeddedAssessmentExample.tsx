@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -232,4 +231,4 @@ const EmbeddedAssessmentExample = () => {
   );
 };
 
-export default EmbeddedAssessmentExample;
+export default EmbeddedAssessmentExample; 

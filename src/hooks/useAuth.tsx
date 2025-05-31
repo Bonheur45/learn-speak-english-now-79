@@ -1,12 +1,20 @@
-
 import { useEffect, useState } from 'react';
+import api from '@/lib/api';
 
 interface AuthUser {
   id: string;
   email: string;
   role: 'student' | 'tutor' | 'admin';
-  profile?: any;
-  studentProfile?: any;
+  profile?: {
+    full_name: string;
+    username: string;
+  };
+  studentProfile?: {
+    status: 'pending_approval' | 'approved' | 'rejected';
+    cohorts?: {
+      name: string;
+    };
+  };
 }
 
 export const useAuth = () => {
@@ -14,59 +22,62 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored user in localStorage
-    const storedUser = localStorage.getItem('auth_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
-  }, []);
-
-  const signIn = (email: string, password: string, role?: 'student' | 'tutor' | 'admin') => {
-    // Mock authentication - in a real app this would call your backend
-    const selectedRole = role || 'student';
-    const mockUser: AuthUser = {
-      id: Math.random().toString(),
-      email: email,
-      role: selectedRole,
-      profile: {
-        full_name: selectedRole === 'student' ? 'Test Student' : selectedRole === 'tutor' ? 'Test Tutor' : 'Test Admin',
-        username: email.split('@')[0]
-      },
-      studentProfile: selectedRole === 'student' ? {
-        status: 'approved'
-      } : undefined
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('auth_user', JSON.stringify(mockUser));
-    return Promise.resolve({ user: mockUser, error: null });
-  };
-
-  const signUp = (userData: any) => {
-    // Mock registration - always creates a student by default
-    const mockUser: AuthUser = {
-      id: Math.random().toString(),
-      email: userData.email,
-      role: 'student',
-      profile: {
-        full_name: userData.fullName,
-        username: userData.username
-      },
-      studentProfile: {
-        status: 'approved'
+    const initializeAuth = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        if (token) {
+          const userData = await api.auth.getCurrentUser();
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error('Failed to initialize auth:', error);
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+      } finally {
+        setLoading(false);
       }
     };
-    
-    setUser(mockUser);
-    localStorage.setItem('auth_user', JSON.stringify(mockUser));
-    return Promise.resolve({ user: mockUser, error: null });
+
+    initializeAuth();
+  }, []);
+
+  const signIn = async (username: string, password: string) => {
+    try {
+      const { user: userData } = await api.auth.login(username, password);
+      setUser(userData);
+      return { user: userData, error: null };
+    } catch (error) {
+      console.error('Login failed:', error);
+      return { user: null, error };
+    }
   };
 
-  const signOut = () => {
-    setUser(null);
-    localStorage.removeItem('auth_user');
-    return Promise.resolve();
+  const signUp = async (userData: {
+    email: string;
+    password: string;
+    full_name: string;
+    username: string;
+  }) => {
+    try {
+      const response = await api.auth.register(userData);
+      setUser(response);
+      return { user: response, error: null };
+    } catch (error) {
+      console.error('Registration failed:', error);
+      return { user: null, error };
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await api.auth.logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setUser(null);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+    }
   };
 
   return {

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -26,20 +25,16 @@ const LoginForm = () => {
 
   const onSubmit = async (data: LoginData) => {
     setIsLoading(true);
-    console.log('Attempting login with email:', data.email, 'as role:', selectedRole);
-
     try {
-      const { user, error } = await signIn(data.email.trim(), data.password, selectedRole);
+      const { user, error } = await signIn(data.email.trim(), data.password);
 
       if (error) {
         throw error;
       }
 
-      console.log('Login successful for user:', user?.id, 'with role:', user?.role);
-
       toast({
         title: "Login Successful",
-        description: `Welcome back! Logging in as ${selectedRole}.`,
+        description: `Welcome back! Logging in as ${user?.role}.`,
       });
 
       // Redirect based on user role
@@ -58,7 +53,7 @@ const LoginForm = () => {
       
       toast({
         title: "Login Failed",
-        description: "Something went wrong. Please try again.",
+        description: error?.message || "Invalid email or password. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -67,82 +62,78 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
-          <CardDescription className="text-center">
-            Sign in to Let's Do It English Program
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Label htmlFor="role">Login as</Label>
-              <Select value={selectedRole} onValueChange={(value: 'student' | 'tutor' | 'admin') => setSelectedRole(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="tutor">Tutor</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>Welcome Back</CardTitle>
+        <CardDescription>Sign in to your account to continue</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              {...register('email', { 
+                required: 'Email is required',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Invalid email address'
+                }
+              })}
+            />
+            {errors.email && (
+              <p className="text-sm text-red-500">{errors.email.message}</p>
+            )}
+          </div>
 
-            <div>
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                {...register('email', { 
-                  required: 'Email is required',
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: 'Invalid email address'
-                  }
-                })}
-                placeholder="Enter your email address"
-              />
-              {errors.email && (
-                <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              {...register('password', { 
+                required: 'Password is required',
+                minLength: {
+                  value: 6,
+                  message: 'Password must be at least 6 characters'
+                }
+              })}
+            />
+            {errors.password && (
+              <p className="text-sm text-red-500">{errors.password.message}</p>
+            )}
+          </div>
 
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                {...register('password', { required: 'Password is required' })}
-                placeholder="Enter your password"
-              />
-              {errors.password && (
-                <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="role">I am a</Label>
+            <Select
+              value={selectedRole}
+              onValueChange={(value: 'student' | 'tutor' | 'admin') => setSelectedRole(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select your role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="student">Student</SelectItem>
+                <SelectItem value="tutor">Tutor</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : `Sign In as ${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}`}
-            </Button>
-
-            <div className="text-center mt-4">
-              <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
-                <Button 
-                  variant="link" 
-                  className="p-0 h-auto"
-                  onClick={() => navigate('/register')}
-                >
-                  Register here
-                </Button>
-              </p>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          <Button 
+            type="submit" 
+            className="w-full bg-brand-yellow text-brand-blue hover:brightness-95"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Signing in...' : 'Sign In'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

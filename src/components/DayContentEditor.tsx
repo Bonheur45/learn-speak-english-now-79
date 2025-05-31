@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Save, Calendar, FileText, BookOpen, Play, TestTube, Plus, Trash2 } from 'lucide-react';
 import RichTextEditor from './RichTextEditor';
 import { toast } from '@/hooks/use-toast';
+import api from '@/lib/api';
 
 interface DayData {
   id: string;
@@ -34,51 +35,64 @@ interface GlossaryTerm {
 }
 
 const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
-  const [dayData, setDayData] = useState<DayData>({
-    ...day,
-    description: day.description || ''
-  });
-  
-  const [glossaryTerms, setGlossaryTerms] = useState<GlossaryTerm[]>([
-    { id: '1', term: 'Present Tense', definition: 'A verb form that describes actions happening now or habitual actions' },
-    { id: '2', term: 'Vocabulary', definition: 'The body of words used in a particular language' }
-  ]);
+  const [dayData, setDayData] = useState<DayData>(day);
+  const [glossaryTerms, setGlossaryTerms] = useState<GlossaryTerm[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Extract route parameters from current URL
-  const currentPath = window.location.pathname;
-  const pathParts = currentPath.split('/');
-  const curriculumId = pathParts[3];
-  const trimesterId = pathParts[5];
-  const dayId = pathParts[7];
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      // Save the day content
+      await api.curriculum.updateCurriculumTemplate(day.id, dayData);
+      
+      // Save glossary terms if any
+      if (glossaryTerms.length > 0) {
+        await api.curriculum.updateCurriculumTemplate(day.id, {
+          glossary_terms: glossaryTerms
+        });
+      }
 
-  const handleSave = () => {
-    onSave(dayData);
-    toast({
-      title: "Day Content Saved",
-      description: `Day ${dayData.day_number} has been updated successfully.`,
-    });
+      toast({
+        title: "Success",
+        description: "Day content saved successfully.",
+      });
+      
+      onSave(dayData);
+    } catch (error) {
+      console.error('Failed to save day content:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save day content. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const updateField = (field: keyof DayData, value: string) => {
-    setDayData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (field: keyof DayData, value: string) => {
+    setDayData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  const addGlossaryTerm = () => {
-    const newTerm: GlossaryTerm = {
-      id: Date.now().toString(),
-      term: '',
-      definition: ''
-    };
-    setGlossaryTerms(prev => [...prev, newTerm]);
+  const handleGlossaryTermAdd = () => {
+    setGlossaryTerms(prev => [
+      ...prev,
+      { id: Date.now().toString(), term: '', definition: '' }
+    ]);
   };
 
-  const updateGlossaryTerm = (id: string, field: 'term' | 'definition', value: string) => {
-    setGlossaryTerms(prev => prev.map(term => 
-      term.id === id ? { ...term, [field]: value } : term
-    ));
+  const handleGlossaryTermChange = (id: string, field: 'term' | 'definition', value: string) => {
+    setGlossaryTerms(prev =>
+      prev.map(term =>
+        term.id === id ? { ...term, [field]: value } : term
+      )
+    );
   };
 
-  const deleteGlossaryTerm = (id: string) => {
+  const handleGlossaryTermDelete = (id: string) => {
     setGlossaryTerms(prev => prev.filter(term => term.id !== id));
   };
 
@@ -109,9 +123,13 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
                 <Badge variant="secondary">Draft</Badge>
               </div>
             </div>
-            <Button onClick={handleSave} className="bg-brand-yellow text-brand-blue hover:brightness-95">
+            <Button 
+              onClick={handleSave} 
+              className="bg-brand-yellow text-brand-blue hover:brightness-95"
+              disabled={isSaving}
+            >
               <Save className="h-4 w-4 mr-2" />
-              Save
+              {isSaving ? 'Saving...' : 'Save'}
             </Button>
           </div>
         </CardHeader>
@@ -119,253 +137,145 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
 
       {/* Navigation Tabs */}
       <Tabs defaultValue="content" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-100">
-          <TabsTrigger value="content" className="flex items-center gap-2 data-[state=active]:bg-white">
+        <TabsList>
+          <TabsTrigger value="content" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Content
           </TabsTrigger>
-          <TabsTrigger value="media" className="flex items-center gap-2 data-[state=active]:bg-white">
-            <Play className="h-4 w-4" />
-            Media
-          </TabsTrigger>
-          <TabsTrigger value="glossary" className="flex items-center gap-2 data-[state=active]:bg-white">
+          <TabsTrigger value="story" className="flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
-            Glossary
+            Story
           </TabsTrigger>
-          <TabsTrigger value="tests" className="flex items-center gap-2 data-[state=active]:bg-white">
+          <TabsTrigger value="audio" className="flex items-center gap-2">
+            <Play className="h-4 w-4" />
+            Audio
+          </TabsTrigger>
+          <TabsTrigger value="glossary" className="flex items-center gap-2">
             <TestTube className="h-4 w-4" />
-            Tests
+            Glossary
           </TabsTrigger>
         </TabsList>
 
-        {/* Basic Information Tab */}
-        <TabsContent value="content">
-          <Card>
-            <CardHeader>
-              <CardTitle>Lesson Content</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="title">Lesson Title</Label>
-                  <Input
-                    id="title"
-                    value={dayData.title}
-                    onChange={(e) => updateField('title', e.target.value)}
-                    placeholder="Enter lesson title..."
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    value={dayData.description}
-                    onChange={(e) => updateField('description', e.target.value)}
-                    placeholder="Enter lesson description..."
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label>Story/Reading Content</Label>
-                <p className="text-sm text-gray-600 mb-2">Enter the story content for students to read</p>
-                <RichTextEditor
-                  value={dayData.story_text}
-                  onChange={(value) => updateField('story_text', value)}
-                  placeholder="Enter the story content for students to read..."
-                  minHeight="300px"
-                />
-              </div>
-
-              <div>
-                <Label>Grammar/Topic Notes</Label>
-                <p className="text-sm text-gray-600 mb-2">Enter detailed grammar or topic explanations</p>
-                <RichTextEditor
-                  value={dayData.topic_notes}
-                  onChange={(value) => updateField('topic_notes', value)}
-                  placeholder="Enter detailed grammar or topic explanations..."
-                  minHeight="250px"
-                />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Content Tab */}
+        <TabsContent value="content" className="space-y-4">
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={dayData.title}
+                onChange={(e) => handleInputChange('title', e.target.value)}
+                placeholder="Enter the day's title"
+              />
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={dayData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder="Enter a brief description"
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label htmlFor="topic_notes">Topic Notes</Label>
+              <RichTextEditor
+                value={dayData.topic_notes}
+                onChange={(value) => handleInputChange('topic_notes', value)}
+                placeholder="Enter topic notes..."
+              />
+            </div>
+          </div>
         </TabsContent>
 
-        {/* Media Tab */}
-        <TabsContent value="media">
-          <Card>
-            <CardHeader>
-              <CardTitle>Watch/Listen to the Speaker</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <input type="checkbox" defaultChecked className="rounded" />
-                    <Label className="flex items-center gap-2">
-                      Include British Version
-                      <Badge variant="outline">UK</Badge>
-                    </Label>
-                  </div>
-                  <Input
-                    value={dayData.british_audio_url}
-                    onChange={(e) => updateField('british_audio_url', e.target.value)}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                  />
-                  {dayData.british_audio_url && getYouTubeEmbedUrl(dayData.british_audio_url) && (
-                    <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                      <iframe
-                        src={getYouTubeEmbedUrl(dayData.british_audio_url)}
-                        className="w-full h-full"
-                        allowFullScreen
-                        title="British Version"
-                      />
-                    </div>
-                  )}
-                </div>
+        {/* Story Tab */}
+        <TabsContent value="story" className="space-y-4">
+          <div>
+            <Label htmlFor="story_text">Story Text</Label>
+            <RichTextEditor
+              value={dayData.story_text}
+              onChange={(value) => handleInputChange('story_text', value)}
+              placeholder="Enter the story text..."
+            />
+          </div>
+        </TabsContent>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <input type="checkbox" defaultChecked className="rounded" />
-                    <Label className="flex items-center gap-2">
-                      Include American Version
-                      <Badge variant="outline">US</Badge>
-                    </Label>
-                  </div>
-                  <Input
-                    value={dayData.american_audio_url}
-                    onChange={(e) => updateField('american_audio_url', e.target.value)}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                  />
-                  {dayData.american_audio_url && getYouTubeEmbedUrl(dayData.american_audio_url) && (
-                    <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                      <iframe
-                        src={getYouTubeEmbedUrl(dayData.american_audio_url)}
-                        className="w-full h-full"
-                        allowFullScreen
-                        title="American Version"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Audio Tab */}
+        <TabsContent value="audio" className="space-y-4">
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="british_audio">British Pronunciation Audio URL</Label>
+              <Input
+                id="british_audio"
+                value={dayData.british_audio_url}
+                onChange={(e) => handleInputChange('british_audio_url', e.target.value)}
+                placeholder="Enter British audio URL"
+              />
+            </div>
+            <div>
+              <Label htmlFor="american_audio">American Pronunciation Audio URL</Label>
+              <Input
+                id="american_audio"
+                value={dayData.american_audio_url}
+                onChange={(e) => handleInputChange('american_audio_url', e.target.value)}
+                placeholder="Enter American audio URL"
+              />
+            </div>
+          </div>
         </TabsContent>
 
         {/* Glossary Tab */}
-        <TabsContent value="glossary">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Glossary Terms</CardTitle>
-                  <p className="text-sm text-gray-600">Define important vocabulary for this lesson</p>
+        <TabsContent value="glossary" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Glossary Terms</h3>
+            <Button
+              onClick={handleGlossaryTermAdd}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Term
+            </Button>
+          </div>
+          <div className="space-y-4">
+            {glossaryTerms.map((term) => (
+              <div key={term.id} className="grid gap-4 p-4 border rounded-lg">
+                <div className="flex justify-between items-start">
+                  <div className="grid gap-4 flex-1">
+                    <div>
+                      <Label htmlFor={`term-${term.id}`}>Term</Label>
+                      <Input
+                        id={`term-${term.id}`}
+                        value={term.term}
+                        onChange={(e) => handleGlossaryTermChange(term.id, 'term', e.target.value)}
+                        placeholder="Enter term"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`definition-${term.id}`}>Definition</Label>
+                      <Textarea
+                        id={`definition-${term.id}`}
+                        value={term.definition}
+                        onChange={(e) => handleGlossaryTermChange(term.id, 'definition', e.target.value)}
+                        placeholder="Enter definition"
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => handleGlossaryTermDelete(term.id)}
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button onClick={addGlossaryTerm} className="bg-brand-yellow text-brand-blue hover:brightness-95">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add
-                </Button>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {glossaryTerms.map((term) => (
-                <Card key={term.id} className="border border-gray-200">
-                  <CardContent className="pt-4">
-                    <div className="space-y-4">
-                      <div>
-                        <Label>Term</Label>
-                        <Input
-                          value={term.term}
-                          onChange={(e) => updateGlossaryTerm(term.id, 'term', e.target.value)}
-                          placeholder="Enter vocabulary term..."
-                        />
-                      </div>
-                      <div className="flex gap-4">
-                        <div className="flex-1">
-                          <Label>Definition</Label>
-                          <Textarea
-                            value={term.definition}
-                            onChange={(e) => updateGlossaryTerm(term.id, 'definition', e.target.value)}
-                            placeholder="Enter definition..."
-                            rows={3}
-                          />
-                        </div>
-                        <div className="flex items-end">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => deleteGlossaryTerm(term.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Tests Tab */}
-        <TabsContent value="tests">
-          <Card>
-            <CardHeader>
-              <CardTitle>Assessment Types</CardTitle>
-              <p className="text-sm text-gray-600">Configure the three types of assessments for this day</p>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Card className="border border-gray-200">
-                <CardContent className="pt-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold">Vocabulary & Comprehension Test</h3>
-                      <p className="text-sm text-gray-600">Test vocabulary and reading comprehension</p>
-                    </div>
-                  </div>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}/day/${dayId}/vocabulary-questions`}>
-                      Configure Questions
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border border-gray-200">
-                <CardContent className="pt-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold">Topic Test</h3>
-                      <p className="text-sm text-gray-600">Test understanding of grammar topics</p>
-                    </div>
-                  </div>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}/day/${dayId}/topic-questions`}>
-                      Configure Questions
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border border-gray-200">
-                <CardContent className="pt-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold">Writing Test</h3>
-                      <p className="text-sm text-gray-600">Creative writing assignments</p>
-                    </div>
-                  </div>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}/day/${dayId}/writing-prompts`}>
-                      Configure Prompts
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
+            ))}
+          </div>
         </TabsContent>
       </Tabs>
     </div>
