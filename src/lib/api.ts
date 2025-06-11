@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -25,9 +27,25 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const refreshToken = localStorage.getItem('refresh_token');
-        const response = await api.post('/api/v1/auth/refresh', { refresh_token: refreshToken });
-        const { access_token } = response.data;
+
+        if (!refreshToken) {
+          throw new Error('Missing refresh token');
+        }
+
+        // Use a fresh axios call without interceptors to avoid sending the expired access token
+        const refreshResponse = await axios.post(
+          `${API_BASE_URL}/api/v1/auth/refresh`,
+          null,
+          {
+            headers: {
+              Authorization: `Bearer ${refreshToken}`,
+            },
+          }
+        );
+
+        const { access_token } = refreshResponse.data;
         localStorage.setItem('access_token', access_token);
+        // Update the authorization header and retry the original request
         originalRequest.headers.Authorization = `Bearer ${access_token}`;
         return api(originalRequest);
       } catch (error) {
@@ -45,10 +63,13 @@ api.interceptors.response.use(
 // Auth API
 export const authApi = {
   login: async (username: string, password: string) => {
-    const response = await api.post('/api/v1/auth/login', {
-      username,
-      password,
-      grant_type: 'password',
+    const payload = new URLSearchParams();
+    payload.append('username', username);
+    payload.append('password', password);
+    payload.append('grant_type', 'password');
+
+    const response = await api.post('/api/v1/auth/login', payload, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
     const { access_token, refresh_token } = response.data;
     localStorage.setItem('access_token', access_token);
@@ -218,7 +239,7 @@ export const assessmentsApi = {
   },
 
   submitAssessment: async (assessmentId: string, submissionData: any) => {
-    const response = await api.post(`/api/v1/assessments/${assessmentId}/submit`, submissionData);
+    const response = await api.post(`/api/v1/assessments/${assessmentId}/submissions`, submissionData);
     return response.data;
   },
 };
@@ -322,6 +343,19 @@ export const analyticsApi = {
   },
 };
 
+// Users API
+export const usersApi = {
+  listUsers: async (skip = 0, limit = 100) => {
+    const response = await api.get('/api/v1/users/', { params: { skip, limit } });
+    return response.data;
+  },
+
+  updateUser: async (userId: string, userData: any) => {
+    const response = await api.put(`/api/v1/users/${userId}`, userData);
+    return response.data;
+  },
+};
+
 export default {
   auth: authApi,
   students: studentsApi,
@@ -332,4 +366,5 @@ export default {
   materials: materialsApi,
   progress: progressApi,
   analytics: analyticsApi,
+  users: usersApi,
 }; 

@@ -162,6 +162,9 @@ const Navbar = ({ userRole, isLoggedIn }: NavbarProps) => {
                         <NavLink href="/tutor/students" title="Students">
                           View and manage student progress
                         </NavLink>
+                        <NavLink href="/tutor/curriculum" title="Curriculum Templates">
+                          Manage curriculum templates
+                        </NavLink>
                       </div>
                     </NavigationMenuContent>
                   </NavigationMenuItem>

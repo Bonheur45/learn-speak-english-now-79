@@ -1,22 +1,37 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { MOCK_COHORTS, ProficiencyLevel, PROFICIENCY_DESCRIPTIONS } from '@/lib/types';
+import { ProficiencyLevel, PROFICIENCY_DESCRIPTIONS } from '@/lib/types';
 import { Link } from 'react-router-dom';
 import { BookOpen, GraduationCap, Users } from 'lucide-react';
+import api from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
 
 const Cohorts = () => {
-  const cohorts = MOCK_COHORTS;
+  const { user } = useAuth();
   const [selectedLevel, setSelectedLevel] = useState<ProficiencyLevel>('A1-A2');
+  const [cohorts, setCohorts] = useState<any[]>([]);
   
-  // Get the user's current cohort (in a real app this would come from API/auth)
-  const userCohortId = '1'; // Assuming user is in cohort 1
-  
+  // Determine the cohort(s) the current user is enrolled in (if any)
+  const userCohortIds = user?.enrollments?.map((e: any) => e.cohort_id) || [];
+
+  useEffect(() => {
+    const fetchCohorts = async () => {
+      try {
+        const data = await api.cohorts.getCohorts(0, 1000);
+        setCohorts(data);
+      } catch (err) {
+        console.error('Failed to load cohorts:', err);
+      }
+    };
+
+    fetchCohorts();
+  }, []);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -53,7 +68,7 @@ const Cohorts = () => {
           <h2 className="text-xl font-semibold mb-4">Your Enrolled Cohort</h2>
           <div className="grid grid-cols-1 gap-6">
             {cohorts
-              .filter(cohort => cohort.id === userCohortId)
+              .filter(cohort => userCohortIds.includes(cohort.id))
               .map(cohort => (
                 <Card key={cohort.id} className="hover:shadow-md transition-shadow border-l-4 border-l-brand-blue">
                   <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
@@ -79,7 +94,8 @@ const Cohorts = () => {
                       <div>
                         <h3 className="font-medium text-lg">Current Progress</h3>
                         <p className="text-gray-600">
-                          Currently in Trimester {cohort.current_trimester} of 3
+                          {/* TODO: replace with real current trimester when backend supports it */}
+                          Currently in Trimester –
                         </p>
                       </div>
                       
@@ -103,9 +119,9 @@ const Cohorts = () => {
                             <Users className="h-5 w-5 text-brand-blue mr-2" />
                             <span className="font-medium">Cohort Enrollment</span>
                           </div>
-                          <span className="text-sm text-gray-600">{cohort.enrolled_students}/{cohort.capacity} students</span>
+                          <span className="text-sm text-gray-600">{cohort.current_students}/{cohort.max_students} students</span>
                         </div>
-                        <Progress value={(cohort.enrolled_students / cohort.capacity) * 100} className="h-2" />
+                        <Progress value={(cohort.current_students && cohort.max_students ? (cohort.current_students / cohort.max_students) * 100 : 0)} className="h-2" />
                       </div>
                     </div>
                   </CardContent>
@@ -155,7 +171,7 @@ const Cohorts = () => {
                     .map(cohort => (
                       <Card 
                         key={cohort.id} 
-                        className={`hover:shadow-md transition-shadow ${cohort.id === userCohortId ? 'border-blue-500' : ''}`}
+                        className={`hover:shadow-md transition-shadow ${userCohortIds.includes(cohort.id) ? 'border-blue-500' : ''}`}
                       >
                         <CardHeader>
                           <div className="flex justify-between items-start">
@@ -173,7 +189,8 @@ const Cohorts = () => {
                         <CardContent>
                           <div className="space-y-4">
                             <p>
-                              Current Trimester: {cohort.current_trimester}/3
+                              {/* Placeholder until trimester progress is available */}
+                              Trimester Progress: –
                             </p>
                             
                             <div className="bg-gray-50 p-3 rounded">
@@ -182,33 +199,33 @@ const Cohorts = () => {
                                   <Users className="h-4 w-4 mr-1" /> 
                                   Enrollment
                                 </span>
-                                <span className="text-sm font-medium">{cohort.enrolled_students}/{cohort.capacity}</span>
+                                <span className="text-sm font-medium">{cohort.current_students}/{cohort.max_students}</span>
                               </div>
                               <Progress 
-                                value={(cohort.enrolled_students / cohort.capacity) * 100} 
+                                value={(cohort.current_students && cohort.max_students ? (cohort.current_students / cohort.max_students) * 100 : 0)} 
                                 className="h-2" 
                               />
                             </div>
                           </div>
                         </CardContent>
                         <CardFooter className="justify-between border-t pt-4">
-                          {cohort.id === userCohortId ? (
+                          {userCohortIds.includes(cohort.id) ? (
                             <span className="text-sm font-medium text-blue-600 flex items-center">
                               <BookOpen className="h-4 w-4 mr-1" />
                               Currently Enrolled
                             </span>
                           ) : (
                             <span className="text-sm text-gray-500">
-                              {cohort.capacity - cohort.enrolled_students} spots left
+                              {cohort.max_students - cohort.current_students} spots left
                             </span>
                           )}
                           <Button 
                             asChild
-                            variant={cohort.id === userCohortId ? "default" : "outline"} 
+                            variant={userCohortIds.includes(cohort.id) ? "default" : "outline"} 
                             disabled={cohort.status === 'completed'}
                           >
                             <Link to={`/student/trimesters?cohort=${cohort.id}`}>
-                              {cohort.id === userCohortId ? 'Continue Learning' : 'View Details'}
+                              {userCohortIds.includes(cohort.id) ? 'Continue Learning' : 'View Details'}
                             </Link>
                           </Button>
                         </CardFooter>

@@ -19,7 +19,7 @@ const WeeklyRankings = () => {
   useEffect(() => {
     fetchRankings();
   }, []);
-
+  
   const fetchRankings = async () => {
     try {
       const response = await api.analytics.getAnalytics();
@@ -60,7 +60,7 @@ const WeeklyRankings = () => {
         <div className="space-y-4">
           {students.map((student, index) => (
             <div key={student.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
-              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                 <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100">
                   {index === 0 ? (
                     <Trophy className="h-4 w-4 text-yellow-500" />
@@ -68,16 +68,16 @@ const WeeklyRankings = () => {
                     <Medal className="h-4 w-4 text-gray-400" />
                   ) : index === 2 ? (
                     <Award className="h-4 w-4 text-amber-600" />
-                  ) : (
+                      ) : (
                     <span className="text-sm font-medium">{index + 1}</span>
-                  )}
-                </div>
-                <div>
+                      )}
+                    </div>
+                    <div>
                   <p className="font-medium">{student.name}</p>
-                  <p className="text-sm text-gray-500">@{student.username}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
+                      <p className="text-sm text-gray-500">@{student.username}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
                 <span className="font-medium">{student.score} pts</span>
                 {student.weeklyChange && (
                   <div className={`flex items-center ${student.weeklyChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -86,7 +86,7 @@ const WeeklyRankings = () => {
                   </div>
                 )}
               </div>
-            </div>
+        </div>
           ))}
         </div>
       </CardContent>

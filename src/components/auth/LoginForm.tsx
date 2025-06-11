@@ -63,12 +63,12 @@ const LoginForm = () => {
 
   return (
     <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
+        <CardHeader>
         <CardTitle>Welcome Back</CardTitle>
         <CardDescription>Sign in to your account to continue</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -113,27 +113,27 @@ const LoginForm = () => {
               value={selectedRole}
               onValueChange={(value: 'student' | 'tutor' | 'admin') => setSelectedRole(value)}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select your role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="student">Student</SelectItem>
-                <SelectItem value="tutor">Tutor</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="tutor">Tutor</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <Button 
+                <Button 
             type="submit" 
             className="w-full bg-brand-yellow text-brand-blue hover:brightness-95"
             disabled={isLoading}
-          >
+                >
             {isLoading ? 'Signing in...' : 'Sign In'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+                </Button>
+          </form>
+        </CardContent>
+      </Card>
   );
 };
 

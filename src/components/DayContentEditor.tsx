@@ -44,7 +44,7 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
     try {
       // Save the day content
       await api.curriculum.updateCurriculumTemplate(day.id, dayData);
-      
+
       // Save glossary terms if any
       if (glossaryTerms.length > 0) {
         await api.curriculum.updateCurriculumTemplate(day.id, {
@@ -57,10 +57,10 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
         description: "Day content saved successfully.",
       });
       
-      onSave(dayData);
+    onSave(dayData);
     } catch (error) {
       console.error('Failed to save day content:', error);
-      toast({
+    toast({
         title: "Error",
         description: "Failed to save day content. Please try again.",
         variant: "destructive"
@@ -87,7 +87,7 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
   const handleGlossaryTermChange = (id: string, field: 'term' | 'definition', value: string) => {
     setGlossaryTerms(prev =>
       prev.map(term =>
-        term.id === id ? { ...term, [field]: value } : term
+      term.id === id ? { ...term, [field]: value } : term
       )
     );
   };
@@ -159,20 +159,20 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
         {/* Content Tab */}
         <TabsContent value="content" className="space-y-4">
           <div className="grid gap-4">
-            <div>
+                <div>
               <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={dayData.title}
+                  <Input
+                    id="title"
+                    value={dayData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 placeholder="Enter the day's title"
-              />
-            </div>
-            <div>
-              <Label htmlFor="description">Description</Label>
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="description">Description</Label>
               <Textarea
-                id="description"
-                value={dayData.description}
+                    id="description"
+                    value={dayData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 placeholder="Enter a brief description"
                 rows={3}
@@ -184,21 +184,21 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
                 value={dayData.topic_notes}
                 onChange={(value) => handleInputChange('topic_notes', value)}
                 placeholder="Enter topic notes..."
-              />
-            </div>
-          </div>
+                  />
+                </div>
+              </div>
         </TabsContent>
 
         {/* Story Tab */}
         <TabsContent value="story" className="space-y-4">
-          <div>
+              <div>
             <Label htmlFor="story_text">Story Text</Label>
-            <RichTextEditor
-              value={dayData.story_text}
+                <RichTextEditor
+                  value={dayData.story_text}
               onChange={(value) => handleInputChange('story_text', value)}
               placeholder="Enter the story text..."
-            />
-          </div>
+                />
+              </div>
         </TabsContent>
 
         {/* Audio Tab */}
@@ -206,39 +206,39 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
           <div className="grid gap-4">
             <div>
               <Label htmlFor="british_audio">British Pronunciation Audio URL</Label>
-              <Input
+                  <Input
                 id="british_audio"
-                value={dayData.british_audio_url}
+                    value={dayData.british_audio_url}
                 onChange={(e) => handleInputChange('british_audio_url', e.target.value)}
                 placeholder="Enter British audio URL"
-              />
-            </div>
+                      />
+                    </div>
             <div>
               <Label htmlFor="american_audio">American Pronunciation Audio URL</Label>
-              <Input
+                  <Input
                 id="american_audio"
-                value={dayData.american_audio_url}
+                    value={dayData.american_audio_url}
                 onChange={(e) => handleInputChange('american_audio_url', e.target.value)}
                 placeholder="Enter American audio URL"
-              />
-            </div>
-          </div>
+                      />
+                </div>
+              </div>
         </TabsContent>
 
         {/* Glossary Tab */}
         <TabsContent value="glossary" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">Glossary Terms</h3>
-            <Button
+                          <Button
               onClick={handleGlossaryTermAdd}
-              variant="outline"
-              size="sm"
+                            variant="outline"
+                            size="sm"
               className="flex items-center gap-2"
-            >
+                          >
               <Plus className="h-4 w-4" />
               Add Term
-            </Button>
-          </div>
+                          </Button>
+                        </div>
           <div className="space-y-4">
             {glossaryTerms.map((term) => (
               <div key={term.id} className="grid gap-4 p-4 border rounded-lg">
@@ -272,8 +272,8 @@ const DayContentEditor = ({ day, onSave }: DayContentEditorProps) => {
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
-                </div>
-              </div>
+                    </div>
+                  </div>
             ))}
           </div>
         </TabsContent>

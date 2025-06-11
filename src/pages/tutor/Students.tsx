@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -7,72 +6,48 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import api from '@/lib/api';
 
 const Students = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [studentsList, setStudentsList] = useState<any[]>([]);
   
-  // Mock data for students
-  const studentsList = [
-    { 
-      id: '1', 
-      name: 'John Doe', 
-      email: 'john@example.com', 
-      lastActive: '2 hours ago', 
-      progress: 75,
-      completedDays: 15,
-      totalDays: 30,
-      assessmentScore: 82,
-      status: 'active'
-    },
-    { 
-      id: '2', 
-      name: 'Sarah Johnson', 
-      email: 'sarah@example.com', 
-      lastActive: '5 hours ago', 
-      progress: 92,
-      completedDays: 24,
-      totalDays: 30,
-      assessmentScore: 95,
-      status: 'active'
-    },
-    { 
-      id: '3', 
-      name: 'Michael Brown', 
-      email: 'michael@example.com', 
-      lastActive: '1 day ago', 
-      progress: 45,
-      completedDays: 9,
-      totalDays: 30,
-      assessmentScore: 68,
-      status: 'active'
-    },
-    { 
-      id: '4', 
-      name: 'Emily Davis', 
-      email: 'emily@example.com', 
-      lastActive: '3 days ago', 
-      progress: 60,
-      completedDays: 12,
-      totalDays: 30,
-      assessmentScore: 76,
-      status: 'inactive'
-    },
-    { 
-      id: '5', 
-      name: 'David Wilson', 
-      email: 'david@example.com', 
-      lastActive: '1 week ago', 
-      progress: 30,
-      completedDays: 6,
-      totalDays: 30,
-      assessmentScore: 58,
-      status: 'inactive'
-    },
-  ];
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const data = await api.students.getStudents(0, 1000);
+        setStudentsList(data);
+      } catch (err) {
+        console.error('Failed to fetch students:', err);
+      }
+    };
+
+    fetchStudents();
+  }, []);
+
+  const getStatusFromProfile = (profile: any) => {
+    if (!profile) return 'inactive';
+    return profile.status === 'approved' ? 'active' : 'inactive';
+  };
+
+  const enhancedStudents = studentsList.map((s) => {
+    const status = getStatusFromProfile(s.student_profile);
+    return {
+      id: s.id,
+      name: s.full_name || s.username || s.email,
+      email: s.email,
+      lastActive: new Date(s.updated_at).toLocaleDateString(),
+      progress: 0, // placeholder until progress API integrated
+      completedDays: 0,
+      totalDays: 0,
+      assessmentScore: 0,
+      status,
+    };
+  });
 
   // Filter students based on search query and active tab
-  const filteredStudents = studentsList.filter(student => {
+  const filteredStudents = enhancedStudents.filter(student => {
     const matchesSearch = 
       student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
       student.email.toLowerCase().includes(searchQuery.toLowerCase());
@@ -194,10 +169,10 @@ const Students = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-medium text-gray-700 mb-2">Average Progress</h3>
                 <div className="text-3xl font-bold text-brand-blue">
-                  {Math.round(studentsList.reduce((sum, student) => sum + student.progress, 0) / studentsList.length)}%
+                  {enhancedStudents.length ? Math.round(enhancedStudents.reduce((sum, student) => sum + student.progress, 0) / enhancedStudents.length) : 0}%
                 </div>
                 <Progress 
-                  value={studentsList.reduce((sum, student) => sum + student.progress, 0) / studentsList.length} 
+                  value={enhancedStudents.length ? enhancedStudents.reduce((sum, student) => sum + student.progress, 0) / enhancedStudents.length : 0} 
                   className="h-2 mt-2"
                 />
               </div>
@@ -205,10 +180,10 @@ const Students = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-medium text-gray-700 mb-2">Average Assessment Score</h3>
                 <div className="text-3xl font-bold text-brand-blue">
-                  {Math.round(studentsList.reduce((sum, student) => sum + student.assessmentScore, 0) / studentsList.length)}%
+                  {Math.round(enhancedStudents.reduce((sum, student) => sum + student.assessmentScore, 0) / enhancedStudents.length)}%
                 </div>
                 <Progress 
-                  value={studentsList.reduce((sum, student) => sum + student.assessmentScore, 0) / studentsList.length} 
+                  value={enhancedStudents.length ? enhancedStudents.reduce((sum, student) => sum + student.assessmentScore, 0) / enhancedStudents.length : 0} 
                   className="h-2 mt-2"
                 />
               </div>
@@ -216,10 +191,10 @@ const Students = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-medium text-gray-700 mb-2">Active Students</h3>
                 <div className="text-3xl font-bold text-brand-blue">
-                  {studentsList.filter(student => student.status === 'active').length}/{studentsList.length}
+                  {enhancedStudents.filter(student => student.status === 'active').length}/{enhancedStudents.length}
                 </div>
                 <Progress 
-                  value={(studentsList.filter(student => student.status === 'active').length / studentsList.length) * 100} 
+                  value={(enhancedStudents.filter(student => student.status === 'active').length / enhancedStudents.length) * 100} 
                   className="h-2 mt-2"
                 />
               </div>

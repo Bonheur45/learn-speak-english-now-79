@@ -154,13 +154,13 @@ const EmbeddedAssessment = () => {
           <div className="flex-1 flex flex-col items-center justify-center">
             <ResultsDisplay result={result} />
             <div className="mt-8 flex gap-4">
-              <Button 
+                <Button 
                 onClick={() => { setText(""); setResult(null); setShowResults(false); }} 
-                variant="outline" 
-                className="px-6 py-4"
-              >
+                  variant="outline" 
+                  className="px-6 py-4"
+                >
                 Start New Assessment
-              </Button>
+                </Button>
               <Button 
                 onClick={handleReturnToDashboard} 
                 className="px-6 py-4 bg-amber-400 hover:bg-amber-500 text-black"

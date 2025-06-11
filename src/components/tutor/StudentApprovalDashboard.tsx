@@ -82,16 +82,16 @@ const StudentApprovalDashboard = () => {
     try {
       await api.students.updateStudent(studentId, { status: newStatus });
       
-      setStudents(prev => prev.map(student => 
-        student.id === studentId 
-          ? { ...student, status: newStatus }
-          : student
-      ));
+    setStudents(prev => prev.map(student => 
+      student.id === studentId 
+        ? { ...student, status: newStatus }
+        : student
+    ));
 
-      toast({
-        title: "Success",
-        description: `Student ${newStatus} successfully.`,
-      });
+    toast({
+      title: "Success",
+      description: `Student ${newStatus} successfully.`,
+    });
     } catch (error) {
       console.error('Failed to update student status:', error);
       toast({

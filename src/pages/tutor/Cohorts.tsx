@@ -1,22 +1,56 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MOCK_COHORTS } from '@/lib/types';
+import api from '@/lib/api';
 import { Calendar, Calendar as CalendarIcon, ChevronRight, Edit, Users } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const TutorCohorts = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Group cohorts by status
-  const activeCohorts = MOCK_COHORTS.filter(c => c.status === 'active');
-  const upcomingCohorts = MOCK_COHORTS.filter(c => c.status === 'upcoming');
-  const completedCohorts = MOCK_COHORTS.filter(c => c.status === 'completed');
-  
+  const [cohorts, setCohorts] = useState<any[]>([]);
+  const [performance, setPerformance] = useState<Record<string, any>>({});
+
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchCohorts = async () => {
+      try {
+        const data = await api.cohorts.getCohorts(0, 1000);
+        setCohorts(data);
+
+        // Fetch performance analytics in parallel
+        const perfEntries = await Promise.all(
+          data.map(async (c: any) => {
+            try {
+              const perf = await api.analytics.getCohortPerformance(c.id);
+              return [c.id, perf] as const;
+            } catch {
+              return [c.id, null] as const;
+            }
+          })
+        );
+        const perfMap: Record<string, any> = {};
+        perfEntries.forEach(([id, perf]) => {
+          if (perf) perfMap[id] = perf;
+        });
+        setPerformance(perfMap);
+      } catch (err) {
+        console.error('Failed to load cohorts:', err);
+      }
+    };
+
+    fetchCohorts();
+  }, []);
+
+  const filteredByStatus = (status: string) => cohorts.filter((c) => c.status === status);
+  const activeCohorts = filteredByStatus('active');
+  const upcomingCohorts = filteredByStatus('upcoming');
+  const completedCohorts = filteredByStatus('completed');
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar isLoggedIn={true} userRole="tutor" />
@@ -40,13 +74,13 @@ const TutorCohorts = () => {
             <TabsTrigger value="active" className="flex-1">Active ({activeCohorts.length})</TabsTrigger>
             <TabsTrigger value="upcoming" className="flex-1">Upcoming ({upcomingCohorts.length})</TabsTrigger>
             <TabsTrigger value="completed" className="flex-1">Completed ({completedCohorts.length})</TabsTrigger>
-            <TabsTrigger value="all" className="flex-1">All ({MOCK_COHORTS.length})</TabsTrigger>
+            <TabsTrigger value="all" className="flex-1">All ({cohorts.length})</TabsTrigger>
           </TabsList>
           
           <TabsContent value="active">
             <div className="grid gap-6">
               {activeCohorts.map(cohort => (
-                <CohortCard key={cohort.id} cohort={cohort} />
+                <CohortCard key={cohort.id} cohort={cohort} performance={performance[cohort.id]} />
               ))}
               {activeCohorts.length === 0 && (
                 <EmptyState message="No active cohorts found" />
@@ -57,7 +91,7 @@ const TutorCohorts = () => {
           <TabsContent value="upcoming">
             <div className="grid gap-6">
               {upcomingCohorts.map(cohort => (
-                <CohortCard key={cohort.id} cohort={cohort} />
+                <CohortCard key={cohort.id} cohort={cohort} performance={performance[cohort.id]} />
               ))}
               {upcomingCohorts.length === 0 && (
                 <EmptyState message="No upcoming cohorts found" />
@@ -68,7 +102,7 @@ const TutorCohorts = () => {
           <TabsContent value="completed">
             <div className="grid gap-6">
               {completedCohorts.map(cohort => (
-                <CohortCard key={cohort.id} cohort={cohort} />
+                <CohortCard key={cohort.id} cohort={cohort} performance={performance[cohort.id]} />
               ))}
               {completedCohorts.length === 0 && (
                 <EmptyState message="No completed cohorts found" />
@@ -78,10 +112,10 @@ const TutorCohorts = () => {
           
           <TabsContent value="all">
             <div className="grid gap-6">
-              {MOCK_COHORTS.map(cohort => (
-                <CohortCard key={cohort.id} cohort={cohort} />
+              {cohorts.map(cohort => (
+                <CohortCard key={cohort.id} cohort={cohort} performance={performance[cohort.id]} />
               ))}
-              {MOCK_COHORTS.length === 0 && (
+              {cohorts.length === 0 && (
                 <EmptyState message="No cohorts found" />
               )}
             </div>
@@ -100,17 +134,11 @@ const TutorCohorts = () => {
 
 // Cohort Card Component
 interface CohortCardProps {
-  cohort: {
-    id: string;
-    name: string;
-    start_date: string;
-    end_date: string;
-    current_trimester: number;
-    status: 'active' | 'upcoming' | 'completed';
-  }
+  cohort: any;
+  performance?: any;
 }
 
-const CohortCard = ({ cohort }: CohortCardProps) => {
+const CohortCard = ({ cohort, performance }: CohortCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -124,9 +152,11 @@ const CohortCard = ({ cohort }: CohortCardProps) => {
     }
   };
   
-  // Mock student count - in a real app this would come from an API
-  const studentCount = Math.floor(Math.random() * 30) + 10;
+  const studentCount = performance?.total_students ?? cohort.current_students ?? 0;
   
+  const completionRate = performance?.completion_rate ? performance.completion_rate * 100 : undefined;
+  const engagementRate = performance?.engagement_rate ? performance.engagement_rate * 100 : undefined;
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="bg-gray-50 border-b">
@@ -165,7 +195,7 @@ const CohortCard = ({ cohort }: CohortCardProps) => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Current Trimester</p>
-              <p className="font-medium">{cohort.current_trimester} of 3</p>
+              <p className="font-medium">–</p>
             </div>
           </div>
           
@@ -184,8 +214,8 @@ const CohortCard = ({ cohort }: CohortCardProps) => {
               <CalendarIcon className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Duration</p>
-              <p className="font-medium">12 months</p>
+              <p className="text-sm text-gray-500">Completion Rate</p>
+              <p className="font-medium">{completionRate !== undefined ? `${Math.round(completionRate)}%` : '–'}</p>
             </div>
           </div>
         </div>
@@ -217,6 +247,12 @@ const CohortCard = ({ cohort }: CohortCardProps) => {
             ))}
           </div>
         </div>
+
+        {engagementRate !== undefined && (
+          <div className="mt-4 text-sm text-gray-600">
+            Engagement: {Math.round(engagementRate)}%
+          </div>
+        )}
       </CardContent>
       
       <CardFooter className="bg-gray-50 border-t flex flex-col sm:flex-row justify-between py-4">

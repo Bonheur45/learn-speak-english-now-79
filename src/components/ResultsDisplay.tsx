@@ -129,9 +129,9 @@ const ResultsDisplay = ({ result }: ResultsDisplayProps) => {
             <ul className="space-y-3">
               {feedback.map((item, index) => (
                 <li key={index} className="flex items-start">
-                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-3 mt-2"></span>
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-3 mt-2"></span>
                   <span>{item}</span>
-                </li>
+              </li>
               ))}
             </ul>
           </Card>
@@ -192,17 +192,17 @@ const ResultsDisplay = ({ result }: ResultsDisplayProps) => {
           <Card className="p-6">
             <h4 className="text-lg font-semibold mb-3">Grammar Feedback</h4>
             {result.details.errors.length > 0 ? (
-              <ul className="space-y-3">
+            <ul className="space-y-3">
                 {result.details.errors.map((error, index) => (
                   <li key={index} className="flex items-start">
-                    <span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-3 mt-2"></span>
+                <span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-3 mt-2"></span>
                     <div>
                       <span className="font-medium">{error.description}</span>
                       <span className="text-sm text-gray-500 ml-2">(Level: {error.level})</span>
                     </div>
-                  </li>
+              </li>
                 ))}
-              </ul>
+            </ul>
             ) : (
               <p className="text-gray-600">No significant grammar errors detected.</p>
             )}
@@ -215,9 +215,9 @@ const ResultsDisplay = ({ result }: ResultsDisplayProps) => {
             <ul className="space-y-3">
               {feedback.map((item, index) => (
                 <li key={index} className="flex items-start">
-                  <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-3 mt-2"></span>
+                <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-3 mt-2"></span>
                   <span>{item}</span>
-                </li>
+              </li>
               ))}
             </ul>
           </Card>

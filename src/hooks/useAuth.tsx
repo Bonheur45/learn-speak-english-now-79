@@ -43,7 +43,11 @@ export const useAuth = () => {
 
   const signIn = async (username: string, password: string) => {
     try {
-      const { user: userData } = await api.auth.login(username, password);
+      // First, obtain tokens
+      await api.auth.login(username, password);
+
+      // Then, fetch the current user using the stored access token
+      const userData = await api.auth.getCurrentUser();
       setUser(userData);
       return { user: userData, error: null };
     } catch (error) {
@@ -59,9 +63,14 @@ export const useAuth = () => {
     username: string;
   }) => {
     try {
-      const response = await api.auth.register(userData);
-      setUser(response);
-      return { user: response, error: null };
+      // Create account
+      await api.auth.register(userData);
+
+      // Immediately log the user in and fetch their profile
+      await api.auth.login(userData.username, userData.password);
+      const currentUser = await api.auth.getCurrentUser();
+      setUser(currentUser);
+      return { user: currentUser, error: null };
     } catch (error) {
       console.error('Registration failed:', error);
       return { user: null, error };
