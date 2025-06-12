@@ -1,0 +1,6458 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Bonheur API",
+    "description": "Bonheur3 API - English Language Learning Platform",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login",
+        "description": "Login endpoint for obtaining access and refresh tokens.",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_login_api_v1_auth_login_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register",
+        "description": "Register a new user.",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Refresh",
+        "description": "Refresh access token using refresh token.",
+        "operationId": "refresh_api_v1_auth_refresh_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Refresh Api V1 Auth Refresh Post"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Logout",
+        "description": "Logout user by blacklisting current token.",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Logout Api V1 Auth Logout Post"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Read Users Me",
+        "description": "Get current user information.",
+        "operationId": "read_users_me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/students/": {
+      "get": {
+        "tags": [
+          "Students"
+        ],
+        "summary": "Get Students",
+        "description": "Get all students. Requires READ_STUDENTS scope.",
+        "operationId": "get_students_api_v1_students__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:students"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StudentProfilePublic"
+                  },
+                  "title": "Response Get Students Api V1 Students  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Students"
+        ],
+        "summary": "Create Student",
+        "description": "Create a new student profile. Requires WRITE_STUDENTS scope.",
+        "operationId": "create_student_api_v1_students__post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:students"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentProfileCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentProfilePublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/students/{student_id}": {
+      "get": {
+        "tags": [
+          "Students"
+        ],
+        "summary": "Get Student",
+        "description": "Get a specific student profile. Requires READ_STUDENTS scope.",
+        "operationId": "get_student_api_v1_students__student_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:students"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Student Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentProfilePublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Students"
+        ],
+        "summary": "Update Student",
+        "description": "Update a student profile. Requires WRITE_STUDENTS scope.",
+        "operationId": "update_student_api_v1_students__student_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:students"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Student Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentProfileUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentProfilePublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Students"
+        ],
+        "summary": "Delete Student",
+        "description": "Delete a student profile. Requires DELETE_STUDENTS scope.",
+        "operationId": "delete_student_api_v1_students__student_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "delete:students"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Student Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentProfilePublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/curriculum/": {
+      "get": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Get Curriculum Templates",
+        "description": "Get all curriculum templates. Requires READ_CURRICULUM scope.",
+        "operationId": "get_curriculum_templates_api_v1_curriculum__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CurriculumPublic"
+                  },
+                  "title": "Response Get Curriculum Templates Api V1 Curriculum  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Create Curriculum Template",
+        "description": "Create a new curriculum template. Requires WRITE_CURRICULUM scope.",
+        "operationId": "create_curriculum_template_api_v1_curriculum__post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:curriculum"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CurriculumTemplateCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurriculumPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/curriculum/{template_id}": {
+      "get": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Get Curriculum Template",
+        "description": "Get a specific curriculum template. Requires READ_CURRICULUM scope.",
+        "operationId": "get_curriculum_template_api_v1_curriculum__template_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Template Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurriculumPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Update Curriculum Template",
+        "description": "Update a curriculum template. Requires WRITE_CURRICULUM scope.",
+        "operationId": "update_curriculum_template_api_v1_curriculum__template_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Template Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CurriculumTemplateUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurriculumPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Delete Curriculum Template",
+        "description": "Delete a curriculum template. Requires DELETE_CURRICULUM scope.",
+        "operationId": "delete_curriculum_template_api_v1_curriculum__template_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "delete:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Template Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurriculumPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/curriculum/{template_id}/trimesters": {
+      "get": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Get Trimesters",
+        "description": "Get all trimesters for a curriculum template. Requires READ_CURRICULUM scope.",
+        "operationId": "get_trimesters_api_v1_curriculum__template_id__trimesters_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Template Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrimesterPublic"
+                  },
+                  "title": "Response Get Trimesters Api V1 Curriculum  Template Id  Trimesters Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Create Trimester",
+        "description": "Create a new trimester. Requires WRITE_CURRICULUM scope.",
+        "operationId": "create_trimester_api_v1_curriculum__template_id__trimesters_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Template Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrimesterCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrimesterPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/curriculum/trimesters/{trimester_id}": {
+      "put": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Update Trimester",
+        "description": "Update a trimester. Requires WRITE_CURRICULUM scope.",
+        "operationId": "update_trimester_api_v1_curriculum_trimesters__trimester_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trimester_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Trimester Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrimesterUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrimesterPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Delete Trimester",
+        "description": "Delete a trimester. Requires DELETE_CURRICULUM scope.",
+        "operationId": "delete_trimester_api_v1_curriculum_trimesters__trimester_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "delete:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trimester_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Trimester Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrimesterPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/curriculum/trimesters/{trimester_id}/days": {
+      "get": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Get Days",
+        "description": "Get all days for a trimester. Requires READ_CURRICULUM scope.",
+        "operationId": "get_days_api_v1_curriculum_trimesters__trimester_id__days_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trimester_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Trimester Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayPublic"
+                  },
+                  "title": "Response Get Days Api V1 Curriculum Trimesters  Trimester Id  Days Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Create Day",
+        "description": "Create a new day. Requires WRITE_CURRICULUM scope.",
+        "operationId": "create_day_api_v1_curriculum_trimesters__trimester_id__days_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trimester_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Trimester Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DayCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/curriculum/days/{day_id}": {
+      "put": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Update Day",
+        "description": "Update a day. Requires WRITE_CURRICULUM scope.",
+        "operationId": "update_day_api_v1_curriculum_days__day_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "day_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Day Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DayUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Delete Day",
+        "description": "Delete a day. Requires DELETE_CURRICULUM scope.",
+        "operationId": "delete_day_api_v1_curriculum_days__day_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "delete:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "day_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Day Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cohorts/": {
+      "get": {
+        "tags": [
+          "Cohorts"
+        ],
+        "summary": "Get Cohorts",
+        "description": "Get all cohorts. Requires READ_COHORTS scope.",
+        "operationId": "get_cohorts_api_v1_cohorts__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:cohorts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CohortPublic"
+                  },
+                  "title": "Response Get Cohorts Api V1 Cohorts  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Cohorts"
+        ],
+        "summary": "Create Cohort",
+        "description": "Create a new cohort. Requires WRITE_COHORTS scope.",
+        "operationId": "create_cohort_api_v1_cohorts__post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:cohorts"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CohortCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohortPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cohorts/{cohort_id}": {
+      "get": {
+        "tags": [
+          "Cohorts"
+        ],
+        "summary": "Get Cohort",
+        "description": "Get a specific cohort. Requires READ_COHORTS scope.",
+        "operationId": "get_cohort_api_v1_cohorts__cohort_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:cohorts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cohort_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cohort Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohortPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Cohorts"
+        ],
+        "summary": "Update Cohort",
+        "description": "Update a cohort. Requires WRITE_COHORTS scope.",
+        "operationId": "update_cohort_api_v1_cohorts__cohort_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:cohorts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cohort_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cohort Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CohortUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohortPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Cohorts"
+        ],
+        "summary": "Delete Cohort",
+        "description": "Delete a cohort. Requires DELETE_COHORTS scope.",
+        "operationId": "delete_cohort_api_v1_cohorts__cohort_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "delete:cohorts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cohort_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cohort Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohortPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/enrollments/": {
+      "get": {
+        "tags": [
+          "Enrollments"
+        ],
+        "summary": "Get Enrollments",
+        "description": "Get all enrollments. Requires READ_ENROLLMENTS scope.",
+        "operationId": "get_enrollments_api_v1_enrollments__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:enrollments"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnrollmentPublic"
+                  },
+                  "title": "Response Get Enrollments Api V1 Enrollments  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Enrollments"
+        ],
+        "summary": "Create Enrollment",
+        "description": "Create a new enrollment. Requires WRITE_ENROLLMENTS scope.",
+        "operationId": "create_enrollment_api_v1_enrollments__post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:enrollments"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnrollmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/enrollments/{enrollment_id}": {
+      "get": {
+        "tags": [
+          "Enrollments"
+        ],
+        "summary": "Get Enrollment",
+        "description": "Get a specific enrollment. Requires READ_ENROLLMENTS scope.",
+        "operationId": "get_enrollment_api_v1_enrollments__enrollment_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:enrollments"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "enrollment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Enrollment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Enrollments"
+        ],
+        "summary": "Update Enrollment",
+        "description": "Update an enrollment. Requires WRITE_ENROLLMENTS scope.",
+        "operationId": "update_enrollment_api_v1_enrollments__enrollment_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:enrollments"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "enrollment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Enrollment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnrollmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Enrollments"
+        ],
+        "summary": "Delete Enrollment",
+        "description": "Delete an enrollment. Requires DELETE_ENROLLMENTS scope.",
+        "operationId": "delete_enrollment_api_v1_enrollments__enrollment_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "delete:enrollments"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "enrollment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Enrollment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/assessments/": {
+      "get": {
+        "tags": [
+          "Assessments"
+        ],
+        "summary": "Get Assessments",
+        "description": "Get all assessments. Requires READ_ASSESSMENTS scope.",
+        "operationId": "get_assessments_api_v1_assessments__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:assessments"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssessmentPublic"
+                  },
+                  "title": "Response Get Assessments Api V1 Assessments  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Assessments"
+        ],
+        "summary": "Create Assessment",
+        "description": "Create a new assessment. Requires WRITE_ASSESSMENTS scope.",
+        "operationId": "create_assessment_api_v1_assessments__post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:assessments"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/assessments/{assessment_id}": {
+      "get": {
+        "tags": [
+          "Assessments"
+        ],
+        "summary": "Get Assessment",
+        "description": "Get a specific assessment. Requires READ_ASSESSMENTS scope.",
+        "operationId": "get_assessment_api_v1_assessments__assessment_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:assessments"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "assessment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Assessment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Assessments"
+        ],
+        "summary": "Update Assessment",
+        "description": "Update an assessment. Requires WRITE_ASSESSMENTS scope.",
+        "operationId": "update_assessment_api_v1_assessments__assessment_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:assessments"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "assessment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Assessment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Assessments"
+        ],
+        "summary": "Delete Assessment",
+        "description": "Delete an assessment. Requires DELETE_ASSESSMENTS scope.",
+        "operationId": "delete_assessment_api_v1_assessments__assessment_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "delete:assessments"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "assessment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Assessment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/assessments/{assessment_id}/submissions": {
+      "post": {
+        "tags": [
+          "Assessments"
+        ],
+        "summary": "Create Submission",
+        "description": "Create a new assessment submission. Requires WRITE_ASSESSMENTS scope.",
+        "operationId": "create_submission_api_v1_assessments__assessment_id__submissions_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:assessments"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "assessment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Assessment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentSubmissionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentSubmissionPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/materials/": {
+      "get": {
+        "tags": [
+          "Materials"
+        ],
+        "summary": "Get Materials",
+        "description": "Get all materials. Requires READ_MATERIALS scope.",
+        "operationId": "get_materials_api_v1_materials__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:materials"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MaterialPublic"
+                  },
+                  "title": "Response Get Materials Api V1 Materials  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Materials"
+        ],
+        "summary": "Create Material",
+        "description": "Create a new material. Requires WRITE_MATERIALS scope.",
+        "operationId": "create_material_api_v1_materials__post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:materials"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaterialCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/materials/{material_id}": {
+      "get": {
+        "tags": [
+          "Materials"
+        ],
+        "summary": "Get Material",
+        "description": "Get a specific material. Requires READ_MATERIALS scope.",
+        "operationId": "get_material_api_v1_materials__material_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:materials"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "material_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Material Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Materials"
+        ],
+        "summary": "Update Material",
+        "description": "Update a material. Requires WRITE_MATERIALS scope.",
+        "operationId": "update_material_api_v1_materials__material_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:materials"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "material_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Material Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaterialUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Materials"
+        ],
+        "summary": "Delete Material",
+        "description": "Delete a material. Requires DELETE_MATERIALS scope.",
+        "operationId": "delete_material_api_v1_materials__material_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "delete:materials"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "material_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Material Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/progress/": {
+      "get": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Get Progress",
+        "description": "Get all progress entries. Requires READ_PROGRESS scope.",
+        "operationId": "get_progress_api_v1_progress__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:progress"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProgressPublic"
+                  },
+                  "title": "Response Get Progress Api V1 Progress  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Create Progress",
+        "description": "Create a new progress entry. Requires WRITE_PROGRESS scope.",
+        "operationId": "create_progress_api_v1_progress__post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:progress"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/progress/{progress_id}": {
+      "get": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Get Progress Entry",
+        "description": "Get a specific progress entry. Requires READ_PROGRESS scope.",
+        "operationId": "get_progress_entry_api_v1_progress__progress_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:progress"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "progress_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Progress Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Update Progress",
+        "description": "Update a progress entry. Requires WRITE_PROGRESS scope.",
+        "operationId": "update_progress_api_v1_progress__progress_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:progress"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "progress_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Progress Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Delete Progress",
+        "description": "Delete a progress entry. Requires DELETE_PROGRESS scope.",
+        "operationId": "delete_progress_api_v1_progress__progress_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "delete:progress"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "progress_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Progress Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Get Analytics",
+        "description": "Get all analytics. Requires READ_ANALYTICS scope.",
+        "operationId": "get_analytics_api_v1_analytics__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:analytics"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Analytics"
+                  },
+                  "title": "Response Get Analytics Api V1 Analytics  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Create Analytics",
+        "description": "Create a new analytics entry. Requires WRITE_ANALYTICS scope.",
+        "operationId": "create_analytics_api_v1_analytics__post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:analytics"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyticsCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Analytics"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/{analytics_id}": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Get Analytics Entry",
+        "description": "Get a specific analytics entry. Requires READ_ANALYTICS scope.",
+        "operationId": "get_analytics_entry_api_v1_analytics__analytics_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:analytics"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "analytics_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analytics Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Analytics"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Update Analytics",
+        "description": "Update an analytics entry. Requires WRITE_ANALYTICS scope.",
+        "operationId": "update_analytics_api_v1_analytics__analytics_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:analytics"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "analytics_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analytics Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyticsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Analytics"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Delete Analytics",
+        "description": "Delete an analytics entry. Requires DELETE_ANALYTICS scope.",
+        "operationId": "delete_analytics_api_v1_analytics__analytics_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "delete:analytics"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "analytics_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analytics Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Analytics"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/cohorts/{cohort_id}/performance": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Get Cohort Performance",
+        "description": "Get performance analytics for a specific cohort. Requires READ_ANALYTICS scope.",
+        "operationId": "get_cohort_performance_api_v1_analytics_cohorts__cohort_id__performance_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:analytics"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cohort_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cohort Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohortPerformance"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/students/{student_id}/performance": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Get Student Performance",
+        "description": "Get performance analytics for a specific student. Requires READ_ANALYTICS scope.",
+        "operationId": "get_student_performance_api_v1_analytics_students__student_id__performance_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:analytics"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Student Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentPerformance"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/curriculum/{curriculum_id}/performance": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Get Curriculum Performance",
+        "description": "Get performance analytics for a specific curriculum. Requires READ_ANALYTICS scope.",
+        "operationId": "get_curriculum_performance_api_v1_analytics_curriculum__curriculum_id__performance_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:analytics"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "curriculum_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Curriculum Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurriculumPerformance"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List Users",
+        "description": "List all users (admin only).",
+        "operationId": "list_users_api_v1_users__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:users"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserPublic"
+                  },
+                  "title": "Response List Users Api V1 Users  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{user_id}": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update User",
+        "description": "Update user fields (role assignment).",
+        "operationId": "update_user_api_v1_users__user_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:users"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Accent": {
+        "type": "string",
+        "enum": [
+          "American",
+          "British"
+        ],
+        "title": "Accent"
+      },
+      "Analytics": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "metric_type": {
+            "type": "string",
+            "title": "Metric Type"
+          },
+          "metric_name": {
+            "type": "string",
+            "title": "Metric Name"
+          },
+          "metric_value": {
+            "type": "number",
+            "title": "Metric Value"
+          },
+          "period_start": {
+            "type": "string",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "title": "Period End"
+          },
+          "student_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Id"
+          },
+          "cohort_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cohort Id"
+          },
+          "curriculum_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Curriculum Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "metric_type",
+          "metric_name",
+          "metric_value",
+          "period_start",
+          "period_end"
+        ],
+        "title": "Analytics"
+      },
+      "AnalyticsCreate": {
+        "properties": {
+          "metric_type": {
+            "type": "string",
+            "title": "Metric Type"
+          },
+          "metric_name": {
+            "type": "string",
+            "title": "Metric Name"
+          },
+          "metric_value": {
+            "type": "number",
+            "title": "Metric Value"
+          },
+          "period_start": {
+            "type": "string",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "title": "Period End"
+          },
+          "student_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Id"
+          },
+          "cohort_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cohort Id"
+          },
+          "curriculum_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Curriculum Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "metric_type",
+          "metric_name",
+          "metric_value",
+          "period_start",
+          "period_end"
+        ],
+        "title": "AnalyticsCreate"
+      },
+      "AnalyticsUpdate": {
+        "properties": {
+          "metric_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Type"
+          },
+          "metric_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Name"
+          },
+          "metric_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Value"
+          },
+          "period_start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period Start"
+          },
+          "period_end": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period End"
+          }
+        },
+        "type": "object",
+        "title": "AnalyticsUpdate"
+      },
+      "AssessmentCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "passing_score": {
+            "type": "number",
+            "title": "Passing Score"
+          },
+          "max_attempts": {
+            "type": "integer",
+            "title": "Max Attempts",
+            "default": 1
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "passing_score",
+          "cohort_id"
+        ],
+        "title": "AssessmentCreate"
+      },
+      "AssessmentPublic": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "passing_score": {
+            "type": "number",
+            "title": "Passing Score"
+          },
+          "max_attempts": {
+            "type": "integer",
+            "title": "Max Attempts",
+            "default": 1
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "cohort": {
+            "$ref": "#/components/schemas/CohortRead"
+          },
+          "submissions": {
+            "items": {
+              "$ref": "#/components/schemas/AssessmentSubmissionRead"
+            },
+            "type": "array",
+            "title": "Submissions",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "passing_score",
+          "id",
+          "cohort_id",
+          "cohort"
+        ],
+        "title": "AssessmentPublic",
+        "description": "Complete assessment information that can be safely returned"
+      },
+      "AssessmentRead": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "passing_score": {
+            "type": "number",
+            "title": "Passing Score"
+          },
+          "max_attempts": {
+            "type": "integer",
+            "title": "Max Attempts",
+            "default": 1
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "passing_score",
+          "id",
+          "cohort_id"
+        ],
+        "title": "AssessmentRead"
+      },
+      "AssessmentSubmissionCreate": {
+        "properties": {
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "feedback": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback"
+          },
+          "assessment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assessment Id"
+          },
+          "student_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "score",
+          "assessment_id",
+          "student_id"
+        ],
+        "title": "AssessmentSubmissionCreate"
+      },
+      "AssessmentSubmissionPublic": {
+        "properties": {
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "feedback": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "assessment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assessment Id"
+          },
+          "student_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Id"
+          },
+          "submitted_at": {
+            "type": "string",
+            "title": "Submitted At"
+          },
+          "assessment": {
+            "$ref": "#/components/schemas/AssessmentRead"
+          },
+          "student": {
+            "$ref": "#/components/schemas/UserRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "score",
+          "id",
+          "assessment_id",
+          "student_id",
+          "submitted_at",
+          "assessment",
+          "student"
+        ],
+        "title": "AssessmentSubmissionPublic",
+        "description": "Complete assessment submission information that can be safely returned"
+      },
+      "AssessmentSubmissionRead": {
+        "properties": {
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "feedback": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "assessment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Assessment Id"
+          },
+          "student_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Id"
+          },
+          "submitted_at": {
+            "type": "string",
+            "title": "Submitted At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "score",
+          "id",
+          "assessment_id",
+          "student_id",
+          "submitted_at"
+        ],
+        "title": "AssessmentSubmissionRead"
+      },
+      "AssessmentUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "passing_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Passing Score"
+          },
+          "max_attempts": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Attempts"
+          }
+        },
+        "type": "object",
+        "title": "AssessmentUpdate"
+      },
+      "Body_login_api_v1_auth_login_post": {
+        "properties": {
+          "grant_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^password$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grant Type"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": ""
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "Body_login_api_v1_auth_login_post"
+      },
+      "CEFRLevel": {
+        "type": "string",
+        "enum": [
+          "A1",
+          "A2",
+          "B1",
+          "B2",
+          "C1",
+          "C2"
+        ],
+        "title": "CEFRLevel"
+      },
+      "CohortCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "max_students": {
+            "type": "integer",
+            "title": "Max Students",
+            "default": 20
+          },
+          "proficiency_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "curriculum_id",
+          "start_date",
+          "end_date"
+        ],
+        "title": "CohortCreate"
+      },
+      "CohortPerformance": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "total_students": {
+            "type": "integer",
+            "title": "Total Students"
+          },
+          "active_students": {
+            "type": "integer",
+            "title": "Active Students"
+          },
+          "average_score": {
+            "type": "number",
+            "title": "Average Score"
+          },
+          "completion_rate": {
+            "type": "number",
+            "title": "Completion Rate"
+          },
+          "engagement_rate": {
+            "type": "number",
+            "title": "Engagement Rate"
+          },
+          "period_start": {
+            "type": "string",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "title": "Period End"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_students",
+          "active_students",
+          "average_score",
+          "completion_rate",
+          "engagement_rate",
+          "period_start",
+          "period_end",
+          "cohort_id"
+        ],
+        "title": "CohortPerformance"
+      },
+      "CohortPublic": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "max_students": {
+            "type": "integer",
+            "title": "Max Students",
+            "default": 20
+          },
+          "proficiency_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          },
+          "current_students": {
+            "type": "integer",
+            "title": "Current Students"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CohortStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "curriculum": {
+            "$ref": "#/components/schemas/CurriculumTemplateRead"
+          },
+          "enrollments": {
+            "items": {
+              "$ref": "#/components/schemas/EnrollmentRead"
+            },
+            "type": "array",
+            "title": "Enrollments",
+            "default": []
+          },
+          "materials": {
+            "items": {
+              "$ref": "#/components/schemas/MaterialRead"
+            },
+            "type": "array",
+            "title": "Materials",
+            "default": []
+          },
+          "assessments": {
+            "items": {
+              "$ref": "#/components/schemas/AssessmentRead"
+            },
+            "type": "array",
+            "title": "Assessments",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "id",
+          "curriculum_id",
+          "start_date",
+          "end_date",
+          "current_students",
+          "status",
+          "created_at",
+          "updated_at",
+          "curriculum"
+        ],
+        "title": "CohortPublic",
+        "description": "Complete cohort information that can be safely returned"
+      },
+      "CohortRead": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "max_students": {
+            "type": "integer",
+            "title": "Max Students",
+            "default": 20
+          },
+          "proficiency_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          },
+          "current_students": {
+            "type": "integer",
+            "title": "Current Students"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CohortStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "id",
+          "curriculum_id",
+          "start_date",
+          "end_date",
+          "current_students",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CohortRead"
+      },
+      "CohortStatus": {
+        "type": "string",
+        "enum": [
+          "planning",
+          "active",
+          "completed",
+          "cancelled"
+        ],
+        "title": "CohortStatus"
+      },
+      "CohortUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "max_students": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Students"
+          },
+          "proficiency_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CEFRLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "curriculum_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Curriculum Id"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CohortStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "CohortUpdate"
+      },
+      "CurriculumPerformance": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "total_cohorts": {
+            "type": "integer",
+            "title": "Total Cohorts"
+          },
+          "total_students": {
+            "type": "integer",
+            "title": "Total Students"
+          },
+          "average_score": {
+            "type": "number",
+            "title": "Average Score"
+          },
+          "completion_rate": {
+            "type": "number",
+            "title": "Completion Rate"
+          },
+          "engagement_rate": {
+            "type": "number",
+            "title": "Engagement Rate"
+          },
+          "period_start": {
+            "type": "string",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "title": "Period End"
+          },
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_cohorts",
+          "total_students",
+          "average_score",
+          "completion_rate",
+          "engagement_rate",
+          "period_start",
+          "period_end",
+          "curriculum_id"
+        ],
+        "title": "CurriculumPerformance"
+      },
+      "CurriculumPublic": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "target_level": {
+            "$ref": "#/components/schemas/CEFRLevel"
+          },
+          "duration_weeks": {
+            "type": "integer",
+            "title": "Duration Weeks"
+          },
+          "max_students": {
+            "type": "integer",
+            "title": "Max Students",
+            "default": 20
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "trimesters": {
+            "items": {
+              "$ref": "#/components/schemas/TrimesterRead"
+            },
+            "type": "array",
+            "title": "Trimesters",
+            "default": []
+          },
+          "cohorts": {
+            "items": {
+              "$ref": "#/components/schemas/CohortRead"
+            },
+            "type": "array",
+            "title": "Cohorts",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "target_level",
+          "duration_weeks",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CurriculumPublic",
+        "description": "Complete curriculum information that can be safely returned"
+      },
+      "CurriculumTemplateCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "target_level": {
+            "$ref": "#/components/schemas/CEFRLevel"
+          },
+          "duration_weeks": {
+            "type": "integer",
+            "title": "Duration Weeks"
+          },
+          "max_students": {
+            "type": "integer",
+            "title": "Max Students",
+            "default": 20
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "target_level",
+          "duration_weeks"
+        ],
+        "title": "CurriculumTemplateCreate"
+      },
+      "CurriculumTemplateRead": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "target_level": {
+            "$ref": "#/components/schemas/CEFRLevel"
+          },
+          "duration_weeks": {
+            "type": "integer",
+            "title": "Duration Weeks"
+          },
+          "max_students": {
+            "type": "integer",
+            "title": "Max Students",
+            "default": 20
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "target_level",
+          "duration_weeks",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CurriculumTemplateRead"
+      },
+      "CurriculumTemplateUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "target_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CEFRLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration_weeks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Weeks"
+          },
+          "max_students": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Students"
+          }
+        },
+        "type": "object",
+        "title": "CurriculumTemplateUpdate"
+      },
+      "DayCreate": {
+        "properties": {
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "trimester_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Trimester Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "number",
+          "title",
+          "trimester_id"
+        ],
+        "title": "DayCreate"
+      },
+      "DayPublic": {
+        "properties": {
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "trimester_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Trimester Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "trimester": {
+            "$ref": "#/components/schemas/TrimesterRead"
+          },
+          "materials": {
+            "items": {
+              "$ref": "#/components/schemas/MaterialRead"
+            },
+            "type": "array",
+            "title": "Materials",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "number",
+          "title",
+          "id",
+          "trimester_id",
+          "created_at",
+          "updated_at",
+          "trimester"
+        ],
+        "title": "DayPublic",
+        "description": "Complete day information that can be safely returned"
+      },
+      "DayRead": {
+        "properties": {
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "trimester_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Trimester Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "number",
+          "title",
+          "id",
+          "trimester_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "DayRead"
+      },
+      "DayUpdate": {
+        "properties": {
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "title": "DayUpdate"
+      },
+      "EnrollmentCreate": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/EnrollmentStatus",
+            "default": "pending"
+          },
+          "student_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "student_id",
+          "cohort_id"
+        ],
+        "title": "EnrollmentCreate"
+      },
+      "EnrollmentPublic": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/EnrollmentStatus",
+            "default": "pending"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "student_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "enrolled_at": {
+            "type": "string",
+            "title": "Enrolled At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawn At"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "student": {
+            "$ref": "#/components/schemas/UserRead"
+          },
+          "cohort": {
+            "$ref": "#/components/schemas/CohortRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "student_id",
+          "cohort_id",
+          "enrolled_at",
+          "completed_at",
+          "withdrawn_at",
+          "reason",
+          "student",
+          "cohort"
+        ],
+        "title": "EnrollmentPublic",
+        "description": "Complete enrollment information that can be safely returned"
+      },
+      "EnrollmentRead": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/EnrollmentStatus",
+            "default": "pending"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "student_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "enrolled_at": {
+            "type": "string",
+            "title": "Enrolled At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawn At"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "student_id",
+          "cohort_id",
+          "enrolled_at",
+          "completed_at",
+          "withdrawn_at",
+          "reason"
+        ],
+        "title": "EnrollmentRead"
+      },
+      "EnrollmentStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "active",
+          "completed",
+          "withdrawn"
+        ],
+        "title": "EnrollmentStatus"
+      },
+      "EnrollmentUpdate": {
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnrollmentStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawn At"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "title": "EnrollmentUpdate"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MaterialCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "type": {
+            "$ref": "#/components/schemas/MaterialType"
+          },
+          "accent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Accent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "difficulty_level": {
+            "type": "integer",
+            "title": "Difficulty Level",
+            "default": 1
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes"
+          },
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "type",
+          "url",
+          "curriculum_id",
+          "cohort_id"
+        ],
+        "title": "MaterialCreate"
+      },
+      "MaterialPublic": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "type": {
+            "$ref": "#/components/schemas/MaterialType"
+          },
+          "accent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Accent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "difficulty_level": {
+            "type": "integer",
+            "title": "Difficulty Level",
+            "default": 1
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "curriculum": {
+            "$ref": "#/components/schemas/CurriculumTemplateRead"
+          },
+          "cohort": {
+            "$ref": "#/components/schemas/CohortRead"
+          },
+          "day": {
+            "$ref": "#/components/schemas/DayRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "type",
+          "url",
+          "id",
+          "curriculum_id",
+          "cohort_id",
+          "created_at",
+          "updated_at",
+          "curriculum",
+          "cohort",
+          "day"
+        ],
+        "title": "MaterialPublic",
+        "description": "Complete material information that can be safely returned"
+      },
+      "MaterialRead": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "type": {
+            "$ref": "#/components/schemas/MaterialType"
+          },
+          "accent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Accent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "difficulty_level": {
+            "type": "integer",
+            "title": "Difficulty Level",
+            "default": 1
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "type",
+          "url",
+          "id",
+          "curriculum_id",
+          "cohort_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "MaterialRead"
+      },
+      "MaterialType": {
+        "type": "string",
+        "enum": [
+          "audio",
+          "video",
+          "doc",
+          "form"
+        ],
+        "title": "MaterialType"
+      },
+      "MaterialUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MaterialType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "accent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Accent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "difficulty_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Difficulty Level"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes"
+          }
+        },
+        "type": "object",
+        "title": "MaterialUpdate"
+      },
+      "ProficiencyLevel": {
+        "type": "string",
+        "enum": [
+          "A1-A2",
+          "B1-B2",
+          "C1-C2"
+        ],
+        "title": "ProficiencyLevel"
+      },
+      "ProgressCreate": {
+        "properties": {
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "default": 0
+          },
+          "completed": {
+            "type": "boolean",
+            "title": "Completed",
+            "default": false
+          },
+          "speaking_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "listening_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "reading_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "writing_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "grammar_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "vocabulary_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "pronunciation_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "fluency_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "comprehension_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "confidence_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "student_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "student_id",
+          "cohort_id"
+        ],
+        "title": "ProgressCreate"
+      },
+      "ProgressPublic": {
+        "properties": {
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "default": 0
+          },
+          "completed": {
+            "type": "boolean",
+            "title": "Completed",
+            "default": false
+          },
+          "speaking_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "listening_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "reading_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "writing_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "grammar_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "vocabulary_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "pronunciation_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "fluency_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "comprehension_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "confidence_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "student_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "last_updated": {
+            "type": "string",
+            "title": "Last Updated"
+          },
+          "student": {
+            "$ref": "#/components/schemas/UserRead"
+          },
+          "day": {
+            "$ref": "#/components/schemas/DayRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "student_id",
+          "cohort_id",
+          "last_updated",
+          "student",
+          "day"
+        ],
+        "title": "ProgressPublic",
+        "description": "Complete progress information that can be safely returned"
+      },
+      "ProgressRead": {
+        "properties": {
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "default": 0
+          },
+          "completed": {
+            "type": "boolean",
+            "title": "Completed",
+            "default": false
+          },
+          "speaking_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "listening_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "reading_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "writing_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "grammar_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "vocabulary_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "pronunciation_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "fluency_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "comprehension_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "confidence_level": {
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "student_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "last_updated": {
+            "type": "string",
+            "title": "Last Updated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "student_id",
+          "cohort_id",
+          "last_updated"
+        ],
+        "title": "ProgressRead"
+      },
+      "ProgressUpdate": {
+        "properties": {
+          "speaking_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CEFRLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "listening_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CEFRLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reading_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CEFRLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "writing_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CEFRLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "grammar_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CEFRLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "vocabulary_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CEFRLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pronunciation_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CEFRLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fluency_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CEFRLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "comprehension_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CEFRLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "confidence_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CEFRLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "completed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed"
+          }
+        },
+        "type": "object",
+        "title": "ProgressUpdate"
+      },
+      "StudentPerformance": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "overall_score": {
+            "type": "number",
+            "title": "Overall Score"
+          },
+          "attendance_rate": {
+            "type": "number",
+            "title": "Attendance Rate"
+          },
+          "completion_rate": {
+            "type": "number",
+            "title": "Completion Rate"
+          },
+          "engagement_rate": {
+            "type": "number",
+            "title": "Engagement Rate"
+          },
+          "period_start": {
+            "type": "string",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "title": "Period End"
+          },
+          "student_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "overall_score",
+          "attendance_rate",
+          "completion_rate",
+          "engagement_rate",
+          "period_start",
+          "period_end",
+          "student_id",
+          "cohort_id"
+        ],
+        "title": "StudentPerformance"
+      },
+      "StudentProfileCreate": {
+        "properties": {
+          "current_level": {
+            "$ref": "#/components/schemas/ProficiencyLevel"
+          },
+          "study_experience": {
+            "type": "string",
+            "title": "Study Experience"
+          },
+          "learning_goals": {
+            "type": "string",
+            "title": "Learning Goals"
+          },
+          "took_proficiency_test": {
+            "type": "boolean",
+            "title": "Took Proficiency Test",
+            "default": false
+          },
+          "test_score": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test Score"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_level",
+          "study_experience",
+          "learning_goals",
+          "user_id"
+        ],
+        "title": "StudentProfileCreate"
+      },
+      "StudentProfilePublic": {
+        "properties": {
+          "current_level": {
+            "$ref": "#/components/schemas/ProficiencyLevel"
+          },
+          "study_experience": {
+            "type": "string",
+            "title": "Study Experience"
+          },
+          "learning_goals": {
+            "type": "string",
+            "title": "Learning Goals"
+          },
+          "took_proficiency_test": {
+            "type": "boolean",
+            "title": "Took Proficiency Test",
+            "default": false
+          },
+          "test_score": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test Score"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StudentStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_level",
+          "study_experience",
+          "learning_goals",
+          "id",
+          "user_id",
+          "status",
+          "created_at",
+          "updated_at",
+          "user"
+        ],
+        "title": "StudentProfilePublic",
+        "description": "Complete student profile information that can be safely returned"
+      },
+      "StudentProfileRead": {
+        "properties": {
+          "current_level": {
+            "$ref": "#/components/schemas/ProficiencyLevel"
+          },
+          "study_experience": {
+            "type": "string",
+            "title": "Study Experience"
+          },
+          "learning_goals": {
+            "type": "string",
+            "title": "Learning Goals"
+          },
+          "took_proficiency_test": {
+            "type": "boolean",
+            "title": "Took Proficiency Test",
+            "default": false
+          },
+          "test_score": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test Score"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StudentStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_level",
+          "study_experience",
+          "learning_goals",
+          "id",
+          "user_id",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "StudentProfileRead"
+      },
+      "StudentProfileUpdate": {
+        "properties": {
+          "current_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProficiencyLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "study_experience": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Study Experience"
+          },
+          "learning_goals": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Learning Goals"
+          },
+          "took_proficiency_test": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Took Proficiency Test"
+          },
+          "test_score": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test Score"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StudentStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "StudentProfileUpdate"
+      },
+      "StudentStatus": {
+        "type": "string",
+        "enum": [
+          "pending_approval",
+          "approved",
+          "rejected"
+        ],
+        "title": "StudentStatus"
+      },
+      "Token": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "refresh_token",
+          "token_type"
+        ],
+        "title": "Token"
+      },
+      "TrimesterCreate": {
+        "properties": {
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "number",
+          "curriculum_id"
+        ],
+        "title": "TrimesterCreate"
+      },
+      "TrimesterPublic": {
+        "properties": {
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "curriculum": {
+            "$ref": "#/components/schemas/CurriculumTemplateRead"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/DayRead"
+            },
+            "type": "array",
+            "title": "Days",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "number",
+          "id",
+          "curriculum_id",
+          "created_at",
+          "updated_at",
+          "curriculum"
+        ],
+        "title": "TrimesterPublic",
+        "description": "Complete trimester information that can be safely returned"
+      },
+      "TrimesterRead": {
+        "properties": {
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "curriculum_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Curriculum Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "number",
+          "id",
+          "curriculum_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TrimesterRead"
+      },
+      "TrimesterUpdate": {
+        "properties": {
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "title": "TrimesterUpdate"
+      },
+      "User": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "hashed_password": {
+            "type": "string",
+            "title": "Hashed Password"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole",
+            "default": "student"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "full_name",
+          "username",
+          "hashed_password"
+        ],
+        "title": "User"
+      },
+      "UserCreate": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "full_name",
+          "username",
+          "password"
+        ],
+        "title": "UserCreate"
+      },
+      "UserPublic": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "student_profile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StudentProfileRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enrollments": {
+            "items": {
+              "$ref": "#/components/schemas/EnrollmentRead"
+            },
+            "type": "array",
+            "title": "Enrollments",
+            "default": []
+          },
+          "activities": {
+            "items": {
+              "$ref": "#/components/schemas/ProgressRead"
+            },
+            "type": "array",
+            "title": "Activities",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "full_name",
+          "username",
+          "id",
+          "role",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "UserPublic",
+        "description": "Complete user information that can be safely returned"
+      },
+      "UserRead": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "full_name",
+          "username",
+          "id",
+          "role",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "UserRead"
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "admin",
+          "tutor",
+          "student"
+        ],
+        "title": "UserRole"
+      },
+      "UserUpdate": {
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "UserUpdate"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "scopes": {
+              "read:users": "Read user information",
+              "write:users": "Modify user information",
+              "delete:users": "Delete users",
+              "read:students": "Read student information",
+              "write:students": "Modify student information",
+              "delete:students": "Delete students",
+              "read:curriculum": "Read curriculum information",
+              "write:curriculum": "Modify curriculum information",
+              "delete:curriculum": "Delete curriculum",
+              "read:cohorts": "Read cohort information",
+              "write:cohorts": "Modify cohort information",
+              "delete:cohorts": "Delete cohorts",
+              "read:enrollments": "Read enrollment information",
+              "write:enrollments": "Modify enrollment information",
+              "delete:enrollments": "Delete enrollments",
+              "read:assessments": "Read assessment information",
+              "write:assessments": "Modify assessment information",
+              "delete:assessments": "Delete assessments",
+              "read:materials": "Read material information",
+              "write:materials": "Modify material information",
+              "delete:materials": "Delete materials",
+              "read:progress": "Read progress information",
+              "write:progress": "Modify progress information",
+              "read:analytics": "Read analytics information"
+            },
+            "tokenUrl": "/api/v1/auth/login"
+          }
+        }
+      }
+    }
+  }
+}

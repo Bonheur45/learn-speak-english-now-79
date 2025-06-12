@@ -301,10 +301,10 @@ const DayContent = () => {
     // For test activities, navigate to the appropriate test page
     if (type === 'test') {
       if (activityId === 'vocabularyTest') {
-        navigate(`/student/days/${dayId}/vocabulary-test`);
+        navigate(`/student/vocabulary-test/${dayId}`);
         return;
       } else if (activityId === 'topicTest') {
-        navigate(`/student/days/${dayId}/topic-test`);
+        navigate(`/student/topic-test/${dayId}`);
         return;
       } else if (activityId === 'writingAssessment') {
         navigate(`/student/writing-assessment/${dayId}`);
@@ -446,6 +446,28 @@ const DayContent = () => {
                   </div>
                 </details>
               </div>
+            </div>
+          </div>
+        );
+        
+      case 'test':
+        return (
+          <div className="space-y-6 mb-10 px-4 sm:px-6">
+            <h2 className="text-2xl font-bold">{openDialogContent.title}</h2>
+            <p className="text-gray-700 text-lg">(Sample question stub – replace with real quiz component)</p>
+
+            <div className="bg-gray-50 p-6 rounded-lg border space-y-4">
+              <h3 className="text-xl font-semibold">Question 1</h3>
+              <p>What is the past tense of <em>go</em>?</p>
+              <div className="space-y-2">
+                {['goed', 'went', 'gone'].map((opt) => (
+                  <label key={opt} className="flex items-center gap-2">
+                    <input type="radio" name="q1" value={opt} className="form-radio" />
+                    {opt}
+                  </label>
+                ))}
+              </div>
+              <Button size="sm" className="bg-brand-yellow text-brand-blue hover:brightness-95">Submit Answer</Button>
             </div>
           </div>
         );
@@ -789,8 +811,9 @@ const DayContent = () => {
         </div>
       </div>
       
-      {/* Activity Dialog */}
-      <Sheet open={!!openDialogContent} onOpenChange={(open) => {
+      {/* Activity Popup: Dialog on md+ screens, Sheet on mobile */}
+      {/* Mobile Sheet */}
+      <Sheet open={!!openDialogContent && window.innerWidth < 768} onOpenChange={(open) => {
         if (!open) {
           setOpenActivityId(null);
           setOpenDialogContent(null);
@@ -805,22 +828,44 @@ const DayContent = () => {
                 <span className="sr-only">Close</span>
               </SheetClose>
             </SheetHeader>
-            
             <div className="flex-grow overflow-auto p-6">
               {renderDialogContent()}
             </div>
-            
             <SheetFooter className="p-6 border-t">
-              <Button 
-                onClick={() => openActivityId && markAsComplete(openActivityId)} 
-                className="bg-yellow-400 text-blue-900 hover:bg-yellow-500 w-full md:w-auto"
-              >
+              <Button onClick={() => openActivityId && markAsComplete(openActivityId)} className="bg-yellow-400 text-blue-900 hover:bg-yellow-500 w-full md:w-auto">
                 Mark as Complete
               </Button>
             </SheetFooter>
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Desktop Dialog */}
+      <Dialog open={!!openDialogContent && window.innerWidth >= 768} onOpenChange={(open) => {
+        if (!open) {
+          setOpenActivityId(null);
+          setOpenDialogContent(null);
+        }
+      }}>
+        <DialogContent className="max-w-3xl w-full p-0 overflow-hidden">
+          <DialogHeader className="p-6 border-b">
+            <DialogTitle className="text-2xl">{openDialogContent?.title || ''}</DialogTitle>
+            <DialogClose asChild>
+              <button className="absolute right-4 top-4 opacity-70 hover:opacity-100">
+                <X className="h-4 w-4" />
+              </button>
+            </DialogClose>
+          </DialogHeader>
+          <div className="max-h-[70vh] overflow-auto p-6">
+            {renderDialogContent()}
+          </div>
+          <DialogFooter className="p-6 border-t">
+            <Button onClick={() => openActivityId && markAsComplete(openActivityId)} className="bg-yellow-400 text-blue-900 hover:bg-yellow-500 w-full md:w-auto">
+              Mark as Complete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

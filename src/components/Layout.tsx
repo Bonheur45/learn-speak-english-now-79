@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Navbar from './Navbar';
 import { UserRole } from '@/lib/types';
@@ -15,7 +14,7 @@ const Layout = ({ children, isLoggedIn, userRole, fullWidth = false }: LayoutPro
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar isLoggedIn={isLoggedIn} userRole={userRole} />
-      <main className={`flex-1 pt-32 md:pt-28 lg:pt-24 ${fullWidth ? 'px-0' : 'px-2 sm:px-4 lg:px-6'}`}>
+      <main className={`flex-1 ${fullWidth ? 'pt-0 px-0' : 'pt-32 md:pt-28 lg:pt-24 px-2 sm:px-4 lg:px-6'}`}>
         {children}
       </main>
       <Toaster position="top-right" richColors />

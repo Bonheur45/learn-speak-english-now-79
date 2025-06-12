@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -100,7 +99,7 @@ const CurriculumTrimesters = () => {
                   
                   <div className="pt-4 border-t">
                     <Button asChild className="w-full" variant="outline">
-                      <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimester.id}`}>
+                      <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimester.id}`}> 
                         <BookOpen className="h-4 w-4 mr-2" />
                         Edit Days
                         <ArrowRight className="h-4 w-4 ml-2" />

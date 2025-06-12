@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -18,13 +17,15 @@ const Index = () => {
 
   return (
     <Layout isLoggedIn={false} fullWidth={true}>
-      {/* Hero Section */}
-      <section className="bg-white py-16 md:py-20 flex-grow">
+      {/* Hero Section (full viewport) */}
+      <section className="bg-white min-h-screen flex items-center pt-32 md:pt-28 lg:pt-24">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center bg-white">
             <div className="md:w-1/2 px-4 md:pr-8 mb-8 md:mb-0">
-              <h1 className="text-4xl md:text-5xl font-bold text-brand-blue mb-4">
-                Master English the <span className="text-brand-yellow">Right Way</span>
+              <h1 className="text-4xl md:text-5xl font-bold text-brand-blue mb-4 leading-tight">
+                Master English
+                <br className="hidden md:block" />
+                <span className="text-brand-blue">the </span><span className="text-brand-yellow">Right Way</span>
               </h1>
               <p className="text-lg mb-6 text-gray-700 max-w-lg">
                 Join our structured learning program designed by expert tutors. Daily lessons, vocabulary practice, 
@@ -44,7 +45,7 @@ const Index = () => {
                 <ImageCarousel 
                   images={carouselImages} 
                   altText="English learning presentation"
-                  className="w-full aspect-[4/3] md:h-[400px]"
+                  className="w-full aspect-[16/9] md:h-[500px]"
                 />
               </div>
             </div>
@@ -53,7 +54,7 @@ const Index = () => {
       </section>
       
       {/* Proficiency Levels Section */}
-      <section className="py-12 bg-white">
+      <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center text-brand-blue mb-2">Discover Your Level</h2>
           <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
@@ -113,7 +114,7 @@ const Index = () => {
       </section>
       
       {/* Features Section */}
-      <section className="py-12 bg-gray-50">
+      <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center text-brand-blue mb-12">Why Choose Our Platform?</h2>
           
