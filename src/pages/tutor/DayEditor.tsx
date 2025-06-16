@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Save, Calendar, BookOpen, Video, PenTool, FileText, Eye, Plus, Trash2, Edit } from 'lucide-react';
-import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
-import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
+import { Cohort, getCohort, CohortTrimester, getCohortTrimesters, getCohortTrimesterDays, updateCohortDay } from '@/services/cohorts';
 import RichTextEditor from '@/components/RichTextEditor';
 import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -20,29 +19,20 @@ const DayEditor = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
-  const cohort = MOCK_COHORTS.find(c => c.id === cohortId);
-  const trimester = MOCK_TRIMESTERS.find(t => t.id === trimesterId);
+  const [cohort, setCohort] = useState<Cohort | null>(null);
+  const [trimester, setTrimester] = useState<CohortTrimester | null>(null);
+  const [day, setDay] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
   
-  // Get day from curriculum template
-  const getDay = () => {
-    if (!trimester) return null;
-    const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
-      ct => ct.id === trimester.curriculum_trimester_id
-    );
-    return curriculumTrimester?.days.find(d => d.id === dayId) || null;
-  };
-  
-  const day = getDay();
-  
-  const [dayData, setDayData] = useState({
-    id: day?.id || '',
-    day_number: day?.day_number || 1,
-    title: day?.title || '',
-    date: new Date().toISOString().split('T')[0], // Use current date for cohort-specific days
-    story_text: day?.story_text || '<p>Enter the story content here...</p>',
-    topic_notes: day?.topic_notes || '<p>Today we will learn about present tense verbs. Present tense describes actions happening now or habitual actions...</p>',
-    british_audio_url: day?.british_audio_url || '',
-    american_audio_url: day?.american_audio_url || ''
+  const [dayData, setDayData] = useState<any>({
+    id: '',
+    day_number: 1,
+    title: '',
+    date: new Date().toISOString().split('T')[0],
+    story_text: '<p>Enter story...</p>',
+    topic_notes: '<p>Enter topic notes...</p>',
+    british_audio_url: '',
+    american_audio_url: '',
   });
 
   const [audioVersions, setAudioVersions] = useState({
@@ -56,6 +46,49 @@ const DayEditor = () => {
   ]);
 
   const [showPreview, setShowPreview] = useState(false);
+
+  useEffect(() => {
+    if (!cohortId || !trimesterId || !dayId) return;
+
+    // Fetch cohort + trimester list then day
+    Promise.all([
+      getCohort(cohortId),
+      getCohortTrimesters(cohortId),
+    ])
+      .then(([c, tris]) => {
+        setCohort(c);
+        const tri = tris.find((t) => t.id === trimesterId) || null;
+        setTrimester(tri);
+        if (!tri) return Promise.resolve(null);
+        return getCohortTrimesterDays(cohortId, trimesterId);
+      })
+      .then((days: any) => {
+        if (days && Array.isArray(days)) {
+          const d = days.find((d) => d.id === dayId) || null;
+          setDay(d);
+          if (d) {
+            setDayData({
+              id: d.id,
+              day_number: d.day_number,
+              title: d.title,
+              date: d.date || new Date().toISOString().split('T')[0],
+              story_text: d.story_text,
+              topic_notes: d.topic_notes,
+              british_audio_url: d.british_audio_url,
+              american_audio_url: d.american_audio_url,
+            });
+          }
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => setLoading(false));
+  }, [cohortId, trimesterId, dayId]);
+
+  if (loading) {
+    return <div className="p-10">Loading...</div>;
+  }
 
   if (!cohort || !trimester || !day) {
     return (
@@ -74,11 +107,17 @@ const DayEditor = () => {
     );
   }
 
-  const handleSave = () => {
-    toast({
-      title: "Day Content Saved",
-      description: `Day ${dayData.day_number} has been updated successfully.`,
-    });
+  const handleSave = async () => {
+    try {
+      await updateCohortDay(cohortId!, dayId!, dayData);
+      toast({
+        title: 'Day Content Saved',
+        description: `Day ${dayData.day_number} has been updated successfully.`,
+      });
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Error', description: 'Failed to save day', variant: 'destructive' });
+    }
   };
 
   const updateField = (field: string, value: string) => {

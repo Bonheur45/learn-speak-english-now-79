@@ -9,6 +9,8 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
 import CongratulationAnimation from '@/components/student/CongratulationAnimation';
+import { useAuth } from '@/hooks/useAuth';
+import { upsertProgressActivity, ProgressEntry } from '@/services/progress';
 
 const DayContent = () => {
   const { dayId } = useParams<{ dayId: string }>();
@@ -37,6 +39,9 @@ const DayContent = () => {
   } | null>(null);
 
   const [showCongratulations, setShowCongratulations] = useState(false);
+  
+  const { user } = useAuth();
+  const [progressEntries, setProgressEntries] = useState<ProgressEntry[]>([]);
   
   // Load completion state from localStorage
   useEffect(() => {
@@ -281,20 +286,27 @@ const DayContent = () => {
   const totalActivities = Object.keys(completedActivities).length;
   const completedCount = Object.values(completedActivities).filter(Boolean).length;
 
-  const markAsComplete = (activity: string) => {
+  const markAsComplete = async (activity: string) => {
     setCompletedActivities(prev => ({
       ...prev,
-      [activity]: true
+      [activity]: true,
     }));
+
+    // Update backend progress
+    if (user && dayId && user.enrollments?.length) {
+      const cohortId = user.enrollments[0].cohort_id;
+      const existing = progressEntries.find((p) => p.day.id === dayId);
+      const updated = await upsertProgressActivity(existing, user.id, cohortId, dayId, activity);
+      setProgressEntries((prev) => {
+        const others = prev.filter((p) => p.day.id !== dayId);
+        return [...others, updated];
+      });
+    }
+
     toast({
-      title: "Activity Completed",
-      description: `You've completed this activity. Great job!`,
-      variant: "default",
+      title: 'Activity Completed',
+      description: `You have completed the ${activity} activity!`,
     });
-    
-    // Close the dialog after marking as complete
-    setOpenActivityId(null);
-    setOpenDialogContent(null);
   };
   
   const openActivity = (activityId: string, type: 'glossary' | 'reading' | 'listening' | 'video' | 'test' | 'notes', title: string, content: any) => {

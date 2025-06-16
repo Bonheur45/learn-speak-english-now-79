@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,24 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-
-interface StudentProfile {
-  id: string;
-  full_name: string;
-  username: string;
-  email: string;
-  current_level: string;
-  study_experience: string;
-  learning_goals: string;
-  took_proficiency_test: boolean;
-  test_score: string;
-  status: string;
-  assigned_cohort_id: string;
-  created_at: string;
-  cohort?: {
-    name: string;
-  };
-}
+import { StudentProfile } from '@/services/students';
 
 const StudentApprovalDashboard = () => {
   const [students, setStudents] = useState<StudentProfile[]>([]);
@@ -42,42 +24,15 @@ const StudentApprovalDashboard = () => {
   }, [students, statusFilter, levelFilter, searchTerm]);
 
   const fetchStudents = async () => {
-    // Mock data for demonstration
-    const mockStudents: StudentProfile[] = [
-      {
-        id: '1',
-        full_name: 'John Doe',
-        username: 'johndoe',
-        email: 'john@example.com',
-        current_level: 'B1-B2',
-        study_experience: '2 years of English study',
-        learning_goals: 'Improve speaking skills',
-        took_proficiency_test: true,
-        test_score: 'IELTS 6.0',
-        status: 'pending_approval',
-        assigned_cohort_id: '',
-        created_at: new Date().toISOString(),
-        cohort: { name: 'Intermediate Group A' }
-      },
-      {
-        id: '2',
-        full_name: 'Jane Smith',
-        username: 'janesmith',
-        email: 'jane@example.com',
-        current_level: 'A1-A2',
-        study_experience: '6 months of English study',
-        learning_goals: 'Basic conversation skills',
-        took_proficiency_test: false,
-        test_score: 'N/A',
-        status: 'approved',
-        assigned_cohort_id: '',
-        created_at: new Date().toISOString(),
-        cohort: { name: 'Beginner Group B' }
-      }
-    ];
-
-    setStudents(mockStudents);
-    setLoading(false);
+    try {
+      const { getStudents } = await import('@/services/students');
+      const data = await getStudents();
+      setStudents(data);
+    } catch (err) {
+      console.error('Failed to fetch students', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filterStudents = () => {
@@ -102,17 +57,15 @@ const StudentApprovalDashboard = () => {
   };
 
   const updateStudentStatus = async (studentId: string, newStatus: 'approved' | 'rejected') => {
-    // Mock update - in a real app this would call your backend
-    setStudents(prev => prev.map(student => 
-      student.id === studentId 
-        ? { ...student, status: newStatus }
-        : student
-    ));
-
-    toast({
-      title: "Success",
-      description: `Student ${newStatus} successfully.`,
-    });
+    try {
+      const { updateStudentStatus: apiUpdate } = await import('@/services/students');
+      const updated = await apiUpdate(studentId, newStatus);
+      setStudents(prev => prev.map(s => (s.id === studentId ? updated : s)));
+      toast({ title: 'Success', description: `Student ${newStatus}.` });
+    } catch (err: any) {
+      console.error(err);
+      toast({ title: 'Error', description: 'Update failed', variant: 'destructive' });
+    }
   };
 
   const getStatusBadgeVariant = (status: string) => {

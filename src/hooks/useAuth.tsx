@@ -1,72 +1,68 @@
+import { useEffect, useState, useCallback } from 'react';
+import { login, register as apiRegister, logout as apiLogout, getCurrentUser } from '@/services/auth';
+import { setAuthToken, getAuthToken } from '@/services/api';
 
-import { useEffect, useState } from 'react';
-
-interface AuthUser {
+export interface AuthUser {
   id: string;
   email: string;
   role: 'student' | 'tutor' | 'admin';
   profile?: any;
   studentProfile?: any;
+  enrollments?: { id: string; cohort_id: string; status: string }[];
 }
 
 export const useAuth = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Check for stored user in localStorage
-    const storedUser = localStorage.getItem('auth_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+  const fetchUser = useCallback(async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+    try {
+      const data = await getCurrentUser();
+      setUser(data as AuthUser);
+    } catch (err) {
+      console.error('Failed to fetch current user', err);
+      setAuthToken(null);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const signIn = (email: string, password: string, role?: 'student' | 'tutor' | 'admin') => {
-    // Mock authentication - in a real app this would call your backend
-    const selectedRole = role || 'student';
-    const mockUser: AuthUser = {
-      id: Math.random().toString(),
-      email: email,
-      role: selectedRole,
-      profile: {
-        full_name: selectedRole === 'student' ? 'Test Student' : selectedRole === 'tutor' ? 'Test Tutor' : 'Test Admin',
-        username: email.split('@')[0]
-      },
-      studentProfile: selectedRole === 'student' ? {
-        status: 'approved'
-      } : undefined
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('auth_user', JSON.stringify(mockUser));
-    return Promise.resolve({ user: mockUser, error: null });
+  useEffect(() => {
+    fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const signIn = async (email: string, password: string, _role?: 'student' | 'tutor' | 'admin') => {
+    try {
+      await login({ username: email, password });
+      await fetchUser();
+      return { user, error: null };
+    } catch (error: any) {
+      return { user: null, error };
+    }
   };
 
-  const signUp = (userData: any) => {
-    // Mock registration - always creates a student by default
-    const mockUser: AuthUser = {
-      id: Math.random().toString(),
-      email: userData.email,
-      role: 'student',
-      profile: {
-        full_name: userData.fullName,
-        username: userData.username
-      },
-      studentProfile: {
-        status: 'approved'
-      }
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('auth_user', JSON.stringify(mockUser));
-    return Promise.resolve({ user: mockUser, error: null });
+  const signUp = async (userData: any) => {
+    try {
+      await apiRegister(userData);
+      // After registration, auto login
+      await login({ username: userData.email, password: userData.password });
+      await fetchUser();
+      return { user, error: null };
+    } catch (error: any) {
+      return { user: null, error };
+    }
   };
 
-  const signOut = () => {
+  const signOut = async () => {
+    await apiLogout();
     setUser(null);
-    localStorage.removeItem('auth_user');
-    return Promise.resolve();
   };
 
   return {

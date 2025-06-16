@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,8 +16,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
-import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
+import { Cohort, getCohorts, CohortTrimester, getCohortTrimesters, getCohortTrimesterDays } from '@/services/cohorts';
 import { toast } from '@/hooks/use-toast';
 import { Upload, File, Check } from 'lucide-react';
 
@@ -31,21 +30,51 @@ const UploadPage = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   
-  // Filter available trimesters based on selected cohort
-  const availableTrimesters = cohortId ? 
-    MOCK_TRIMESTERS.filter(t => t.cohort_id === cohortId) : 
-    [];
-    
-  // Filter available days based on selected trimester
-  const availableDays = trimesterId ? (() => {
-    const trimester = MOCK_TRIMESTERS.find(t => t.id === trimesterId);
-    if (!trimester) return [];
-    
-    const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
-      ct => ct.id === trimester.curriculum_trimester_id
-    );
-    return curriculumTrimester?.days || [];
-  })() : [];
+  const [cohorts, setCohorts] = useState<Cohort[]>([]);
+  const [trimesters, setTrimesters] = useState<CohortTrimester[]>([]);
+  const [days, setDays] = useState<any[]>([]);
+  
+  useEffect(() => {
+    getCohorts()
+      .then(setCohorts)
+      .catch((err) => console.error(err));
+  }, []);
+  
+  useEffect(() => {
+    if (!cohortId) {
+      setTrimesters([]);
+      setTrimesterId('');
+      return;
+    }
+    getCohortTrimesters(cohortId)
+      .then((tris) => {
+        setTrimesters(tris);
+        if (!tris.find((t) => t.id === trimesterId)) {
+          setTrimesterId('');
+          setDays([]);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, [cohortId]);
+  
+  useEffect(() => {
+    if (!cohortId || !trimesterId) {
+      setDays([]);
+      setDayId('');
+      return;
+    }
+    getCohortTrimesterDays(cohortId, trimesterId)
+      .then((d) => {
+        setDays(d);
+        if (!d.find((d:any) => d.id === dayId)) {
+          setDayId('');
+        }
+      })
+      .catch((err) => console.error(err));
+  }, [cohortId, trimesterId]);
+  
+  const availableTrimesters = trimesters;
+  const availableDays = days;
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -144,7 +173,7 @@ const UploadPage = () => {
                         <SelectContent>
                           <SelectGroup>
                             <SelectLabel>Active Cohorts</SelectLabel>
-                            {MOCK_COHORTS.filter(c => c.status === 'active').map(cohort => (
+                            {cohorts.filter(c => c.status === 'active').map((cohort) => (
                               <SelectItem key={cohort.id} value={cohort.id}>
                                 {cohort.name}
                               </SelectItem>
@@ -152,7 +181,7 @@ const UploadPage = () => {
                           </SelectGroup>
                           <SelectGroup>
                             <SelectLabel>Upcoming Cohorts</SelectLabel>
-                            {MOCK_COHORTS.filter(c => c.status === 'upcoming').map(cohort => (
+                            {cohorts.filter(c => c.status === 'upcoming').map((cohort) => (
                               <SelectItem key={cohort.id} value={cohort.id}>
                                 {cohort.name}
                               </SelectItem>
@@ -173,7 +202,7 @@ const UploadPage = () => {
                           <SelectValue placeholder="Select a trimester" />
                         </SelectTrigger>
                         <SelectContent>
-                          {availableTrimesters.map(trimester => (
+                          {availableTrimesters.map((trimester) => (
                             <SelectItem key={trimester.id} value={trimester.id}>
                               {trimester.name}
                             </SelectItem>
@@ -193,7 +222,7 @@ const UploadPage = () => {
                           <SelectValue placeholder="Select a day" />
                         </SelectTrigger>
                         <SelectContent>
-                          {availableDays.map(day => (
+                          {availableDays.map((day: any) => (
                             <SelectItem key={day.id} value={day.id}>
                               Day {day.day_number}: {day.title}
                             </SelectItem>

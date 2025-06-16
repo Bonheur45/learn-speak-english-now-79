@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -37,6 +36,8 @@ import TutorStudents from '@/pages/tutor/Students';
 import TutorCohorts from '@/pages/tutor/Cohorts';
 import TutorUpload from '@/pages/tutor/Upload';
 import StudentApproval from '@/pages/tutor/StudentApproval';
+import CreateCohort from '@/pages/tutor/CreateCohort';
+import EditCohort from '@/pages/tutor/EditCohort';
 
 // Curriculum Template pages
 import CurriculumMaterials from '@/pages/tutor/CurriculumMaterials';
@@ -166,9 +167,19 @@ const App: React.FC = () => {
                 <TutorCohorts />
               </ProtectedRoute>
             } />
+            <Route path="/tutor/cohorts/new" element={
+              <ProtectedRoute requiredRole="tutor">
+                <CreateCohort />
+              </ProtectedRoute>
+            } />
             <Route path="/tutor/upload" element={
               <ProtectedRoute requiredRole="tutor">
                 <TutorUpload />
+              </ProtectedRoute>
+            } />
+            <Route path="/tutor/cohorts/:cohortId/edit" element={
+              <ProtectedRoute requiredRole="tutor">
+                <EditCohort />
               </ProtectedRoute>
             } />
             

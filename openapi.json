@@ -60,7 +60,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserCreate"
+                "$ref": "#/components/schemas/UserRegistration"
               }
             }
           },
@@ -477,6 +477,22 @@
               "default": 100,
               "title": "Limit"
             }
+          },
+          {
+            "name": "target_level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CEFRLevel"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Target Level"
+            }
           }
         ],
         "responses": {
@@ -511,7 +527,7 @@
           "Curriculum"
         ],
         "summary": "Create Curriculum Template",
-        "description": "Create a new curriculum template. Requires WRITE_CURRICULUM scope.",
+        "description": "Create a new curriculum template and auto-seed 3 trimesters with 24 days each.",
         "operationId": "create_curriculum_template_api_v1_curriculum__post",
         "security": [
           {
@@ -1161,6 +1177,128 @@
         }
       }
     },
+    "/api/v1/curriculum/days/{day_id}/video": {
+      "put": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Update Day Video",
+        "description": "Convenience endpoint to update video material for a day.",
+        "operationId": "update_day_video_api_v1_curriculum_days__day_id__video_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "day_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Day Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VideoPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/curriculum/days/{day_id}/notes": {
+      "put": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Update Day Notes",
+        "description": "Convenience endpoint to update notes material for a day.",
+        "operationId": "update_day_notes_api_v1_curriculum_days__day_id__notes_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "day_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Day Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotesPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/cohorts/": {
       "get": {
         "tags": [
@@ -1195,6 +1333,38 @@
               "type": "integer",
               "default": 100,
               "title": "Limit"
+            }
+          },
+          {
+            "name": "proficiency_level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CEFRLevel"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Proficiency Level"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CohortStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
             }
           }
         ],
@@ -1415,6 +1585,177 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CohortPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Cohorts"
+        ],
+        "summary": "Partial Update Cohort",
+        "description": "Partially update a cohort. Requires WRITE_COHORTS scope.",
+        "operationId": "partial_update_cohort_api_v1_cohorts__cohort_id__patch",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:cohorts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cohort_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cohort Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CohortUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohortPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cohorts/{cohort_id}/refresh": {
+      "post": {
+        "tags": [
+          "Cohorts"
+        ],
+        "summary": "Refresh Cohort",
+        "description": "Refresh a cohort: clear enrollments & progress records, reset status to planning. Requires WRITE_COHORTS scope.",
+        "operationId": "refresh_cohort_api_v1_cohorts__cohort_id__refresh_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:cohorts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cohort_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cohort Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohortPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cohorts/{cohort_id}/mail": {
+      "post": {
+        "tags": [
+          "Cohorts"
+        ],
+        "summary": "Send Cohort Email",
+        "description": "Send an email to students enrolled in the cohort. Stubbed without real provider.",
+        "operationId": "send_cohort_email_api_v1_cohorts__cohort_id__mail_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:cohorts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cohort_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cohort Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_send_cohort_email_api_v1_cohorts__cohort_id__mail_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Send Cohort Email Api V1 Cohorts  Cohort Id  Mail Post"
                 }
               }
             }
@@ -2577,6 +2918,169 @@
         }
       }
     },
+    "/api/v1/progress/{progress_id}/access": {
+      "patch": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Update Day Access",
+        "description": "Grant or revoke access to a day for the given progress (student).",
+        "operationId": "update_day_access_api_v1_progress__progress_id__access_patch",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:progress"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "progress_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Progress Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DayAccessPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/progress/student/{student_id}/access": {
+      "delete": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Lock Student Access",
+        "description": "Remove all day access records for a student, effectively locking them.",
+        "operationId": "lock_student_access_api_v1_progress_student__student_id__access_delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:progress"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Student Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Lock Student Access Api V1 Progress Student  Student Id  Access Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/progress/overview": {
+      "get": {
+        "tags": [
+          "Progress"
+        ],
+        "summary": "Get Progress Overview",
+        "description": "Return aggregate averages for a student's progress.",
+        "operationId": "get_progress_overview_api_v1_progress_overview_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:progress"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Student Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Progress Overview Api V1 Progress Overview Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/analytics/": {
       "get": {
         "tags": [
@@ -3126,6 +3630,221 @@
         }
       }
     },
+    "/api/v1/live-classes/": {
+      "get": {
+        "tags": [
+          "LiveClasses"
+        ],
+        "summary": "Get Live Classes",
+        "operationId": "get_live_classes_api_v1_live_classes__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:cohorts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cohort_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cohort Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LiveClassPublic"
+                  },
+                  "title": "Response Get Live Classes Api V1 Live Classes  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "LiveClasses"
+        ],
+        "summary": "Create Live Class",
+        "operationId": "create_live_class_api_v1_live_classes__post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:cohorts"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveClassCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveClassPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/live-classes/{live_class_id}": {
+      "put": {
+        "tags": [
+          "LiveClasses"
+        ],
+        "summary": "Update Live Class",
+        "operationId": "update_live_class_api_v1_live_classes__live_class_id__put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "write:cohorts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "live_class_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Live Class Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveClassUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveClassPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "LiveClasses"
+        ],
+        "summary": "Delete Live Class",
+        "operationId": "delete_live_class_api_v1_live_classes__live_class_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "delete:cohorts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "live_class_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Live Class Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveClassPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "summary": "Root",
@@ -3518,6 +4237,22 @@
             "type": "number",
             "title": "Score"
           },
+          "cefr_level": {
+            "type": "string",
+            "title": "Cefr Level"
+          },
+          "overview": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Overview"
+          },
+          "sublevels": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Sublevels"
+          },
           "feedback": {
             "anyOf": [
               {
@@ -3543,6 +4278,9 @@
         "type": "object",
         "required": [
           "score",
+          "cefr_level",
+          "overview",
+          "sublevels",
           "assessment_id",
           "student_id"
         ],
@@ -3553,6 +4291,22 @@
           "score": {
             "type": "number",
             "title": "Score"
+          },
+          "cefr_level": {
+            "type": "string",
+            "title": "Cefr Level"
+          },
+          "overview": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Overview"
+          },
+          "sublevels": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Sublevels"
           },
           "feedback": {
             "anyOf": [
@@ -3594,6 +4348,9 @@
         "type": "object",
         "required": [
           "score",
+          "cefr_level",
+          "overview",
+          "sublevels",
           "id",
           "assessment_id",
           "student_id",
@@ -3609,6 +4366,22 @@
           "score": {
             "type": "number",
             "title": "Score"
+          },
+          "cefr_level": {
+            "type": "string",
+            "title": "Cefr Level"
+          },
+          "overview": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Overview"
+          },
+          "sublevels": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Sublevels"
           },
           "feedback": {
             "anyOf": [
@@ -3644,6 +4417,9 @@
         "type": "object",
         "required": [
           "score",
+          "cefr_level",
+          "overview",
+          "sublevels",
           "id",
           "assessment_id",
           "student_id",
@@ -3758,6 +4534,29 @@
         ],
         "title": "Body_login_api_v1_auth_login_post"
       },
+      "Body_send_cohort_email_api_v1_cohorts__cohort_id__mail_post": {
+        "properties": {
+          "subject": {
+            "type": "string",
+            "title": "Subject"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "to_all": {
+            "type": "boolean",
+            "title": "To All",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "subject",
+          "message"
+        ],
+        "title": "Body_send_cohort_email_api_v1_cohorts__cohort_id__mail_post"
+      },
       "CEFRLevel": {
         "type": "string",
         "enum": [
@@ -3797,25 +4596,44 @@
             "default": "A1"
           },
           "curriculum_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Curriculum Id"
           },
           "start_date": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Start Date"
           },
           "end_date": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "End Date"
           }
         },
+        "additionalProperties": true,
         "type": "object",
         "required": [
-          "name",
-          "curriculum_id",
-          "start_date",
-          "end_date"
+          "name"
         ],
         "title": "CohortCreate"
       },
@@ -3966,6 +4784,69 @@
             "type": "array",
             "title": "Assessments",
             "default": []
+          },
+          "live_classes": {
+            "items": {
+              "$ref": "#/components/schemas/LiveClassPublic"
+            },
+            "type": "array",
+            "title": "Live Classes",
+            "default": []
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity"
+          },
+          "enrolled_students": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enrolled Students"
+          },
+          "current_trimester": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Trimester"
+          },
+          "proficiency_band": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proficiency Band"
+          },
+          "current_day_position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Day Position"
           }
         },
         "type": "object",
@@ -4061,6 +4942,7 @@
       "CohortStatus": {
         "type": "string",
         "enum": [
+          "upcoming",
           "planning",
           "active",
           "completed",
@@ -4240,12 +5122,36 @@
             ],
             "title": "Description"
           },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
           "target_level": {
-            "$ref": "#/components/schemas/CEFRLevel"
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
           },
           "duration_weeks": {
             "type": "integer",
-            "title": "Duration Weeks"
+            "title": "Duration Weeks",
+            "default": 12
           },
           "max_students": {
             "type": "integer",
@@ -4285,8 +5191,6 @@
         "type": "object",
         "required": [
           "name",
-          "target_level",
-          "duration_weeks",
           "id",
           "created_at",
           "updated_at"
@@ -4311,12 +5215,36 @@
             ],
             "title": "Description"
           },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
           "target_level": {
-            "$ref": "#/components/schemas/CEFRLevel"
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
           },
           "duration_weeks": {
             "type": "integer",
-            "title": "Duration Weeks"
+            "title": "Duration Weeks",
+            "default": 12
           },
           "max_students": {
             "type": "integer",
@@ -4324,11 +5252,10 @@
             "default": 20
           }
         },
+        "additionalProperties": true,
         "type": "object",
         "required": [
-          "name",
-          "target_level",
-          "duration_weeks"
+          "name"
         ],
         "title": "CurriculumTemplateCreate"
       },
@@ -4349,12 +5276,36 @@
             ],
             "title": "Description"
           },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
           "target_level": {
-            "$ref": "#/components/schemas/CEFRLevel"
+            "$ref": "#/components/schemas/CEFRLevel",
+            "default": "A1"
           },
           "duration_weeks": {
             "type": "integer",
-            "title": "Duration Weeks"
+            "title": "Duration Weeks",
+            "default": 12
           },
           "max_students": {
             "type": "integer",
@@ -4378,8 +5329,6 @@
         "type": "object",
         "required": [
           "name",
-          "target_level",
-          "duration_weeks",
           "id",
           "created_at",
           "updated_at"
@@ -4409,6 +5358,28 @@
               }
             ],
             "title": "Description"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
           },
           "target_level": {
             "anyOf": [
@@ -4445,6 +5416,66 @@
         },
         "type": "object",
         "title": "CurriculumTemplateUpdate"
+      },
+      "DayAccessPayload": {
+        "properties": {
+          "day_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Day Id"
+          },
+          "allowed": {
+            "type": "boolean",
+            "title": "Allowed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "day_id",
+          "allowed"
+        ],
+        "title": "DayAccessPayload"
+      },
+      "DayAccessRead": {
+        "properties": {
+          "allowed": {
+            "type": "boolean",
+            "title": "Allowed",
+            "default": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "student_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Id"
+          },
+          "day_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Day Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "student_id",
+          "day_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "DayAccessRead"
       },
       "DayCreate": {
         "properties": {
@@ -4530,6 +5561,25 @@
             "type": "array",
             "title": "Materials",
             "default": []
+          },
+          "day_access": {
+            "items": {
+              "$ref": "#/components/schemas/DayAccessRead"
+            },
+            "type": "array",
+            "title": "Day Access",
+            "default": []
+          },
+          "day_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day Number"
           }
         },
         "type": "object",
@@ -4882,6 +5932,156 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "LiveClassCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "date_time": {
+            "type": "string",
+            "title": "Date Time"
+          },
+          "link": {
+            "type": "string",
+            "title": "Link"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "date_time",
+          "link",
+          "cohort_id"
+        ],
+        "title": "LiveClassCreate"
+      },
+      "LiveClassPublic": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "date_time": {
+            "type": "string",
+            "title": "Date Time"
+          },
+          "link": {
+            "type": "string",
+            "title": "Link"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "cohort_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cohort Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "cohort": {
+            "$ref": "#/components/schemas/CohortRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "date_time",
+          "link",
+          "id",
+          "cohort_id",
+          "created_at",
+          "updated_at",
+          "cohort"
+        ],
+        "title": "LiveClassPublic"
+      },
+      "LiveClassUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "date_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Time"
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link"
+          }
+        },
+        "type": "object",
+        "title": "LiveClassUpdate"
+      },
       "MaterialCreate": {
         "properties": {
           "title": {
@@ -5231,6 +6431,19 @@
         "type": "object",
         "title": "MaterialUpdate"
       },
+      "NotesPayload": {
+        "properties": {
+          "markdown": {
+            "type": "string",
+            "title": "Markdown"
+          }
+        },
+        "type": "object",
+        "required": [
+          "markdown"
+        ],
+        "title": "NotesPayload"
+      },
       "ProficiencyLevel": {
         "type": "string",
         "enum": [
@@ -5386,6 +6599,22 @@
           },
           "day": {
             "$ref": "#/components/schemas/DayRead"
+          },
+          "access": {
+            "items": {
+              "$ref": "#/components/schemas/DayAccessRead"
+            },
+            "type": "array",
+            "title": "Access",
+            "default": []
+          },
+          "completed_activities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Completed Activities",
+            "default": []
           }
         },
         "type": "object",
@@ -5675,14 +6904,29 @@
       "StudentProfileCreate": {
         "properties": {
           "current_level": {
-            "$ref": "#/components/schemas/ProficiencyLevel"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "study_experience": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Study Experience"
           },
           "learning_goals": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Learning Goals"
           },
           "took_proficiency_test": {
@@ -5702,31 +6946,48 @@
             "title": "Test Score"
           },
           "user_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "User Id"
           }
         },
+        "additionalProperties": true,
         "type": "object",
-        "required": [
-          "current_level",
-          "study_experience",
-          "learning_goals",
-          "user_id"
-        ],
         "title": "StudentProfileCreate"
       },
       "StudentProfilePublic": {
         "properties": {
           "current_level": {
-            "$ref": "#/components/schemas/ProficiencyLevel"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "study_experience": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Study Experience"
           },
           "learning_goals": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Learning Goals"
           },
           "took_proficiency_test": {
@@ -5772,9 +7033,6 @@
         },
         "type": "object",
         "required": [
-          "current_level",
-          "study_experience",
-          "learning_goals",
           "id",
           "user_id",
           "status",
@@ -5788,14 +7046,29 @@
       "StudentProfileRead": {
         "properties": {
           "current_level": {
-            "$ref": "#/components/schemas/ProficiencyLevel"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "study_experience": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Study Experience"
           },
           "learning_goals": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Learning Goals"
           },
           "took_proficiency_test": {
@@ -5838,9 +7111,6 @@
         },
         "type": "object",
         "required": [
-          "current_level",
-          "study_experience",
-          "learning_goals",
           "id",
           "user_id",
           "status",
@@ -5957,6 +7227,17 @@
             "type": "integer",
             "title": "Number"
           },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
           "description": {
             "anyOf": [
               {
@@ -5967,6 +7248,28 @@
               }
             ],
             "title": "Description"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
           },
           "curriculum_id": {
             "type": "string",
@@ -5987,6 +7290,17 @@
             "type": "integer",
             "title": "Number"
           },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
           "description": {
             "anyOf": [
               {
@@ -5997,6 +7311,28 @@
               }
             ],
             "title": "Description"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
           },
           "id": {
             "type": "string",
@@ -6046,6 +7382,17 @@
             "type": "integer",
             "title": "Number"
           },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
           "description": {
             "anyOf": [
               {
@@ -6056,6 +7403,28 @@
               }
             ],
             "title": "Description"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
           },
           "id": {
             "type": "string",
@@ -6163,34 +7532,6 @@
           "hashed_password"
         ],
         "title": "User"
-      },
-      "UserCreate": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
-          "full_name": {
-            "type": "string",
-            "title": "Full Name"
-          },
-          "username": {
-            "type": "string",
-            "title": "Username"
-          },
-          "password": {
-            "type": "string",
-            "title": "Password"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "full_name",
-          "username",
-          "password"
-        ],
-        "title": "UserCreate"
       },
       "UserPublic": {
         "properties": {
@@ -6315,6 +7656,38 @@
         ],
         "title": "UserRead"
       },
+      "UserRegistration": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "proficiency_level": {
+            "$ref": "#/components/schemas/ProficiencyLevel"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "full_name",
+          "username",
+          "password",
+          "proficiency_level"
+        ],
+        "title": "UserRegistration"
+      },
       "UserRole": {
         "type": "string",
         "enum": [
@@ -6416,6 +7789,30 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VideoPayload": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "VideoPayload"
       }
     },
     "securitySchemes": {

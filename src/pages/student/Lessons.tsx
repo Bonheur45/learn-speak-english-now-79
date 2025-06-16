@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,8 +6,10 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { MOCK_TRIMESTERS, MOCK_COHORTS } from '@/lib/types';
-import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
+import { Cohort, getCohort } from '@/services/cohorts';
+import { CurriculumTrimester, getCurriculumTrimesters, getTrimesterDays } from '@/services/curriculum';
+import { getStudentProgress, ProgressEntry } from '@/services/progress';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   ChevronDown, 
   ChevronRight, 
@@ -22,15 +23,44 @@ import {
 } from 'lucide-react';
 
 const Lessons = () => {
-  const [openTrimesters, setOpenTrimesters] = useState<Record<string, boolean>>({
-    '1': true, // First trimester open by default
-  });
+  const [openTrimesters, setOpenTrimesters] = useState<Record<string, boolean>>({});
+  const [cohort, setCohort] = useState<Cohort | null>(null);
+  const [trimesters, setTrimesters] = useState<CurriculumTrimester[]>([]);
+  const [daysByTrimester, setDaysByTrimester] = useState<Record<string, any[]>>({});
+  const [progressEntries, setProgressEntries] = useState<ProgressEntry[]>([]);
 
-  // Get current cohort (in real app, this would come from user context)
-  const currentCohort = MOCK_COHORTS[0]; // Assuming first cohort for demo
-  
-  // Filter trimesters for current cohort
-  const trimesters = MOCK_TRIMESTERS.filter(t => t.cohort_id === currentCohort.id);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user?.enrollments?.length) return;
+    const cohortId = user.enrollments[0].cohort_id;
+
+    // Fetch cohort
+    getCohort(cohortId)
+      .then(async (c) => {
+        setCohort(c);
+        // open the current trimester accordion by default
+        setOpenTrimesters({ [c.current_trimester.toString()]: true });
+
+        const tris = await getCurriculumTrimesters(c.curriculum_id);
+        setTrimesters(tris);
+
+        const dayMap: Record<string, any[]> = {};
+        await Promise.all(
+          tris.map(async (tri) => {
+            let days = tri.days && tri.days.length > 0 ? tri.days : await getTrimesterDays(tri.id);
+            days = days.map((d: any) => ({ ...d, day_number: d.day_number ?? d.number }));
+            dayMap[tri.id] = days;
+          })
+        );
+        setDaysByTrimester(dayMap);
+
+        // Progress
+        const progress = await getStudentProgress(user.id, c.id);
+        setProgressEntries(progress);
+      })
+      .catch((err) => console.error('Failed to load lessons data', err));
+  }, [user]);
 
   const toggleTrimester = (trimesterId: string) => {
     setOpenTrimesters(prev => ({
@@ -39,38 +69,56 @@ const Lessons = () => {
     }));
   };
 
-  // Helper function to get days from curriculum template
-  const getTrimesterDays = (trimester: any) => {
-    // Find the curriculum trimester that matches this cohort trimester
-    const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
-      ct => ct.curriculum_id === currentCohort.curriculum_template_id && ct.number === trimester.number
-    );
-    return curriculumTrimester?.days || [];
-  };
+  const getTrimesterDaysLocal = (trimester: CurriculumTrimester) => daysByTrimester[trimester.id] || [];
 
-  const getDayProgress = (dayNumber: number) => {
-    // Mock progress data - in real app, this would come from user's actual progress
-    const completedDays = Math.floor(Math.random() * 5) + 1; // Random for demo
+  const buildDayProgress = (dayId: string) => {
+    const entry = progressEntries.find((p) => p.day.id === dayId);
+    if (!entry) {
+      return {
+        reading: false,
+        listeningAmerican: false,
+        listeningBritish: false,
+        vocabulary: false,
+        topic: false,
+        totalCompleted: 0,
+        total: 5,
+      };
+    }
+
+    const activities = entry.completed_activities || [];
+    const isDone = (act: string) => activities.includes(act);
+
     return {
-      reading: dayNumber <= completedDays,
-      listeningAmerican: dayNumber <= completedDays,
-      listeningBritish: dayNumber <= completedDays - 1,
-      vocabulary: dayNumber <= completedDays,
-      topic: dayNumber <= completedDays - 1,
-      totalCompleted: dayNumber <= completedDays ? 5 : Math.floor(Math.random() * 5),
-      total: 5
+      reading: entry.completed || isDone('reading'),
+      listeningAmerican: isDone('listening_american'),
+      listeningBritish: isDone('listening_british'),
+      vocabulary: isDone('vocabulary_test'),
+      topic: isDone('topic_test'),
+      totalCompleted: entry.completed ? 5 : activities.length,
+      total: 5,
     };
   };
 
-  const getTrimesterProgress = (trimester: any) => {
-    const currentTrimester = currentCohort.current_trimester;
+  const getTrimesterProgress = (trimester: CurriculumTrimester) => {
+    if (!cohort) return 0;
+    const currentTrimester = cohort.current_trimester;
     if (trimester.number < currentTrimester) return 100;
-    if (trimester.number === currentTrimester) return 35; // Current progress
+    if (trimester.number === currentTrimester) {
+      // crude calc based on day completion entries
+      const days = getTrimesterDaysLocal(trimester);
+      if (!days.length) return 0;
+      const completedCount = days.filter((d) => {
+        const entry = progressEntries.find((p) => p.day.id === d.id);
+        return entry?.completed;
+      }).length;
+      return Math.round((completedCount / days.length) * 100);
+    }
     return 0;
   };
 
-  const getTrimesterStatus = (trimester: any) => {
-    const currentTrimester = currentCohort.current_trimester;
+  const getTrimesterStatus = (trimester: CurriculumTrimester) => {
+    if (!cohort) return 'upcoming';
+    const currentTrimester = cohort.current_trimester;
     if (trimester.number < currentTrimester) return 'completed';
     if (trimester.number === currentTrimester) return 'current';
     return 'upcoming';
@@ -85,13 +133,13 @@ const Lessons = () => {
               <h1 className="text-2xl sm:text-3xl font-bold mb-2 truncate">Your Learning Journey</h1>
               <div className="flex items-center gap-2 text-gray-600 flex-wrap">
                 <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                <span className="truncate">{currentCohort.name}</span>
-                <Badge variant="outline" className="flex-shrink-0">{currentCohort.proficiency_level}</Badge>
+                <span className="truncate">{cohort?.name}</span>
+                <Badge variant="outline" className="flex-shrink-0">{cohort?.proficiency_level}</Badge>
               </div>
             </div>
             <div className="text-left sm:text-right flex-shrink-0">
               <p className="text-sm text-gray-600">Current Progress</p>
-              <p className="text-xl sm:text-2xl font-bold text-blue-600">Trimester {currentCohort.current_trimester}</p>
+              <p className="text-xl sm:text-2xl font-bold text-blue-600">Trimester {cohort?.current_trimester}</p>
             </div>
           </div>
         </div>
@@ -101,7 +149,7 @@ const Lessons = () => {
             const isOpen = openTrimesters[trimester.id] || false;
             const progress = getTrimesterProgress(trimester);
             const status = getTrimesterStatus(trimester);
-            const trimesterDays = getTrimesterDays(trimester);
+            const trimesterDays = getTrimesterDaysLocal(trimester);
             
             return (
               <Card key={trimester.id} className={`transition-all duration-200 ${
@@ -166,7 +214,7 @@ const Lessons = () => {
                         <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">Days in this Trimester</h3>
                         <div className="space-y-2 sm:space-y-3">
                           {trimesterDays.map((day, dayIndex) => {
-                            const dayProgress = getDayProgress(day.day_number);
+                            const dayProgress = buildDayProgress(day.id);
                             const isAccessible = status !== 'upcoming';
                             
                             return (

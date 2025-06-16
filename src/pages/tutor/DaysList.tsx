@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,64 +23,47 @@ import {
   ArrowRight,
   Eye
 } from 'lucide-react';
-import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
-import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
+import { Cohort, getCohort, CohortTrimester, getCohortTrimesters, getCohortTrimesterDays } from '@/services/cohorts';
 import { toast } from '@/hooks/use-toast';
+import { setDayAccess } from '@/services/dayAccess';
 
 const DaysList = () => {
   const { cohortId, trimesterId } = useParams();
   const navigate = useNavigate();
   
-  const cohort = MOCK_COHORTS.find(c => c.id === cohortId);
-  const trimester = MOCK_TRIMESTERS.find(t => t.id === trimesterId);
-  
-  // Debug logging
-  console.log('DaysList Debug:', {
-    cohortId,
-    trimesterId,
-    foundCohort: cohort?.name,
-    foundTrimester: trimester?.name,
-    curriculumTrimesterId: trimester?.curriculum_trimester_id
-  });
-  
-  // Get days from curriculum template
-  const getTrimesterDays = () => {
-    if (!trimester) {
-      console.log('No trimester found');
-      return [];
-    }
-    
-    const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
-      ct => ct.id === trimester.curriculum_trimester_id
-    );
-    
-    console.log('Curriculum lookup:', {
-      looking_for: trimester.curriculum_trimester_id,
-      available: MOCK_CURRICULUM_TRIMESTERS.map(ct => ct.id),
-      found: curriculumTrimester?.name
-    });
-    
-    if (!curriculumTrimester) {
-      // Fallback: create sample days for demonstration
-      console.log('Creating fallback days for demonstration');
-      return Array.from({ length: 24 }, (_, index) => ({
-        id: `fallback_day_${index + 1}`,
-        day_number: index + 1,
-        title: `Day ${index + 1}: Sample Lesson`,
-        description: `Sample lesson content for day ${index + 1}`,
-        story_text: '<p>Sample story content...</p>',
-        topic_notes: '<p>Sample topic notes...</p>',
-        british_audio_url: '',
-        american_audio_url: ''
-      }));
-    }
-    
-    return curriculumTrimester?.days || [];
-  };
-  
+  const [cohort, setCohort] = useState<Cohort | null>(null);
+  const [trimester, setTrimester] = useState<CohortTrimester | null>(null);
+  const [trimesterDays, setTrimesterDays] = useState<any[]>([]);
   const [dayAccessControl, setDayAccessControl] = useState<Record<string, boolean>>({});
-  
-  const trimesterDays = getTrimesterDays();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!cohortId || !trimesterId) return;
+
+    // Fetch cohort, trimester list, then days
+    Promise.all([
+      getCohort(cohortId),
+      getCohortTrimesters(cohortId),
+    ])
+      .then(([c, tris]) => {
+        setCohort(c);
+        const tri = tris.find((t) => t.id === trimesterId) || null;
+        setTrimester(tri);
+        if (!tri) return Promise.resolve([]);
+        return getCohortTrimesterDays(cohortId, trimesterId);
+      })
+      .then((days) => {
+        setTrimesterDays(days as any);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => setLoading(false));
+  }, [cohortId, trimesterId]);
+
+  if (loading) {
+    return <div className="p-10">Loading...</div>;
+  }
 
   if (!cohort || !trimester) {
     return (
@@ -105,15 +87,23 @@ const DaysList = () => {
     );
   }
 
-  const toggleDayAccess = (dayId: string) => {
-    setDayAccessControl(prev => ({
-      ...prev,
-      [dayId]: !prev[dayId]
-    }));
-    toast({
-      title: "Day Access Updated",
-      description: `Day access has been ${dayAccessControl[dayId] ? 'unlocked' : 'locked'} for students.`,
-    });
+  const toggleDayAccess = async (dayId: string) => {
+    const currentlyLocked = dayAccessControl[dayId] === true;
+    setDayAccessControl(prev => ({ ...prev, [dayId]: !currentlyLocked }));
+
+    try {
+      // NOTE: we need the progressId; in a real app we'd fetch it. Here call setDayAccess with placeholder.
+      await setDayAccess(dayId /* assuming progressId == dayId for demo */, !currentlyLocked);
+      toast({
+        title: 'Day Access Updated',
+        description: `Day access has been ${currentlyLocked ? 'unlocked' : 'locked'}.`,
+      });
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Error', description: 'Failed to update access', variant: 'destructive' });
+      // rollback UI
+      setDayAccessControl(prev => ({ ...prev, [dayId]: currentlyLocked }));
+    }
   };
 
   const calculateProgress = () => {

@@ -1,23 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Plus, Save, Edit, Calendar, BookOpen } from 'lucide-react';
-import { MOCK_CURRICULA, MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
+import { CurriculumTemplate, getCurriculumTemplate } from '@/services/curriculumTemplates';
+import { CurriculumTrimester, CurriculumDay, getTrimesterDays, updateCurriculumDay } from '@/services/curriculum';
 import { toast } from '@/hooks/use-toast';
 
 const CurriculumDays = () => {
   const { curriculumId, trimesterId } = useParams();
   const navigate = useNavigate();
   
-  const curriculum = MOCK_CURRICULA.find(c => c.id === curriculumId);
-  const trimester = MOCK_CURRICULUM_TRIMESTERS.find(t => t.id === trimesterId);
-  
-  const [daysData, setDaysData] = useState(trimester?.days || []);
+  const [template, setTemplate] = useState<CurriculumTemplate | null>(null);
+  const [trimester, setTrimester] = useState<CurriculumTrimester | null>(null);
+  const [daysData, setDaysData] = useState<CurriculumDay[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (!curriculum || !trimester) {
+  useEffect(() => {
+    if (!curriculumId || !trimesterId) return;
+
+    // Parallel fetches
+    Promise.all([
+      getCurriculumTemplate(curriculumId),
+      getTrimesterDays(trimesterId),
+    ])
+      .then(([tmpl, days]) => {
+        setTemplate(tmpl);
+        setDaysData(days);
+        // We still need trimester meta; easiest: find in tmpl?
+        // fallback trim metadata fetch via getCurriculumTrimesters then find the one, but simpler we derive placeholder.
+        setTrimester({ id: trimesterId, curriculum_id: curriculumId, name: `Trimester`, number: 0, description: '', total_days: days.length, days } as any);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({ title: 'Error', description: 'Failed to load curriculum days', variant: 'destructive' });
+      })
+      .finally(() => setLoading(false));
+  }, [curriculumId, trimesterId]);
+
+  if (loading) {
+    return <div className="p-10">Loading...</div>;
+  }
+
+  if (!template || !trimester) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar isLoggedIn={true} userRole="tutor" />
@@ -38,17 +65,25 @@ const CurriculumDays = () => {
     navigate(`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}/day/${dayId}/edit`);
   };
 
-  const handleSaveAll = () => {
-    toast({
-      title: "Curriculum Template Saved",
-      description: `All day content for ${trimester.name} has been saved to the curriculum template.`,
-    });
+  const handleSaveAll = async () => {
+    try {
+      await Promise.all(
+        daysData.map((day) => updateCurriculumDay(day.id, day))
+      );
+      toast({
+        title: 'Curriculum Template Saved',
+        description: `All day content for ${trimester.name} has been saved.`,
+      });
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Error', description: 'Failed to save days', variant: 'destructive' });
+    }
   };
 
   const addNewDay = () => {
-    const newDay = {
-      id: `day_${Date.now()}`,
-      trimester_id: trimester.id,
+    const newDay: CurriculumDay = {
+      id: `tmp_${Date.now()}`,
+      trimester_id: trimester!.id,
       title: `New Lesson ${daysData.length + 1}`,
       description: `Learning objectives for day ${daysData.length + 1}`,
       day_number: daysData.length + 1,
@@ -58,9 +93,9 @@ const CurriculumDays = () => {
       american_audio_url: '',
       glossary_terms: [],
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    setDaysData(prev => [...prev, newDay]);
+      updated_at: new Date().toISOString(),
+    } as any;
+    setDaysData((prev) => [...prev, newDay]);
   };
 
   return (
@@ -73,7 +108,7 @@ const CurriculumDays = () => {
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
             <Link to="/tutor/curriculum" className="hover:text-brand-blue">Curriculum Templates</Link>
             <span>/</span>
-            <Link to={`/tutor/curriculum/${curriculumId}`} className="hover:text-brand-blue">{curriculum.level}</Link>
+            <Link to={`/tutor/curriculum/${curriculumId}`} className="hover:text-brand-blue">{template.level}</Link>
             <span>/</span>
             <span className="font-medium">{trimester.name}</span>
           </div>
@@ -81,7 +116,7 @@ const CurriculumDays = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div>
               <h1 className="text-3xl font-bold text-brand-blue">{trimester.name} - Template Days</h1>
-              <p className="text-gray-600 mt-1">Edit master curriculum content for {curriculum.level} level</p>
+              <p className="text-gray-600 mt-1">Edit master curriculum content for {template.level} level</p>
             </div>
             
             <div className="flex flex-wrap gap-3">
@@ -113,7 +148,7 @@ const CurriculumDays = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription>Curriculum Level</CardDescription>
-                <CardTitle className="text-lg">{curriculum.level}</CardTitle>
+                <CardTitle className="text-lg">{template.level}</CardTitle>
               </CardHeader>
             </Card>
             <Card>
@@ -126,7 +161,7 @@ const CurriculumDays = () => {
 
           <div className="p-4 bg-amber-50 rounded-lg border border-amber-200 mb-6">
             <p className="text-amber-800 text-sm">
-              <strong>Template Editing:</strong> You are editing the master curriculum template for {curriculum.level}. 
+              <strong>Template Editing:</strong> You are editing the master curriculum template for {template.level}. 
               Changes here will be available for new cohorts but won't affect existing cohorts automatically.
             </p>
           </div>

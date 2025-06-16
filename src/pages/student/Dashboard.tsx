@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ProgressCard from '@/components/student/ProgressCard';
@@ -8,28 +7,50 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Video, Clock } from 'lucide-react';
-import { MOCK_DAYS, MOCK_PROGRESS } from '@/lib/types';
+import { getMe, getMyProgress, getCohortDays } from '@/services/student';
 
 const StudentDashboard = () => {
-  // In a real app, this would come from an API call
-  const studentName = 'John Doe';
-  const currentUserId = 'user1';
-  const days = MOCK_DAYS;
-  const progress = MOCK_PROGRESS;
-  
-  const currentDay = days[1]; // Assuming day 2 is the current day
-  const completedDays = 1;
+  const [studentName, setStudentName] = useState('');
+  const [userId, setUserId] = useState('');
+  const [cohortId, setCohortId] = useState('');
+  const [days, setDays] = useState<any[]>([]);
+  const [progress, setProgress] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getMe()
+      .then((profile) => {
+        setStudentName(profile.name);
+        setUserId(profile.id);
+        setCohortId(profile.cohort_id);
+        return Promise.all([
+          getCohortDays(profile.cohort_id),
+          getMyProgress(profile.id, profile.cohort_id),
+        ]);
+      })
+      .then(([daysRes, progRes]) => {
+        setDays(daysRes);
+        setProgress(progRes);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <Layout isLoggedIn={true} userRole="student"><div className="p-10">Loading...</div></Layout>;
+  }
+
+  if (days.length === 0) {
+    return <Layout isLoggedIn={true} userRole="student"><div className="p-10">No days available.</div></Layout>;
+  }
+
+  const currentDayIndex = progress.find((p:any) => p.completed_at === undefined) ? progress.length : progress.length; // simplistic
+  const currentDay = days[currentDayIndex] || days[0];
+  const completedDays = progress.filter((p:any) => p.completed_at).length;
   const totalDays = days.length;
-  
-  // Mock data for weekly rankings with updated scores
-  const cohortStudents = [
-    { id: 'user2', name: 'Alice Johnson', username: 'alice_j', score: 95 },
-    { id: currentUserId, name: studentName, username: 'john_doe', score: 87 },
-    { id: 'user3', name: 'Bob Smith', username: 'bob_smith', score: 82 },
-    { id: 'user4', name: 'Carol Wilson', username: 'carol_w', score: 78 },
-    { id: 'user5', name: 'David Brown', username: 'david_b', score: 75 },
-  ];
-  
+
+  const cohortStudents:any[] = [];
+
   // Get today's activities including Writing
   const todayActivities = [
     { name: 'Reading', completed: true },
@@ -72,9 +93,9 @@ const StudentDashboard = () => {
           />
           <ProgressCard
             title="Vocabulary Score"
-            value={progress[0].score_summary.vocabulary}
+            value={progress[0]?.score_summary?.vocabulary || 0}
             maxValue={100}
-            label={`${progress[0].score_summary.vocabulary}% correct`}
+            label={`${progress[0]?.score_summary?.vocabulary}% correct`}
           />
           <ProgressCard
             title="Writing Score"
@@ -84,9 +105,9 @@ const StudentDashboard = () => {
           />
           <ProgressCard
             title="Topic Assessments"
-            value={progress[0].score_summary.topic}
+            value={progress[0]?.score_summary?.topic || 0}
             maxValue={100}
-            label={`${progress[0].score_summary.topic}% correct`}
+            label={`${progress[0]?.score_summary?.topic}% correct`}
           />
         </div>
         
@@ -178,7 +199,7 @@ const StudentDashboard = () => {
           </div>
           
           <div>
-            <WeeklyRankings students={cohortStudents} currentUserId={currentUserId} />
+            <WeeklyRankings students={cohortStudents} currentUserId={userId} />
           </div>
         </div>
       </div>

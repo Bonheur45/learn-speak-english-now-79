@@ -1,22 +1,29 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { MOCK_COHORTS, ProficiencyLevel, PROFICIENCY_DESCRIPTIONS } from '@/lib/types';
+import { ProficiencyLevel, PROFICIENCY_DESCRIPTIONS } from '@/lib/types';
 import { Link } from 'react-router-dom';
 import { BookOpen, GraduationCap, Users } from 'lucide-react';
+import { getCohorts, Cohort } from '@/services/cohorts';
+import { useAuth } from '@/hooks/useAuth';
 
 const Cohorts = () => {
-  const cohorts = MOCK_COHORTS;
+  const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<ProficiencyLevel>('A1-A2');
+  const { user } = useAuth();
   
-  // Get the user's current cohort (in a real app this would come from API/auth)
-  const userCohortId = '1'; // Assuming user is in cohort 1
-  
+  // Determine user cohort from enrollments (if provided)
+  const userCohortId = user?.enrollments?.[0]?.cohort_id ?? null;
+
+  useEffect(() => {
+    // Fetch cohorts from backend, optionally filter by proficiency level
+    getCohorts().then(setCohorts).catch((err) => console.error('Failed to fetch cohorts', err));
+  }, []);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
