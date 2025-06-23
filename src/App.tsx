@@ -65,7 +65,7 @@ const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 pt-24">
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Index />} />

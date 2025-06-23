@@ -28,10 +28,11 @@ const StudentDetails: React.FC = () => {
         setStudent(data);
 
         // Attempt to resolve cohort if not present
-        let cId: string | undefined;
-        if (data.cohort?.id) {
+        let cId: string | undefined = data.assigned_cohort_id;
+        if (!cId && data.cohort?.id) {
           cId = data.cohort.id;
-        } else if (data.user?.enrollments?.length) {
+        }
+        if (!cId && data.user?.enrollments?.length) {
           cId = data.user.enrollments[0].cohort_id;
         }
 
@@ -99,7 +100,7 @@ const StudentDetails: React.FC = () => {
                 <span className="font-medium">Level:</span> {student.current_level || 'Not specified'}
               </div>
               <div>
-                <span className="font-medium">Cohort:</span> {student.cohort?.name || cohort?.name || 'Not assigned'}
+                <span className="font-medium">Cohort:</span> {cohort?.name || student.cohort?.name || 'Not assigned'}
               </div>
               <div>
                 <span className="font-medium">Test Taken:</span> {student.took_proficiency_test ? 'Yes' : 'No'}
