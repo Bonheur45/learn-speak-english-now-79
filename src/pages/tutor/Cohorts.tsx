@@ -1,21 +1,30 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MOCK_COHORTS } from '@/lib/types';
-import { Calendar, Calendar as CalendarIcon, ChevronRight, Edit, Users } from 'lucide-react';
+import { Cohort, getCohorts, refreshCohort } from '@/services/cohorts';
+import { Calendar, Calendar as CalendarIcon, ChevronRight, Edit, Users, RefreshCw } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 const TutorCohorts = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [cohorts, setCohorts] = useState<Cohort[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    getCohorts()
+      .then(setCohorts)
+      .catch((err) => console.error('Failed to fetch cohorts', err))
+      .finally(() => setLoading(false));
+  }, []);
   
   // Group cohorts by status
-  const activeCohorts = MOCK_COHORTS.filter(c => c.status === 'active');
-  const upcomingCohorts = MOCK_COHORTS.filter(c => c.status === 'upcoming');
-  const completedCohorts = MOCK_COHORTS.filter(c => c.status === 'completed');
+  const activeCohorts = cohorts.filter(c => c.status === 'active');
+  const upcomingCohorts = cohorts.filter(c => c.status === 'upcoming');
+  const completedCohorts = cohorts.filter(c => c.status === 'completed');
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -40,7 +49,7 @@ const TutorCohorts = () => {
             <TabsTrigger value="active" className="flex-1">Active ({activeCohorts.length})</TabsTrigger>
             <TabsTrigger value="upcoming" className="flex-1">Upcoming ({upcomingCohorts.length})</TabsTrigger>
             <TabsTrigger value="completed" className="flex-1">Completed ({completedCohorts.length})</TabsTrigger>
-            <TabsTrigger value="all" className="flex-1">All ({MOCK_COHORTS.length})</TabsTrigger>
+            <TabsTrigger value="all" className="flex-1">All ({cohorts.length})</TabsTrigger>
           </TabsList>
           
           <TabsContent value="active">
@@ -78,10 +87,10 @@ const TutorCohorts = () => {
           
           <TabsContent value="all">
             <div className="grid gap-6">
-              {MOCK_COHORTS.map(cohort => (
+              {cohorts.map(cohort => (
                 <CohortCard key={cohort.id} cohort={cohort} />
               ))}
-              {MOCK_COHORTS.length === 0 && (
+              {cohorts.length === 0 && (
                 <EmptyState message="No cohorts found" />
               )}
             </div>
@@ -124,8 +133,22 @@ const CohortCard = ({ cohort }: CohortCardProps) => {
     }
   };
   
-  // Mock student count - in a real app this would come from an API
-  const studentCount = Math.floor(Math.random() * 30) + 10;
+  const [refreshing, setRefreshing] = React.useState(false);
+  const studentCount = cohort.enrolled_students ?? Math.floor(Math.random() * 30) + 10;
+  
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refreshCohort(cohort.id);
+      toast({ title: 'Cohort refreshed', description: cohort.name });
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Error', description: 'Unable to refresh', variant: 'destructive' });
+    } finally {
+      setRefreshing(false);
+    }
+  };
   
   return (
     <Card className="overflow-hidden">
@@ -147,6 +170,9 @@ const CohortCard = ({ cohort }: CohortCardProps) => {
               <Link to={`/tutor/cohorts/${cohort.id}/edit`}>
                 <Edit className="h-4 w-4 mr-1" /> Edit
               </Link>
+            </Button>
+            <Button onClick={handleRefresh} variant="outline" size="sm" disabled={refreshing} className="flex items-center gap-1">
+              <RefreshCw className="h-4 w-4" /> {refreshing ? 'Refreshing' : 'Refresh'}
             </Button>
             <Button asChild size="sm">
               <Link to={`/tutor/cohorts/${cohort.id}`}>

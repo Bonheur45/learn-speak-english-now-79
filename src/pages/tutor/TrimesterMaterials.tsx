@@ -1,27 +1,43 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, BookOpen, ArrowRight } from 'lucide-react';
-import { MOCK_COHORTS, MOCK_TRIMESTERS } from '@/lib/types';
-import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
+import { Cohort, getCohort, CohortTrimester, getCohortTrimesters } from '@/services/cohorts';
+import { toast } from '@/hooks/use-toast';
 
 const TrimesterMaterials = () => {
   const { cohortId } = useParams();
   
-  const cohort = MOCK_COHORTS.find(c => c.id === cohortId);
-  const trimesters = MOCK_TRIMESTERS.filter(t => t.cohort_id === cohortId);
+  const [cohort, setCohort] = useState<Cohort | null>(null);
+  const [trimesters, setTrimesters] = useState<CohortTrimester[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Helper function to get days count from curriculum template
-  const getTrimesterDaysCount = (trimester: any) => {
-    const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
-      ct => ct.id === trimester.curriculum_trimester_id
-    );
-    return curriculumTrimester?.days?.length || 0;
-  };
+  useEffect(() => {
+    if (!cohortId) return;
+    Promise.all([
+      getCohort(cohortId),
+      getCohortTrimesters(cohortId),
+    ])
+      .then(([c, tris]) => {
+        setCohort(c);
+        setTrimesters(tris);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({ title: 'Error', description: 'Failed to load trimester data', variant: 'destructive' });
+      })
+      .finally(() => setLoading(false));
+  }, [cohortId]);
+
+  // Helper to get days count if provided by API
+  const getTrimesterDaysCount = (trimester: CohortTrimester) => trimester.total_days ?? 0;
+
+  if (loading) {
+    return <div className="p-10">Loading...</div>;
+  }
 
   if (!cohort) {
     return (

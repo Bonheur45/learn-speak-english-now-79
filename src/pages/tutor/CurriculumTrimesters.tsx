@@ -1,20 +1,46 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, BookOpen, Calendar, ArrowRight } from 'lucide-react';
-import { MOCK_CURRICULA, MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
+import { CurriculumTemplate, getCurriculumTemplate } from '@/services/curriculumTemplates';
+import { CurriculumTrimester, getCurriculumTrimesters } from '@/services/curriculum';
+import { toast } from '@/hooks/use-toast';
 
 const CurriculumTrimesters = () => {
   const { curriculumId } = useParams();
   
-  const curriculum = MOCK_CURRICULA.find(c => c.id === curriculumId);
-  const trimesters = MOCK_CURRICULUM_TRIMESTERS.filter(t => t.curriculum_id === curriculumId);
-  
-  if (!curriculum) {
+  const [template, setTemplate] = useState<CurriculumTemplate | null>(null);
+  const [trimesters, setTrimesters] = useState<CurriculumTrimester[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!curriculumId) return;
+    // Fetch template & trimesters in parallel
+    Promise.all([
+      getCurriculumTemplate(curriculumId),
+      getCurriculumTrimesters(curriculumId),
+    ])
+      .then(([tmpl, tris]) => {
+        setTemplate(tmpl);
+        setTrimesters(tris);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({ title: 'Error', description: 'Failed to load curriculum data', variant: 'destructive' });
+      })
+      .finally(() => setLoading(false));
+  }, [curriculumId]);
+
+  if (loading) {
+    return (
+      <div className="p-10">Loading...</div>
+    );
+  }
+
+  if (!template) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar isLoggedIn={true} userRole="tutor" />
@@ -40,13 +66,13 @@ const CurriculumTrimesters = () => {
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
             <Link to="/tutor/curriculum" className="hover:text-brand-blue">Curriculum Templates</Link>
             <span>/</span>
-            <span className="font-medium">{curriculum.level}</span>
+            <span className="font-medium">{template.level}</span>
           </div>
           
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-brand-blue">{curriculum.name}</h1>
-              <p className="text-gray-600 mt-1">{curriculum.description}</p>
+              <h1 className="text-3xl font-bold text-brand-blue">{template.name}</h1>
+              <p className="text-gray-600 mt-1">{template.description}</p>
             </div>
             
             <div className="flex flex-wrap gap-3">
@@ -57,7 +83,7 @@ const CurriculumTrimesters = () => {
                 </Link>
               </Button>
               <Badge variant="secondary" className="h-9 px-3 flex items-center">
-                Template Level: {curriculum.level}
+                Template Level: {template.level}
               </Badge>
             </div>
           </div>
@@ -100,7 +126,7 @@ const CurriculumTrimesters = () => {
                   
                   <div className="pt-4 border-t">
                     <Button asChild className="w-full" variant="outline">
-                      <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimester.id}`}>
+                      <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimester.id}`}> 
                         <BookOpen className="h-4 w-4 mr-2" />
                         Edit Days
                         <ArrowRight className="h-4 w-4 ml-2" />

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -7,79 +6,44 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getStudents, StudentProfile } from '@/services/students';
 
 const Students = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [studentsList, setStudentsList] = useState<StudentProfile[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  // Mock data for students
-  const studentsList = [
-    { 
-      id: '1', 
-      name: 'John Doe', 
-      email: 'john@example.com', 
-      lastActive: '2 hours ago', 
-      progress: 75,
-      completedDays: 15,
-      totalDays: 30,
-      assessmentScore: 82,
-      status: 'active'
-    },
-    { 
-      id: '2', 
-      name: 'Sarah Johnson', 
-      email: 'sarah@example.com', 
-      lastActive: '5 hours ago', 
-      progress: 92,
-      completedDays: 24,
-      totalDays: 30,
-      assessmentScore: 95,
-      status: 'active'
-    },
-    { 
-      id: '3', 
-      name: 'Michael Brown', 
-      email: 'michael@example.com', 
-      lastActive: '1 day ago', 
-      progress: 45,
-      completedDays: 9,
-      totalDays: 30,
-      assessmentScore: 68,
-      status: 'active'
-    },
-    { 
-      id: '4', 
-      name: 'Emily Davis', 
-      email: 'emily@example.com', 
-      lastActive: '3 days ago', 
-      progress: 60,
-      completedDays: 12,
-      totalDays: 30,
-      assessmentScore: 76,
-      status: 'inactive'
-    },
-    { 
-      id: '5', 
-      name: 'David Wilson', 
-      email: 'david@example.com', 
-      lastActive: '1 week ago', 
-      progress: 30,
-      completedDays: 6,
-      totalDays: 30,
-      assessmentScore: 58,
-      status: 'inactive'
-    },
-  ];
+  useEffect(() => {
+    getStudents()
+      .then(setStudentsList)
+      .catch((err) => console.error('Failed to fetch students', err))
+      .finally(() => setLoading(false));
+  }, []);
 
-  // Filter students based on search query and active tab
-  const filteredStudents = studentsList.filter(student => {
-    const matchesSearch = 
-      student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      student.email.toLowerCase().includes(searchQuery.toLowerCase());
+  const mapProgress = (student: StudentProfile) => {
+    // placeholder calculation until backend supplies progress field
+    return {
+      progress: 0,
+      completedDays: 0,
+      totalDays: 0,
+      assessmentScore: 0,
+    };
+  };
+
+  // Safely filter students based on search query and active tab. We normalise each searchable
+  // field (name & email) to an empty string when it is null/undefined to ensure that
+  // calling `toLowerCase()` never throws.
+  const filteredStudents = studentsList.filter((student) => {
+    const name = (student.full_name || student.user?.full_name || '').toLowerCase();
+    const email = (student.email || student.user?.email || '').toLowerCase();
+    const query = searchQuery.toLowerCase();
+
+    const matchesSearch = name.includes(query) || email.includes(query);
     
     if (activeTab === 'all') return matchesSearch;
-    if (activeTab === 'active') return matchesSearch && student.status === 'active';
-    if (activeTab === 'inactive') return matchesSearch && student.status === 'inactive';
+    if (activeTab === 'active') return matchesSearch && student.status === 'approved';
+    if (activeTab === 'inactive') return matchesSearch && student.status !== 'approved';
     
     return false;
   });
@@ -140,28 +104,42 @@ const Students = () => {
                   <tr key={student.id} className="border-b">
                     <td className="py-4 pl-2">
                       <div>
-                        <div className="font-medium">{student.name}</div>
-                        <div className="text-sm text-gray-500">{student.email}</div>
-                      </div>
-                    </td>
-                    <td className="py-4">{student.lastActive}</td>
-                    <td className="py-4">
-                      <div className="flex items-center space-x-2">
-                        <Progress value={student.progress} className="w-24 h-2" />
-                        <span className="text-sm text-gray-600">{student.progress}%</span>
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {student.completedDays}/{student.totalDays} days
+                        <div className="font-medium">
+                          {student.full_name || student.user?.full_name || student.username || student.user?.username || '—'}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {student.email || student.user?.email || '—'}
+                        </div>
                       </div>
                     </td>
                     <td className="py-4">
-                      <span className={`font-medium ${student.assessmentScore >= 80 ? 'text-green-600' : student.assessmentScore >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
-                        {student.assessmentScore}%
-                      </span>
+                      {(() => {
+                        const ts = student.updated_at || student.user?.updated_at || student.created_at || student.user?.created_at;
+                        return ts ? new Date(ts).toLocaleDateString() : '—';
+                      })()}
                     </td>
                     <td className="py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${student.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                        {student.status === 'active' ? 'Active' : 'Inactive'}
+                      {(() => {
+                        const p = mapProgress(student);
+                        return (
+                          <>
+                            <div className="flex items-center space-x-2">
+                              <Progress value={p.progress} className="w-24 h-2" />
+                              <span className="text-sm text-gray-600">{p.progress}%</span>
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {p.completedDays}/{p.totalDays} days
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </td>
+                    <td className="py-4">
+                      <span className={`font-medium text-gray-600`}>–</span>
+                    </td>
+                    <td className="py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${student.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                        {student.status}
                       </span>
                     </td>
                     <td className="py-4 text-right">
@@ -194,10 +172,10 @@ const Students = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-medium text-gray-700 mb-2">Average Progress</h3>
                 <div className="text-3xl font-bold text-brand-blue">
-                  {Math.round(studentsList.reduce((sum, student) => sum + student.progress, 0) / studentsList.length)}%
+                  {studentsList.length > 0 ? Math.round(studentsList.reduce((sum, student) => sum + (student.progress ?? 0), 0) / studentsList.length) : 0}%
                 </div>
                 <Progress 
-                  value={studentsList.reduce((sum, student) => sum + student.progress, 0) / studentsList.length} 
+                  value={studentsList.length > 0 ? studentsList.reduce((sum, student) => sum + (student.progress ?? 0), 0) / studentsList.length : 0} 
                   className="h-2 mt-2"
                 />
               </div>
@@ -205,10 +183,10 @@ const Students = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-medium text-gray-700 mb-2">Average Assessment Score</h3>
                 <div className="text-3xl font-bold text-brand-blue">
-                  {Math.round(studentsList.reduce((sum, student) => sum + student.assessmentScore, 0) / studentsList.length)}%
+                  {studentsList.length > 0 ? Math.round(studentsList.reduce((sum, student) => sum + (student.assessmentScore ?? 0), 0) / studentsList.length) : 0}%
                 </div>
                 <Progress 
-                  value={studentsList.reduce((sum, student) => sum + student.assessmentScore, 0) / studentsList.length} 
+                  value={studentsList.length > 0 ? studentsList.reduce((sum, student) => sum + (student.assessmentScore ?? 0), 0) / studentsList.length : 0} 
                   className="h-2 mt-2"
                 />
               </div>

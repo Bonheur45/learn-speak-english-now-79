@@ -1,32 +1,52 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { getStudents, StudentProfile } from '@/services/students';
+
+interface RecentStudent {
+  id: string;
+  full_name: string;
+  email: string;
+  lastActive: string; // formatted string
+}
 
 const TutorDashboard = () => {
-  // In a real app, this would come from an API call
-  const tutorName = 'Jane Smith';
-  
-  // Mock data
-  const studentCount = 25;
-  const uploadedMaterialsCount = 42;
-  const assessmentsCount = 15;
-  
-  const studentActivity = [
-    { day: 'Day 1', completionRate: 95 },
-    { day: 'Day 2', completionRate: 85 },
-    { day: 'Day 3', completionRate: 70 },
-  ];
-  
-  const recentStudents = [
-    { id: '1', name: 'John Doe', email: 'john@example.com', lastActive: '2 hours ago', progress: 75 },
-    { id: '2', name: 'Sarah Johnson', email: 'sarah@example.com', lastActive: '5 hours ago', progress: 92 },
-    { id: '3', name: 'Michael Brown', email: 'michael@example.com', lastActive: '1 day ago', progress: 45 },
-  ];
-  
+  const tutorName = 'Tutor';
+
+  const [studentCount, setStudentCount] = useState(0);
+  const [recentStudents, setRecentStudents] = useState<RecentStudent[]>([]);
+
+  const uploadedMaterialsCount = 0; // TODO: fetch materials stats
+  const assessmentsCount = 0; // TODO: fetch assessments stats
+
+  const studentActivity = [] as { day: string; completionRate: number }[]; // placeholder until analytics endpoint wired
+
+  useEffect(() => {
+    getStudents()
+      .then((students) => {
+        setStudentCount(students.length);
+
+        // sort by updated_at (or created_at) desc and take top 3
+        const sorted = [...students].sort((a, b) => {
+          const aDate = new Date(a.updated_at || a.created_at || 0).getTime();
+          const bDate = new Date(b.updated_at || b.created_at || 0).getTime();
+          return bDate - aDate;
+        });
+
+        const recents = sorted.slice(0, 3).map((s) => ({
+          id: s.id,
+          full_name: s.full_name || s.username || 'Student',
+          email: s.email,
+          lastActive: new Date(s.updated_at || s.created_at).toLocaleDateString(),
+        }));
+        setRecentStudents(recents);
+      })
+      .catch((err) => console.error('Failed to fetch students', err));
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar isLoggedIn={true} userRole="tutor" />
@@ -110,7 +130,7 @@ const TutorDashboard = () => {
                 <div key={student.id} className={`py-3 ${index !== recentStudents.length - 1 ? 'border-b' : ''}`}>
                   <div className="flex justify-between items-center">
                     <div>
-                      <h4 className="font-medium">{student.name}</h4>
+                      <h4 className="font-medium">{student.full_name}</h4>
                       <p className="text-sm text-gray-500">{student.email} • Last active {student.lastActive}</p>
                     </div>
                     <Button asChild variant="ghost" className="text-brand-blue hover:text-brand-yellow hover:bg-brand-blue">

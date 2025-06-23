@@ -1,11 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
-import { MOCK_CURRICULA, MOCK_CURRICULUM_TRIMESTERS, CurriculumDay } from '@/lib/curriculumTypes';
+import { getCurriculumTemplate } from '@/services/curriculumTemplates';
+import { getTrimesterDays, updateCurriculumDay } from '@/services/curriculum';
 import DayContentEditor from '@/components/DayContentEditor';
 import { toast } from '@/hooks/use-toast';
 
@@ -13,93 +12,100 @@ const CurriculumDayEditor = () => {
   const { curriculumId, trimesterId, dayId } = useParams();
   const navigate = useNavigate();
   
-  // Debug logging
-  console.log('CurriculumDayEditor params:', { curriculumId, trimesterId, dayId });
-  console.log('Available curricula:', MOCK_CURRICULA.map(c => ({ id: c.id, level: c.level })));
-  console.log('Available trimesters:', MOCK_CURRICULUM_TRIMESTERS.map(t => ({ id: t.id, curriculum_id: t.curriculum_id, name: t.name })));
-  
-  const curriculum = MOCK_CURRICULA.find(c => c.id === curriculumId);
-  const trimester = MOCK_CURRICULUM_TRIMESTERS.find(t => t.id === trimesterId);
-  const curriculumDay = trimester?.days.find(d => d.id === dayId);
-  
-  console.log('Found curriculum:', curriculum);
-  console.log('Found trimester:', trimester);
-  console.log('Found day:', curriculumDay);
-  
-  if (!curriculum || !trimester || !curriculumDay) {
+  // For now, fetch day data from API
+  const [loading, setLoading] = useState(true);
+  const [templateLevel, setTemplateLevel] = useState<string>('');
+  const [trimesterName, setTrimesterName] = useState<string>('');
+  const [dayData, setDayData] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (!curriculumId || !trimesterId || !dayId) return;
+
+    // Fetch template level, trimester name (optional), and day info
+    Promise.all([
+      getCurriculumTemplate(curriculumId),
+      getTrimesterDays(trimesterId),
+    ])
+      .then(([tmpl, days]) => {
+        setTemplateLevel(tmpl.level);
+        const day = days.find((d) => d.id === dayId);
+        if (!day) throw new Error('Day not found');
+        setDayData(day);
+        // trimester name is placeholder; ideally fetched from separate service
+        setTrimesterName(`Trimester`);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({ title: 'Error', description: 'Failed to load day data', variant: 'destructive' });
+      })
+      .finally(() => setLoading(false));
+  }, [curriculumId, trimesterId, dayId]);
+
+  if (loading) {
+    return <div className="p-10">Loading...</div>;
+  }
+
+  if (!dayData) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar isLoggedIn={true} userRole="tutor" />
         <div className="flex-grow container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600">Content Not Found</h1>
-            <p className="mt-2 text-gray-600">The requested curriculum content could not be found.</p>
-            <div className="mt-4 text-left bg-gray-100 p-4 rounded">
-              <p><strong>Debug Info:</strong></p>
-              <p>Looking for curriculum ID: {curriculumId}</p>
-              <p>Looking for trimester ID: {trimesterId}</p>
-              <p>Looking for day ID: {dayId}</p>
-              <p>Found curriculum: {curriculum ? 'Yes' : 'No'}</p>
-              <p>Found trimester: {trimester ? 'Yes' : 'No'}</p>
-              <p>Found day: {curriculumDay ? 'Yes' : 'No'}</p>
-            </div>
-            <Button asChild className="mt-4">
-              <Link to="/tutor/curriculum">Back to Curricula</Link>
-            </Button>
+            <h1 className="text-2xl font-bold text-red-600">Day Not Found</h1>
           </div>
         </div>
       </div>
     );
   }
 
-  // Convert curriculum day to the format expected by DayContentEditor
-  const [dayData, setDayData] = useState({
-    id: curriculumDay.id,
-    day_number: curriculumDay.day_number,
-    title: curriculumDay.title,
-    description: curriculumDay.description || 'Lesson description for curriculum template',
-    story_text: curriculumDay.story_text,
-    topic_notes: curriculumDay.topic_notes,
-    british_audio_url: curriculumDay.british_audio_url,
-    american_audio_url: curriculumDay.american_audio_url
-  });
-
-  const handleSave = (updatedDayData: any) => {
-    setDayData(updatedDayData);
-    toast({
-      title: "Curriculum Template Saved",
-      description: `Day ${updatedDayData.day_number} template has been updated successfully.`,
-    });
+  const handleSave = async (updatedDayData: any) => {
+    try {
+      await updateCurriculumDay(dayId!, updatedDayData);
+      setDayData(updatedDayData);
+      toast({
+        title: 'Curriculum Template Saved',
+        description: `Day ${updatedDayData.day_number} template has been updated successfully.`,
+      });
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Error', description: 'Failed to save day', variant: 'destructive' });
+    }
   };
 
-  const handleSaveAndExit = () => {
-    toast({
-      title: "Template Saved",
-      description: `All changes to Day ${dayData.day_number} have been saved.`,
-    });
-    navigate(`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}`);
+  const handleSaveAndExit = async () => {
+    try {
+      await updateCurriculumDay(dayId!, dayData);
+      toast({
+        title: 'Template Saved',
+        description: `All changes to Day ${dayData.day_number} have been saved.`,
+      });
+      navigate(`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}`);
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Error', description: 'Failed to save day', variant: 'destructive' });
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar isLoggedIn={true} userRole="tutor" />
       
-      <main className="flex-grow container mx-auto px-4 py-8 max-w-6xl">
+      <main className="flex-grow container mx-auto px-4 py-8 pt-24 max-w-6xl">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
             <Link to="/tutor/curriculum" className="hover:text-brand-blue">Curriculum Templates</Link>
             <span>/</span>
-            <Link to={`/tutor/curriculum/${curriculumId}`} className="hover:text-brand-blue">{curriculum.level}</Link>
+            <Link to={`/tutor/curriculum/${curriculumId}`} className="hover:text-brand-blue">{templateLevel}</Link>
             <span>/</span>
-            <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}`} className="hover:text-brand-blue">{trimester.name}</Link>
+            <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}`} className="hover:text-brand-blue">{trimesterName}</Link>
             <span>/</span>
-            <span className="font-medium">Day {curriculumDay.day_number}</span>
+            <span className="font-medium">Day {dayData.day_number}</span>
           </div>
           
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-brand-blue">Edit Day {curriculumDay.day_number}</h1>
+              <h1 className="text-3xl font-bold text-brand-blue">Edit Day {dayData.day_number}</h1>
               <p className="text-gray-600 mt-1">Update lesson content and materials</p>
             </div>
             

@@ -4,10 +4,29 @@ import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Calendar, BookOpen, ArrowRight, Settings, Database, FileText } from 'lucide-react';
-import { MOCK_COHORTS } from '@/lib/types';
+import { Users, Calendar, ArrowRight, Settings, Database, FileText } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Cohort, getCohorts } from '@/services/cohorts';
+import { toast } from '@/hooks/use-toast';
 
 const CohortMaterials = () => {
+  const [cohorts, setCohorts] = useState<Cohort[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getCohorts()
+      .then(setCohorts)
+      .catch((err) => {
+        console.error(err);
+        toast({ title: 'Error', description: 'Failed to load cohorts', variant: 'destructive' });
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <div className="p-10">Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar isLoggedIn={true} userRole="tutor" />
@@ -36,7 +55,7 @@ const CohortMaterials = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {MOCK_COHORTS.map((cohort) => (
+          {cohorts.map((cohort) => (
             <Card key={cohort.id} className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -57,7 +76,7 @@ const CohortMaterials = () => {
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    <span>{new Date(cohort.start_date).getFullYear()}</span>
+                    <span>{new Date(cohort.start_date).toLocaleDateString()}</span>
                   </div>
                 </div>
 
@@ -68,7 +87,7 @@ const CohortMaterials = () => {
                     <span className="text-gray-600">Curriculum Template:</span>
                   </div>
                   <div className="font-medium text-sm mt-1">
-                    {cohort.curriculum_template_id}
+                    {cohort.curriculum_id}
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
                     Position: Day {cohort.current_day_position || 0}

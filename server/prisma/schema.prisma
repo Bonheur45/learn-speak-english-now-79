@@ -1,0 +1,59 @@
+// Datasource
+// Switch to "postgresql" provider when ready
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Curriculum {
+  id               String               @id @default(uuid())
+  level            String
+  name             String
+  description      String
+  total_trimesters Int
+  trimesters       CurriculumTrimester[]
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+}
+
+model CurriculumTrimester {
+  id            String          @id @default(uuid())
+  curriculumId  String
+  curriculum    Curriculum      @relation(fields: [curriculumId], references: [id])
+  number        Int
+  name          String
+  description   String
+  total_days    Int
+  days          CurriculumDay[]
+}
+
+model CurriculumDay {
+  id                 String          @id @default(uuid())
+  trimesterId        String
+  trimester          CurriculumTrimester @relation(fields: [trimesterId], references: [id])
+  day_number         Int
+  title              String
+  description        String
+  story_text         String
+  topic_notes        String
+  british_audio_url  String? 
+  american_audio_url String? 
+  glossary_terms     GlossaryTerm[]
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+}
+
+model GlossaryTerm {
+  id        String         @id @default(uuid())
+  dayId     String
+  day       CurriculumDay  @relation(fields: [dayId], references: [id])
+  term      String
+  definition String
+}
+
+// Additional models (Cohort, Student, etc.) can be added later. 

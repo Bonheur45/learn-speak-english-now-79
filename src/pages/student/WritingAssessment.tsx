@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import TextEditor from "@/components/TextEditor";
 import ResultsDisplay from "@/components/ResultsDisplay";
@@ -128,10 +127,21 @@ const WritingAssessment = () => {
       localStorage.setItem(`writing-attempts-${dayId}`, newAttempts.toString());
       
       // Save the writing assessment score for display in DayContent
-      const averageScore = Math.round((assessmentResult.detailedAnalysis.vocabulary.score + 
-        assessmentResult.detailedAnalysis.grammar.score + 
-        assessmentResult.detailedAnalysis.coherence.score + 
-        assessmentResult.detailedAnalysis.complexity.score) / 4);
+      const averageScore = assessmentResult.sublevels
+        ? Math.round(
+            (assessmentResult.sublevels.vocabulary +
+              assessmentResult.sublevels.grammar +
+              assessmentResult.sublevels.coherence +
+              assessmentResult.sublevels.complexity) /
+              4
+          )
+        : Math.round(
+            (assessmentResult.detailedAnalysis!.vocabulary.score +
+              assessmentResult.detailedAnalysis!.grammar.score +
+              assessmentResult.detailedAnalysis!.coherence.score +
+              assessmentResult.detailedAnalysis!.complexity.score) /
+              4
+          );
       localStorage.setItem(`day${dayId}-writing-score`, averageScore.toString());
       
       console.log("Assessment completed for day:", {

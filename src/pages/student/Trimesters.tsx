@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -6,37 +5,47 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MOCK_COHORTS, MOCK_TRIMESTERS, Trimester, ProficiencyLevel } from '@/lib/types';
-import { MOCK_CURRICULUM_TRIMESTERS } from '@/lib/curriculumTypes';
+import { ProficiencyLevel } from '@/lib/types';
+import { useAuth } from '@/hooks/useAuth';
+import { Cohort, getCohort } from '@/services/cohorts';
+import { CurriculumTrimester, getCurriculumTrimesters, getTrimesterDays } from '@/services/curriculum';
 import { ArrowRight, BookOpen, Calendar, Check, CheckCircle, CircleDashed, Clock } from 'lucide-react';
 
 const Trimesters = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const cohortId = searchParams.get('cohort') || '1';
+  const cohortId = searchParams.get('cohort')!;
   
-  const [selectedCohort, setSelectedCohort] = useState(MOCK_COHORTS.find(c => c.id === cohortId));
-  const [trimesters, setTrimesters] = useState<Trimester[]>([]);
-  const [curriculumDays, setCurriculumDays] = useState<any[]>([]);
+  const [selectedCohort, setSelectedCohort] = useState<Cohort | null>(null);
+  const [trimesters, setTrimesters] = useState<CurriculumTrimester[]>([]);
+  const [daysByTrimester, setDaysByTrimester] = useState<Record<string, any[]>>({});
+  
+  const { user } = useAuth();
   
   useEffect(() => {
-    const cohort = MOCK_COHORTS.find(c => c.id === cohortId);
-    setSelectedCohort(cohort);
-    
-    if (cohort) {
-      // Get cohort's trimesters
-      const cohortTrimesters = MOCK_TRIMESTERS.filter(trim => trim.cohort_id === cohortId);
-      setTrimesters(cohortTrimesters);
-      
-      // Get curriculum template content based on cohort's curriculum_template_id
-      const curriculumTrimester = MOCK_CURRICULUM_TRIMESTERS.find(
-        ct => ct.curriculum_id === cohort.curriculum_template_id
-      );
-      
-      if (curriculumTrimester) {
-        setCurriculumDays(curriculumTrimester.days || []);
-      }
-    }
+    if (!cohortId) return;
+
+    // Fetch cohort details
+    getCohort(cohortId)
+      .then(async (cohortData) => {
+        setSelectedCohort(cohortData);
+
+        // Fetch trimesters from curriculum template
+        const templateId = cohortData.curriculum_id;
+        const tris = await getCurriculumTrimesters(templateId);
+        setTrimesters(tris);
+
+        // For each trimester fetch days
+        const dayMap: Record<string, any[]> = {};
+        await Promise.all(
+          tris.map(async (tri) => {
+            const days = tri.days && tri.days.length > 0 ? tri.days : await getTrimesterDays(tri.id);
+            dayMap[tri.id] = days;
+          })
+        );
+        setDaysByTrimester(dayMap);
+      })
+      .catch((err) => console.error('Failed to load cohort or trimesters', err));
   }, [cohortId]);
   
   if (!selectedCohort) {
@@ -55,7 +64,7 @@ const Trimesters = () => {
     );
   }
   
-  const calculateTrimesterProgress = (trimester: Trimester) => {
+  const calculateTrimesterProgress = (trimester: CurriculumTrimester) => {
     if (selectedCohort!.current_trimester > trimester.number) {
       return 100; // Past trimester, fully completed
     } else if (selectedCohort!.current_trimester === trimester.number) {
@@ -79,10 +88,8 @@ const Trimesters = () => {
   };
 
   // Get days for each trimester from curriculum template
-  const getTrimesterDays = (trimesterNumber: number) => {
-    const startIndex = (trimesterNumber - 1) * 24;
-    const endIndex = startIndex + 24;
-    return curriculumDays.slice(startIndex, endIndex);
+  const getTrimesterDaysLocal = (trimester: CurriculumTrimester) => {
+    return daysByTrimester[trimester.id] || [];
   };
   
   return (
@@ -144,7 +151,7 @@ const Trimesters = () => {
             const isCompleted = progress === 100;
             const isInProgress = selectedCohort.current_trimester === trimester.number;
             const isUpcoming = selectedCohort.current_trimester < trimester.number;
-            const trimesterDays = getTrimesterDays(trimester.number);
+            const trimesterDays = getTrimesterDaysLocal(trimester);
             
             return (
               <Card 

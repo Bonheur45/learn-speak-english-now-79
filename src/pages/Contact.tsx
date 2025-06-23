@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Logo from '@/components/Logo';
@@ -47,11 +46,11 @@ const Contact = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar isLoggedIn={false} />
       
-      <main className="container mx-auto px-4 py-8 flex-grow max-w-3xl">
-        <h1 className="text-3xl font-bold text-brand-blue mb-6">Contact Us</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <main className="container mx-auto px-4 pt-32 md:pt-32 lg:pt-28 pb-8 flex-grow max-w-3xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           <div>
+            <h1 className="text-3xl font-bold text-brand-blue mb-6">Contact Us</h1>
+            
             <p className="mb-4">
               We'd love to hear from you! Please fill out the form below and we'll get back to you as soon as possible.
             </p>

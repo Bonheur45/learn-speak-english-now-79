@@ -1,14 +1,31 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Calendar, ArrowRight, Edit } from 'lucide-react';
-import { MOCK_CURRICULA } from '@/lib/curriculumTypes';
+import { CurriculumTemplate, getCurriculumTemplates } from '@/services/curriculumTemplates';
+import { toast } from '@/hooks/use-toast';
 
 const CurriculumMaterials = () => {
+  const [templates, setTemplates] = useState<CurriculumTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getCurriculumTemplates()
+      .then(setTemplates)
+      .catch((err) => {
+        console.error(err);
+        toast({ title: 'Error', description: 'Failed to load templates', variant: 'destructive' });
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <div className="p-10">Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar isLoggedIn={true} userRole="tutor" />
@@ -20,7 +37,7 @@ const CurriculumMaterials = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {MOCK_CURRICULA.map((curriculum) => (
+          {templates.map((curriculum) => (
             <Card key={curriculum.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -35,7 +52,7 @@ const CurriculumMaterials = () => {
                 <div className="flex items-center gap-4 text-sm text-gray-600">
                   <div className="flex items-center gap-1">
                     <BookOpen className="h-4 w-4" />
-                    <span>{curriculum.total_trimesters} Trimesters</span>
+                    <span>{curriculum.total_trimesters || 3} Trimesters</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
