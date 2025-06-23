@@ -47,10 +47,12 @@ const StudentApprovalDashboard = () => {
     }
 
     if (searchTerm) {
-      filtered = filtered.filter(student => 
-        student.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.username.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      const query = searchTerm.toLowerCase();
+      filtered = filtered.filter((student) => {
+        const name = (student.full_name || student.user?.full_name || '').toLowerCase();
+        const username = (student.username || student.user?.username || '').toLowerCase();
+        return name.includes(query) || username.includes(query);
+      });
     }
 
     setFilteredStudents(filtered);
@@ -136,8 +138,8 @@ const StudentApprovalDashboard = () => {
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-lg">{student.full_name}</CardTitle>
-                  <CardDescription>@{student.username}</CardDescription>
+                  <CardTitle className="text-lg">{student.full_name || student.user?.full_name}</CardTitle>
+                  <CardDescription>@{student.username || student.user?.username}</CardDescription>
                 </div>
                 <Badge variant={getStatusBadgeVariant(student.status)}>
                   {student.status.replace('_', ' ')}

@@ -1,55 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import { getMaterials, Material } from '@/services/materials';
 
-// Mock data for days/materials
-const dayMaterials = [
-  {
-    id: 1,
-    title: "Introduction to Present Tense",
-    description: "Learn the basics of present tense verbs in English",
-    materials: [
-      { id: 1, type: "pdf", name: "Present Tense Guidelines.pdf", size: "1.2 MB", date: "2025-01-15" },
-      { id: 2, type: "audio", name: "Present Tense Examples (US).mp3", size: "3.5 MB", date: "2025-01-15", accent: "American" },
-      { id: 3, type: "audio", name: "Present Tense Examples (UK).mp3", size: "3.2 MB", date: "2025-01-15", accent: "British" },
-      { id: 4, type: "video", name: "Present Tense Explained.mp4", size: "25 MB", date: "2025-01-16" },
-    ]
-  },
-  {
-    id: 2,
-    title: "Daily Routines Vocabulary",
-    description: "Essential vocabulary for describing daily activities",
-    materials: [
-      { id: 5, type: "pdf", name: "Daily Routines Word List.pdf", size: "0.8 MB", date: "2025-01-18" },
-      { id: 6, type: "audio", name: "Daily Routines Pronunciation (US).mp3", size: "4.2 MB", date: "2025-01-18", accent: "American" },
-      { id: 7, type: "audio", name: "Daily Routines Pronunciation (UK).mp3", size: "4.0 MB", date: "2025-01-18", accent: "British" },
-      { id: 8, type: "form", name: "Daily Routines Practice Quiz", size: null, date: "2025-01-19", url: "https://forms.google.com/xyz" },
-    ]
-  },
-  {
-    id: 3,
-    title: "Asking Questions",
-    description: "How to form questions in English with examples",
-    materials: [
-      { id: 9, type: "pdf", name: "Question Formation Guide.pdf", size: "1.5 MB", date: "2025-01-22" },
-      { id: 10, type: "audio", name: "Question Intonation (US).mp3", size: "3.8 MB", date: "2025-01-22", accent: "American" },
-      { id: 11, type: "audio", name: "Question Intonation (UK).mp3", size: "3.7 MB", date: "2025-01-22", accent: "British" },
-      { id: 12, type: "video", name: "Common Question Mistakes.mp4", size: "18 MB", date: "2025-01-23" },
-    ]
-  },
-];
+interface DayGroup {
+  id: string;
+  title: string;
+  description?: string | null;
+  materials: any[];
+}
+
+const groupMaterialsByDay = (materials: Material[]): DayGroup[] => {
+  const map: Record<string, DayGroup> = {};
+  materials.forEach((m) => {
+    const day = m.day;
+    if (!day) return;
+    if (!map[day.id]) {
+      map[day.id] = {
+        id: day.id,
+        title: day.title || `Day ${day.number || ''}`,
+        description: '',
+        materials: [],
+      };
+    }
+    map[day.id].materials.push({
+      id: m.id,
+      type: m.type,
+      name: m.title,
+      size: m.duration_minutes ? `${m.duration_minutes} min` : null,
+      date: m.created_at ? new Date(m.created_at).toISOString().slice(0, 10) : '',
+      accent: m.accent,
+      url: m.url,
+    });
+  });
+  return Object.values(map).sort((a, b) => a.title.localeCompare(b.title));
+};
 
 const Materials = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [dayMaterials, setDayMaterials] = useState<DayGroup[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getMaterials()
+      .then((data) => setDayMaterials(groupMaterialsByDay(data)))
+      .catch((err) => console.error('Failed to load materials', err))
+      .finally(() => setLoading(false));
+  }, []);
   
   // Filter days based on search query
-  const filteredDays = dayMaterials.filter(day =>
+  const filteredDays = dayMaterials.filter((day) =>
     day.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    day.description.toLowerCase().includes(searchQuery.toLowerCase())
+    (day.description || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
   
   // Get icon based on material type

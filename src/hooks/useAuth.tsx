@@ -8,6 +8,7 @@ export interface AuthUser {
   role: 'student' | 'tutor' | 'admin';
   profile?: any;
   studentProfile?: any;
+  student_profile?: any;
   enrollments?: { id: string; cohort_id: string; status: string }[];
 }
 
@@ -23,7 +24,14 @@ export const useAuth = () => {
     }
     try {
       const data = await getCurrentUser();
-      setUser(data as AuthUser);
+
+      // Normalise backend naming conventions to the ones expected by components
+      const normalised = {
+        ...data,
+        studentProfile: data.student_profile ?? data.studentProfile,
+      } as AuthUser;
+
+      setUser(normalised);
     } catch (err) {
       console.error('Failed to fetch current user', err);
       setAuthToken(null);
@@ -38,11 +46,16 @@ export const useAuth = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const signIn = async (email: string, password: string, _role?: 'student' | 'tutor' | 'admin') => {
+  const signIn = async (email: string, password: string) => {
     try {
       await login({ username: email, password });
-      await fetchUser();
-      return { user, error: null };
+      const current = await getCurrentUser();
+      const normalised = {
+        ...current,
+        studentProfile: (current as any).student_profile ?? (current as any).studentProfile,
+      } as AuthUser;
+      setUser(normalised);
+      return { user: current as AuthUser, error: null };
     } catch (error: any) {
       return { user: null, error };
     }

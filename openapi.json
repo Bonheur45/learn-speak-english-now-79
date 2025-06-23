@@ -150,7 +150,7 @@
           "Authentication"
         ],
         "summary": "Read Users Me",
-        "description": "Get current user information.",
+        "description": "Get current user information as UserPublic.",
         "operationId": "read_users_me_api_v1_auth_me_get",
         "responses": {
           "200": {
@@ -158,7 +158,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/UserPublic"
                 }
               }
             }
@@ -485,7 +485,7 @@
             "schema": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/CEFRLevel"
+                  "$ref": "#/components/schemas/ProficiencyLevel"
                 },
                 {
                   "type": "null"
@@ -1068,6 +1068,55 @@
       }
     },
     "/api/v1/curriculum/days/{day_id}": {
+      "get": {
+        "tags": [
+          "Curriculum"
+        ],
+        "summary": "Get Day",
+        "description": "Get a specific day. Requires READ_CURRICULUM scope.",
+        "operationId": "get_day_api_v1_curriculum_days__day_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "day_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Day Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "put": {
         "tags": [
           "Curriculum"
@@ -1342,7 +1391,7 @@
             "schema": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/CEFRLevel"
+                  "$ref": "#/components/schemas/ProficiencyLevel"
                 },
                 {
                   "type": "null"
@@ -1756,6 +1805,124 @@
               "application/json": {
                 "schema": {
                   "title": "Response Send Cohort Email Api V1 Cohorts  Cohort Id  Mail Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cohorts/{cohort_id}/trimesters": {
+      "get": {
+        "tags": [
+          "Cohorts"
+        ],
+        "summary": "Get Cohort Trimesters",
+        "operationId": "get_cohort_trimesters_api_v1_cohorts__cohort_id__trimesters_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cohort_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cohort Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrimesterPublic"
+                  },
+                  "title": "Response Get Cohort Trimesters Api V1 Cohorts  Cohort Id  Trimesters Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cohorts/{cohort_id}/trimesters/{trimester_id}/days": {
+      "get": {
+        "tags": [
+          "Cohorts"
+        ],
+        "summary": "Get Cohort Trimester Days",
+        "operationId": "get_cohort_trimester_days_api_v1_cohorts__cohort_id__trimesters__trimester_id__days_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": [
+              "read:curriculum"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cohort_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cohort Id"
+            }
+          },
+          {
+            "name": "trimester_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Trimester Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayPublic"
+                  },
+                  "title": "Response Get Cohort Trimester Days Api V1 Cohorts  Cohort Id  Trimesters  Trimester Id  Days Get"
                 }
               }
             }
@@ -4557,18 +4724,6 @@
         ],
         "title": "Body_send_cohort_email_api_v1_cohorts__cohort_id__mail_post"
       },
-      "CEFRLevel": {
-        "type": "string",
-        "enum": [
-          "A1",
-          "A2",
-          "B1",
-          "B2",
-          "C1",
-          "C2"
-        ],
-        "title": "CEFRLevel"
-      },
       "CohortCreate": {
         "properties": {
           "name": {
@@ -4592,8 +4747,8 @@
             "default": 20
           },
           "proficiency_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "curriculum_id": {
             "anyOf": [
@@ -4722,8 +4877,8 @@
             "default": 20
           },
           "proficiency_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "id": {
             "type": "string",
@@ -4888,8 +5043,8 @@
             "default": 20
           },
           "proficiency_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "id": {
             "type": "string",
@@ -4988,7 +5143,7 @@
           "proficiency_level": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CEFRLevel"
+                "$ref": "#/components/schemas/ProficiencyLevel"
               },
               {
                 "type": "null"
@@ -5145,8 +5300,8 @@
             "title": "Status"
           },
           "target_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "duration_weeks": {
             "type": "integer",
@@ -5238,8 +5393,8 @@
             "title": "Status"
           },
           "target_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "duration_weeks": {
             "type": "integer",
@@ -5299,8 +5454,8 @@
             "title": "Status"
           },
           "target_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "duration_weeks": {
             "type": "integer",
@@ -5384,7 +5539,7 @@
           "target_level": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CEFRLevel"
+                "$ref": "#/components/schemas/ProficiencyLevel"
               },
               {
                 "type": "null"
@@ -5498,6 +5653,50 @@
             ],
             "title": "Description"
           },
+          "story_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Story Text"
+          },
+          "topic_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Notes"
+          },
+          "british_audio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "British Audio Url"
+          },
+          "american_audio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "American Audio Url"
+          },
           "trimester_id": {
             "type": "string",
             "format": "uuid",
@@ -5533,6 +5732,50 @@
             ],
             "title": "Description"
           },
+          "story_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Story Text"
+          },
+          "topic_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Notes"
+          },
+          "british_audio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "British Audio Url"
+          },
+          "american_audio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "American Audio Url"
+          },
           "id": {
             "type": "string",
             "format": "uuid",
@@ -5547,9 +5790,37 @@
             "type": "string",
             "title": "Created At"
           },
-          "updated_at": {
-            "type": "string",
-            "title": "Updated At"
+          "glossary_terms": {
+            "items": {
+              "$ref": "#/components/schemas/GlossaryTermRead"
+            },
+            "type": "array",
+            "title": "Glossary Terms",
+            "default": []
+          },
+          "vocabulary_questions": {
+            "items": {
+              "$ref": "#/components/schemas/VocabularyQuestionRead"
+            },
+            "type": "array",
+            "title": "Vocabulary Questions",
+            "default": []
+          },
+          "topic_questions": {
+            "items": {
+              "$ref": "#/components/schemas/TopicQuestionRead"
+            },
+            "type": "array",
+            "title": "Topic Questions",
+            "default": []
+          },
+          "writing_prompts": {
+            "items": {
+              "$ref": "#/components/schemas/WritingPromptRead"
+            },
+            "type": "array",
+            "title": "Writing Prompts",
+            "default": []
           },
           "trimester": {
             "$ref": "#/components/schemas/TrimesterRead"
@@ -5589,7 +5860,6 @@
           "id",
           "trimester_id",
           "created_at",
-          "updated_at",
           "trimester"
         ],
         "title": "DayPublic",
@@ -5616,6 +5886,50 @@
             ],
             "title": "Description"
           },
+          "story_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Story Text"
+          },
+          "topic_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Notes"
+          },
+          "british_audio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "British Audio Url"
+          },
+          "american_audio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "American Audio Url"
+          },
           "id": {
             "type": "string",
             "format": "uuid",
@@ -5630,9 +5944,37 @@
             "type": "string",
             "title": "Created At"
           },
-          "updated_at": {
-            "type": "string",
-            "title": "Updated At"
+          "glossary_terms": {
+            "items": {
+              "$ref": "#/components/schemas/GlossaryTermRead"
+            },
+            "type": "array",
+            "title": "Glossary Terms",
+            "default": []
+          },
+          "vocabulary_questions": {
+            "items": {
+              "$ref": "#/components/schemas/VocabularyQuestionRead"
+            },
+            "type": "array",
+            "title": "Vocabulary Questions",
+            "default": []
+          },
+          "topic_questions": {
+            "items": {
+              "$ref": "#/components/schemas/TopicQuestionRead"
+            },
+            "type": "array",
+            "title": "Topic Questions",
+            "default": []
+          },
+          "writing_prompts": {
+            "items": {
+              "$ref": "#/components/schemas/WritingPromptRead"
+            },
+            "type": "array",
+            "title": "Writing Prompts",
+            "default": []
           }
         },
         "type": "object",
@@ -5641,8 +5983,7 @@
           "title",
           "id",
           "trimester_id",
-          "created_at",
-          "updated_at"
+          "created_at"
         ],
         "title": "DayRead"
       },
@@ -5680,6 +6021,106 @@
               }
             ],
             "title": "Description"
+          },
+          "story_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Story Text"
+          },
+          "topic_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Notes"
+          },
+          "british_audio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "British Audio Url"
+          },
+          "american_audio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "American Audio Url"
+          },
+          "glossary_terms": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GlossaryTermBase"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Glossary Terms"
+          },
+          "vocabulary_questions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/QuestionBase"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vocabulary Questions"
+          },
+          "topic_questions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/QuestionBase"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Questions"
+          },
+          "writing_prompts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/WritingPromptBase"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Writing Prompts"
           }
         },
         "type": "object",
@@ -5918,6 +6359,53 @@
         },
         "type": "object",
         "title": "EnrollmentUpdate"
+      },
+      "GlossaryTermBase": {
+        "properties": {
+          "term": {
+            "type": "string",
+            "title": "Term"
+          },
+          "definition": {
+            "type": "string",
+            "title": "Definition"
+          }
+        },
+        "type": "object",
+        "required": [
+          "term",
+          "definition"
+        ],
+        "title": "GlossaryTermBase"
+      },
+      "GlossaryTermRead": {
+        "properties": {
+          "term": {
+            "type": "string",
+            "title": "Term"
+          },
+          "definition": {
+            "type": "string",
+            "title": "Definition"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "term",
+          "definition",
+          "id",
+          "created_at"
+        ],
+        "title": "GlossaryTermRead"
       },
       "HTTPValidationError": {
         "properties": {
@@ -6466,44 +6954,44 @@
             "default": false
           },
           "speaking_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "listening_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "reading_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "writing_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "grammar_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "vocabulary_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "pronunciation_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "fluency_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "comprehension_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "confidence_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "student_id": {
             "type": "string",
@@ -6536,44 +7024,44 @@
             "default": false
           },
           "speaking_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "listening_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "reading_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "writing_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "grammar_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "vocabulary_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "pronunciation_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "fluency_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "comprehension_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "confidence_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "id": {
             "type": "string",
@@ -6642,44 +7130,44 @@
             "default": false
           },
           "speaking_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "listening_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "reading_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "writing_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "grammar_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "vocabulary_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "pronunciation_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "fluency_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "comprehension_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "confidence_level": {
-            "$ref": "#/components/schemas/CEFRLevel",
-            "default": "A1"
+            "$ref": "#/components/schemas/ProficiencyLevel",
+            "default": "A1-A2"
           },
           "id": {
             "type": "string",
@@ -6715,7 +7203,7 @@
           "speaking_level": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CEFRLevel"
+                "$ref": "#/components/schemas/ProficiencyLevel"
               },
               {
                 "type": "null"
@@ -6725,7 +7213,7 @@
           "listening_level": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CEFRLevel"
+                "$ref": "#/components/schemas/ProficiencyLevel"
               },
               {
                 "type": "null"
@@ -6735,7 +7223,7 @@
           "reading_level": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CEFRLevel"
+                "$ref": "#/components/schemas/ProficiencyLevel"
               },
               {
                 "type": "null"
@@ -6745,7 +7233,7 @@
           "writing_level": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CEFRLevel"
+                "$ref": "#/components/schemas/ProficiencyLevel"
               },
               {
                 "type": "null"
@@ -6755,7 +7243,7 @@
           "grammar_level": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CEFRLevel"
+                "$ref": "#/components/schemas/ProficiencyLevel"
               },
               {
                 "type": "null"
@@ -6765,7 +7253,7 @@
           "vocabulary_level": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CEFRLevel"
+                "$ref": "#/components/schemas/ProficiencyLevel"
               },
               {
                 "type": "null"
@@ -6775,7 +7263,7 @@
           "pronunciation_level": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CEFRLevel"
+                "$ref": "#/components/schemas/ProficiencyLevel"
               },
               {
                 "type": "null"
@@ -6785,7 +7273,7 @@
           "fluency_level": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CEFRLevel"
+                "$ref": "#/components/schemas/ProficiencyLevel"
               },
               {
                 "type": "null"
@@ -6795,7 +7283,7 @@
           "comprehension_level": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CEFRLevel"
+                "$ref": "#/components/schemas/ProficiencyLevel"
               },
               {
                 "type": "null"
@@ -6805,7 +7293,7 @@
           "confidence_level": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CEFRLevel"
+                "$ref": "#/components/schemas/ProficiencyLevel"
               },
               {
                 "type": "null"
@@ -6837,6 +7325,49 @@
         },
         "type": "object",
         "title": "ProgressUpdate"
+      },
+      "QuestionBase": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "correct_answer_index": {
+            "type": "integer",
+            "title": "Correct Answer Index"
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question",
+          "correct_answer_index"
+        ],
+        "title": "QuestionBase"
       },
       "StudentPerformance": {
         "properties": {
@@ -7221,6 +7752,66 @@
         ],
         "title": "Token"
       },
+      "TopicQuestionRead": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "correct_answer_index": {
+            "type": "integer",
+            "title": "Correct Answer Index"
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "day_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Day Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question",
+          "correct_answer_index",
+          "id",
+          "day_id",
+          "created_at"
+        ],
+        "title": "TopicQuestionRead"
+      },
       "TrimesterCreate": {
         "properties": {
           "number": {
@@ -7482,56 +8073,6 @@
         },
         "type": "object",
         "title": "TrimesterUpdate"
-      },
-      "User": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "created_at": {
-            "type": "string",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "type": "string",
-            "title": "Updated At"
-          },
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
-          "full_name": {
-            "type": "string",
-            "title": "Full Name"
-          },
-          "username": {
-            "type": "string",
-            "title": "Username"
-          },
-          "hashed_password": {
-            "type": "string",
-            "title": "Hashed Password"
-          },
-          "role": {
-            "$ref": "#/components/schemas/UserRole",
-            "default": "student"
-          },
-          "is_active": {
-            "type": "boolean",
-            "title": "Is Active",
-            "default": true
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "full_name",
-          "username",
-          "hashed_password"
-        ],
-        "title": "User"
       },
       "UserPublic": {
         "properties": {
@@ -7813,6 +8354,153 @@
           "url"
         ],
         "title": "VideoPayload"
+      },
+      "VocabularyQuestionRead": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "correct_answer_index": {
+            "type": "integer",
+            "title": "Correct Answer Index"
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "day_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Day Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question",
+          "correct_answer_index",
+          "id",
+          "day_id",
+          "created_at"
+        ],
+        "title": "VocabularyQuestionRead"
+      },
+      "WritingPromptBase": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt"
+          },
+          "instructions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instructions"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Example"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "WritingPromptBase"
+      },
+      "WritingPromptRead": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt"
+          },
+          "instructions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instructions"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Example"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "day_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Day Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt",
+          "id",
+          "day_id",
+          "created_at"
+        ],
+        "title": "WritingPromptRead"
       }
     },
     "securitySchemes": {

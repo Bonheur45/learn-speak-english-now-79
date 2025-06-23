@@ -42,7 +42,42 @@ export const getTrimesterDays = async (trimesterId: string): Promise<CurriculumD
   }));
 };
 
-export const updateCurriculumDay = async (dayId: string, payload: Partial<CurriculumDay>) => {
-  const { data } = await api.put(`/curriculum/days/${dayId}`, payload);
+export const updateCurriculumDay = async (
+  dayId: string,
+  payload: Partial<CurriculumDay>
+): Promise<CurriculumDay> => {
+  const body = {
+    ...payload,
+    number: (payload.day_number ?? payload.number) as any,
+  };
+  delete (body as any).day_number;
+
+  const { data } = await api.put(`/curriculum/days/${dayId}`, body);
+  return data;
+};
+
+export const getCurriculumDay = async (dayId: string): Promise<CurriculumDay> => {
+  const { data } = await api.get(`/curriculum/days/${dayId}`);
+  return data;
+};
+
+// Create a new curriculum template day inside a trimester
+export const createCurriculumDay = async (
+  trimesterId: string,
+  payload: Partial<CurriculumDay>
+): Promise<CurriculumDay> => {
+  const body = {
+    trimester_id: trimesterId,
+    number: (payload.day_number ?? payload.number) ?? 1,
+    title: payload.title ?? 'Lesson',
+    description: payload.description,
+    // pass through other optional fields too
+    story_text: payload.story_text,
+    topic_notes: payload.topic_notes,
+    british_audio_url: payload.british_audio_url,
+    american_audio_url: payload.american_audio_url,
+    glossary_terms: payload.glossary_terms,
+  };
+  const { data } = await api.post(`/curriculum/trimesters/${trimesterId}/days`, body);
   return data;
 }; 

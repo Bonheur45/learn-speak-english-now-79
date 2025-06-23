@@ -38,6 +38,7 @@ import TutorUpload from '@/pages/tutor/Upload';
 import StudentApproval from '@/pages/tutor/StudentApproval';
 import CreateCohort from '@/pages/tutor/CreateCohort';
 import EditCohort from '@/pages/tutor/EditCohort';
+import TutorStudentDetails from '@/pages/tutor/StudentDetails';
 
 // Curriculum Template pages
 import CurriculumMaterials from '@/pages/tutor/CurriculumMaterials';
@@ -50,11 +51,6 @@ import CohortMaterials from '@/pages/tutor/CohortMaterials';
 import TrimesterMaterials from '@/pages/tutor/TrimesterMaterials';
 import DaysList from '@/pages/tutor/DaysList';
 import DayEditor from '@/pages/tutor/DayEditor';
-
-// Question editor pages
-import VocabularyQuestionEditor from '@/pages/tutor/VocabularyQuestionEditor';
-import TopicQuestionEditor from '@/pages/tutor/TopicQuestionEditor';
-import WritingPromptEditor from '@/pages/tutor/WritingPromptEditor';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -157,6 +153,11 @@ const App: React.FC = () => {
                 <TutorStudents />
               </ProtectedRoute>
             } />
+            <Route path="/tutor/students/:studentId" element={
+              <ProtectedRoute requiredRole="tutor">
+                <TutorStudentDetails />
+              </ProtectedRoute>
+            } />
             <Route path="/tutor/student-approval" element={
               <ProtectedRoute requiredRole="tutor">
                 <StudentApproval />
@@ -205,23 +206,6 @@ const App: React.FC = () => {
               </ProtectedRoute>
             } />
             
-            {/* Curriculum Question editor routes */}
-            <Route path="/tutor/curriculum/:curriculumId/trimester/:trimesterId/day/:dayId/vocabulary-questions" element={
-              <ProtectedRoute requiredRole="tutor">
-                <VocabularyQuestionEditor />
-              </ProtectedRoute>
-            } />
-            <Route path="/tutor/curriculum/:curriculumId/trimester/:trimesterId/day/:dayId/topic-questions" element={
-              <ProtectedRoute requiredRole="tutor">
-                <TopicQuestionEditor />
-              </ProtectedRoute>
-            } />
-            <Route path="/tutor/curriculum/:curriculumId/trimester/:trimesterId/day/:dayId/writing-prompts" element={
-              <ProtectedRoute requiredRole="tutor">
-                <WritingPromptEditor />
-              </ProtectedRoute>
-            } />
-            
             {/* Cohort Management routes */}
             <Route path="/tutor/materials" element={
               <ProtectedRoute requiredRole="tutor">
@@ -241,23 +225,6 @@ const App: React.FC = () => {
             <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/edit" element={
               <ProtectedRoute requiredRole="tutor">
                 <DayEditor />
-              </ProtectedRoute>
-            } />
-            
-            {/* Cohort Question editor routes */}
-            <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/questions/vocabulary" element={
-              <ProtectedRoute requiredRole="tutor">
-                <VocabularyQuestionEditor />
-              </ProtectedRoute>
-            } />
-            <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/questions/topic" element={
-              <ProtectedRoute requiredRole="tutor">
-                <TopicQuestionEditor />
-              </ProtectedRoute>
-            } />
-            <Route path="/tutor/materials/cohort/:cohortId/trimester/:trimesterId/day/:dayId/questions/writing" element={
-              <ProtectedRoute requiredRole="tutor">
-                <WritingPromptEditor />
               </ProtectedRoute>
             } />
 

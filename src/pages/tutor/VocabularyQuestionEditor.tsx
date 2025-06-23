@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,38 +8,59 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Save, Plus, Trash2, Eye } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { getCurriculumDay, updateCurriculumDay } from '@/services/curriculum';
 
 interface VocabularyQuestion {
-  id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number;
+  id?: string;
+  question: string;        // UI prompt
+  options: string[];       // UI choices
+  correctAnswer: number;   // UI index
   type: 'multiple-choice' | 'fill-blank';
 }
 
+const createEmptyQuestion = (index:number): VocabularyQuestion => ({
+  id: Date.now().toString()+index,
+  question: '',
+  options: ['', '', '', ''],
+  correctAnswer: 0,
+  type: 'multiple-choice',
+});
+
 const VocabularyQuestionEditor = () => {
-  const { cohortId, trimesterId, dayId } = useParams();
+  const { curriculumId, trimesterId, dayId } = useParams();
   const navigate = useNavigate();
   
-  const [questions, setQuestions] = useState<VocabularyQuestion[]>([
-    {
-      id: '1',
-      question: 'What does "present tense" mean?',
-      options: ['Past actions', 'Current or habitual actions', 'Future actions', 'Completed actions'],
-      correctAnswer: 1,
-      type: 'multiple-choice'
-    }
-  ]);
+  const [questions, setQuestions] = useState<VocabularyQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dayData, setDayData] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (!dayId) return;
+    getCurriculumDay(dayId)
+      .then((day) => {
+        setDayData(day);
+        const mapped = (day.vocabulary_questions || []).map((q: any) => ({
+          id: q.id,
+          question: q.prompt,
+          options: q.choices,
+          correctAnswer: q.correct_answer_index,
+          type: q.type ?? 'multiple-choice',
+        }));
+        setQuestions(mapped);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({ title: 'Error', description: 'Failed to load questions', variant: 'destructive' });
+      })
+      .finally(() => setLoading(false));
+  }, [dayId]);
 
   const addQuestion = () => {
-    const newQuestion: VocabularyQuestion = {
-      id: Date.now().toString(),
-      question: '',
-      options: ['', '', '', ''],
-      correctAnswer: 0,
-      type: 'multiple-choice'
-    };
-    setQuestions(prev => [...prev, newQuestion]);
+    setQuestions(prev => [...prev, createEmptyQuestion(prev.length)]);
+  };
+
+  const addOption = (questionId: string) => {
+    setQuestions(prev => prev.map(q => q.id === questionId ? { ...q, options: [...q.options, ''] } : q));
   };
 
   const updateQuestion = (id: string, field: string, value: any) => {
@@ -61,11 +81,26 @@ const VocabularyQuestionEditor = () => {
     setQuestions(prev => prev.filter(q => q.id !== id));
   };
 
-  const handleSave = () => {
-    toast({
-      title: "Questions Saved",
-      description: "Vocabulary questions have been saved successfully.",
-    });
+  const handleSave = async () => {
+    if (!dayId) return;
+    try {
+      const apiPayload = questions.map((q) => ({
+        id: q.id,
+        prompt: q.question,
+        choices: q.options,
+        correct_answer_index: q.correctAnswer,
+        type: q.type,
+      }));
+      if (!dayData) return;
+      await updateCurriculumDay(dayId, {
+        ...dayData,
+        vocabulary_questions: apiPayload,
+      });
+      toast({ title: 'Saved', description: 'Vocabulary questions updated.' });
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Error', description: 'Failed to save', variant: 'destructive' });
+    }
   };
 
   return (
@@ -77,7 +112,7 @@ const VocabularyQuestionEditor = () => {
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
             <Link to="/tutor/materials" className="hover:text-brand-blue">Materials</Link>
             <span>/</span>
-            <Link to={`/tutor/materials/cohort/${cohortId}/trimester/${trimesterId}/day/${dayId}/edit`} className="hover:text-brand-blue">Day Editor</Link>
+            <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}/day/${dayId}/edit`} className="hover:text-brand-blue">Day Editor</Link>
             <span>/</span>
             <span className="font-medium">Vocabulary Questions</span>
           </div>
@@ -90,7 +125,7 @@ const VocabularyQuestionEditor = () => {
             
             <div className="flex flex-wrap gap-3">
               <Button asChild variant="outline" size="sm">
-                <Link to={`/tutor/materials/cohort/${cohortId}/trimester/${trimesterId}/day/${dayId}/edit`}>
+                <Link to={`/tutor/curriculum/${curriculumId}/trimester/${trimesterId}/day/${dayId}/edit`}>
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Editor
                 </Link>
@@ -156,6 +191,11 @@ const VocabularyQuestionEditor = () => {
                         />
                       </div>
                     ))}
+                    {question.options.length < 6 && (
+                      <Button type="button" size="sm" variant="outline" onClick={() => addOption(question.id)}>
+                        <Plus className="h-4 w-4 mr-1" /> Add Option
+                      </Button>
+                    )}
                   </div>
                   <p className="text-sm text-gray-600 mt-2">Select the radio button next to the correct answer</p>
                 </div>

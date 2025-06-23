@@ -1,104 +1,110 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
+import { getMe, getMyProgress, getCohortDays } from '@/services/student';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, FileCheck } from 'lucide-react';
 
+interface AssessmentRow {
+  id: string;
+  dayNumber: number;
+  title: string;
+  date: string;
+  vocabularyLevel?: string;
+  writingLevel?: string;
+  score?: number; // topic / overall score
+}
+
+const cefrToPercent = (level?: string): number => {
+  switch (level) {
+    case 'A1':
+    case 'A1-A2':
+      return 20;
+    case 'A2':
+      return 35;
+    case 'B1':
+    case 'B1-B2':
+      return 55;
+    case 'B2':
+      return 70;
+    case 'C1':
+      return 85;
+    case 'C2':
+    case 'C1-C2':
+      return 100;
+    default:
+      return 0;
+  }
+};
+
 const Assessments = () => {
-  // Sample data structure with improved details
-  const [assessments, setAssessments] = useState([
-    { 
-      id: 1, 
-      day: 1, 
-      vocabularyScore: 85, 
-      topicScore: 90,
-      writingScore: 88,
-      date: '2025-04-20',
-      vocabularyCompleted: true,
-      topicCompleted: true,
-      writingCompleted: true,
-      title: "Introduction to English"
-    },
-    { 
-      id: 2, 
-      day: 2, 
-      vocabularyScore: 78, 
-      topicScore: 85,
-      writingScore: 82,
-      date: '2025-04-21',
-      vocabularyCompleted: true,
-      topicCompleted: true,
-      writingCompleted: true,
-      title: "Common Greetings"
-    },
-    { 
-      id: 3, 
-      day: 3, 
-      vocabularyScore: 92, 
-      topicScore: 88,
-      writingScore: 90,
-      date: '2025-04-22',
-      vocabularyCompleted: true,
-      topicCompleted: true,
-      writingCompleted: true,
-      title: "Basic Conversation"
-    },
-    { 
-      id: 4, 
-      day: 4, 
-      vocabularyScore: 95, 
-      topicScore: 94,
-      writingScore: 87,
-      date: '2025-04-23',
-      vocabularyCompleted: true,
-      topicCompleted: true,
-      writingCompleted: true,
-      title: "Present Tenses"
-    }
-  ]);
+  const [rows, setRows] = useState<AssessmentRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Check localStorage for any saved assessment scores on component mount
   useEffect(() => {
-    const updatedAssessments = [...assessments];
-    let hasUpdates = false;
+    (async () => {
+      try {
+        const me = await getMe();
+        const cohortId = me.cohort_id || me.enrollments?.[0]?.cohort_id;
+        if (!cohortId) {
+          setRows([]);
+          return;
+        }
 
-    // Loop through assessments and check if we have scores in localStorage
-    updatedAssessments.forEach((assessment, index) => {
-      const vocabScore = localStorage.getItem(`day${assessment.day}-vocabulary-score`);
-      const topicScore = localStorage.getItem(`day${assessment.day}-topic-score`);
-      const writingScore = localStorage.getItem(`day${assessment.day}-writing-score`);
-      
-      if (vocabScore) {
-        updatedAssessments[index].vocabularyScore = parseInt(vocabScore);
-        updatedAssessments[index].vocabularyCompleted = true;
-        hasUpdates = true;
-      }
-      
-      if (topicScore) {
-        updatedAssessments[index].topicScore = parseInt(topicScore);
-        updatedAssessments[index].topicCompleted = true;
-        hasUpdates = true;
-      }
-      
-      if (writingScore) {
-        updatedAssessments[index].writingScore = parseInt(writingScore);
-        updatedAssessments[index].writingCompleted = true;
-        hasUpdates = true;
-      }
-    });
+        const [days, progress] = await Promise.all([
+          getCohortDays(cohortId),
+          getMyProgress(me.id, cohortId),
+        ]);
 
-    if (hasUpdates) {
-      setAssessments(updatedAssessments);
-    }
+        // Build table rows
+        const mapped: AssessmentRow[] = progress.map((p: any) => {
+          const dayInfo = days.find((d: any) => d.id === p.day.id) || p.day;
+          return {
+            id: p.id,
+            dayNumber: dayInfo.number || dayInfo.day_number || dayInfo.id,
+            title: dayInfo.title || `Day ${dayInfo.id}`,
+            date: new Date(p.last_updated || p.day.date || dayInfo.date).toLocaleDateString(),
+            vocabularyLevel: p.vocabulary_level,
+            writingLevel: p.writing_level,
+            score: p.score,
+          };
+        });
+
+        setRows(mapped);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  // Calculate average scores including writing
-  const avgVocabularyScore = assessments.reduce((sum, assessment) => sum + assessment.vocabularyScore, 0) / assessments.length;
-  const avgTopicScore = assessments.reduce((sum, assessment) => sum + assessment.topicScore, 0) / assessments.length;
-  const avgWritingScore = assessments.reduce((sum, assessment) => sum + assessment.writingScore, 0) / assessments.length;
-  const overallAverage = (avgVocabularyScore + avgTopicScore + avgWritingScore) / 3;
+  if (loading) {
+    return (
+      <Navbar isLoggedIn={true} userRole="student" />
+    );
+  }
+
+  if (rows.length === 0) {
+    return (
+      <>
+        <Navbar isLoggedIn={true} userRole="student" />
+        <main className="container mx-auto px-4 py-8">
+          <h1 className="text-3xl font-bold mb-6">No assessments yet.</h1>
+        </main>
+      </>
+    );
+  }
+
+  // Averages
+  const avgVocab = rows.reduce((s, r) => s + cefrToPercent(r.vocabularyLevel), 0) / rows.length;
+  const avgWriting = rows.reduce((s, r) => s + cefrToPercent(r.writingLevel), 0) / rows.length;
+  const avgTopic = rows.reduce((s, r) => s + (r.score ?? 0), 0) / rows.length;
+  const overall = (avgVocab + avgWriting + avgTopic) / 3;
+
+  const radial = (val: number) => `${val * 2.83} 283`;
 
   return (
     <>
@@ -126,14 +132,14 @@ const Assessments = () => {
                       fill="none" 
                       stroke="#3b82f6" 
                       strokeWidth="10" 
-                      strokeDasharray={`${avgVocabularyScore * 2.83} 283`} 
+                      strokeDasharray={radial(avgVocab)} 
                       strokeDashoffset="0" 
                       strokeLinecap="round"
                       transform="rotate(-90 50 50)"
                     />
                   </svg>
                 </div>
-                <p className="text-4xl font-bold text-blue-600">{avgVocabularyScore.toFixed(1)}%</p>
+                <p className="text-4xl font-bold text-blue-600">{avgVocab.toFixed(1)}%</p>
               </div>
             </CardContent>
           </Card>
@@ -157,14 +163,14 @@ const Assessments = () => {
                       fill="none" 
                       stroke="#22c55e" 
                       strokeWidth="10" 
-                      strokeDasharray={`${avgTopicScore * 2.83} 283`} 
+                      strokeDasharray={radial(avgTopic)} 
                       strokeDashoffset="0" 
                       strokeLinecap="round"
                       transform="rotate(-90 50 50)"
                     />
                   </svg>
                 </div>
-                <p className="text-4xl font-bold text-green-600">{avgTopicScore.toFixed(1)}%</p>
+                <p className="text-4xl font-bold text-green-600">{avgTopic.toFixed(1)}%</p>
               </div>
             </CardContent>
           </Card>
@@ -188,14 +194,14 @@ const Assessments = () => {
                       fill="none" 
                       stroke="#f59e0b" 
                       strokeWidth="10" 
-                      strokeDasharray={`${avgWritingScore * 2.83} 283`} 
+                      strokeDasharray={radial(avgWriting)} 
                       strokeDashoffset="0" 
                       strokeLinecap="round"
                       transform="rotate(-90 50 50)"
                     />
                   </svg>
                 </div>
-                <p className="text-4xl font-bold text-amber-600">{avgWritingScore.toFixed(1)}%</p>
+                <p className="text-4xl font-bold text-amber-600">{avgWriting.toFixed(1)}%</p>
               </div>
             </CardContent>
           </Card>
@@ -219,14 +225,14 @@ const Assessments = () => {
                       fill="none" 
                       stroke="#8b5cf6" 
                       strokeWidth="10" 
-                      strokeDasharray={`${overallAverage * 2.83} 283`} 
+                      strokeDasharray={radial(overall)} 
                       strokeDashoffset="0" 
                       strokeLinecap="round"
                       transform="rotate(-90 50 50)"
                     />
                   </svg>
                 </div>
-                <p className="text-4xl font-bold text-purple-600">{overallAverage.toFixed(1)}%</p>
+                <p className="text-4xl font-bold text-purple-600">{overall.toFixed(1)}%</p>
               </div>
             </CardContent>
           </Card>
@@ -250,47 +256,14 @@ const Assessments = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {assessments.map((assessment) => (
-                  <TableRow key={assessment.id} className="border-b last:border-0">
-                    <TableCell className="font-medium">Day {assessment.day}</TableCell>
-                    <TableCell>{assessment.title}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        {assessment.vocabularyCompleted ? (
-                          <>
-                            <span className={`inline-block w-3 h-3 rounded-full ${assessment.vocabularyScore >= 70 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                            <span>{assessment.vocabularyScore}%</span>
-                          </>
-                        ) : (
-                          <span className="text-gray-400">Not taken</span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        {assessment.topicCompleted ? (
-                          <>
-                            <span className={`inline-block w-3 h-3 rounded-full ${assessment.topicScore >= 70 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                            <span>{assessment.topicScore}%</span>
-                          </>
-                        ) : (
-                          <span className="text-gray-400">Not taken</span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        {assessment.writingCompleted ? (
-                          <>
-                            <span className={`inline-block w-3 h-3 rounded-full ${assessment.writingScore >= 70 ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                            <span>{assessment.writingScore}%</span>
-                          </>
-                        ) : (
-                          <span className="text-gray-400">Not taken</span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>{new Date(assessment.date).toLocaleDateString()}</TableCell>
+                {rows.map((r) => (
+                  <TableRow key={r.id} className="border-b last:border-0">
+                    <TableCell className="font-medium">Day {r.dayNumber}</TableCell>
+                    <TableCell>{r.title}</TableCell>
+                    <TableCell>{cefrToPercent(r.vocabularyLevel)}%</TableCell>
+                    <TableCell>{r.score ?? '—'}%</TableCell>
+                    <TableCell>{cefrToPercent(r.writingLevel)}%</TableCell>
+                    <TableCell>{r.date}</TableCell>
                     <TableCell>
                       <Button 
                         variant="ghost" 
@@ -298,7 +271,7 @@ const Assessments = () => {
                         className="text-blue-600" 
                         asChild
                       >
-                        <Link to={`/student/days/${assessment.day}`}>
+                        <Link to={`/student/days/${r.dayNumber}`}>
                           View Day <ArrowRight className="ml-1 h-4 w-4" />
                         </Link>
                       </Button>

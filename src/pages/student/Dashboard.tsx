@@ -7,7 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Video, Clock } from 'lucide-react';
-import { getMe, getMyProgress, getCohortDays } from '@/services/student';
+import { getMe, getMyProgress, getCohortDays, getCohortProgress } from '@/services/student';
+import { getLiveClasses, LiveClass } from '@/services/liveClasses';
+import { getStudents, StudentProfile } from '@/services/students';
 
 const StudentDashboard = () => {
   const [studentName, setStudentName] = useState('');
@@ -15,22 +17,77 @@ const StudentDashboard = () => {
   const [cohortId, setCohortId] = useState('');
   const [days, setDays] = useState<any[]>([]);
   const [progress, setProgress] = useState<any[]>([]);
+  const [liveClass, setLiveClass] = useState<LiveClass | null>(null);
+  const [ranking, setRanking] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getMe()
-      .then((profile) => {
-        setStudentName(profile.name);
+      .then(async (profile) => {
+        const name = (profile.full_name || profile.name || profile.username || '').split(' ')[0];
+        setStudentName(name);
         setUserId(profile.id);
-        setCohortId(profile.cohort_id);
-        return Promise.all([
-          getCohortDays(profile.cohort_id),
-          getMyProgress(profile.id, profile.cohort_id),
+
+        const cId = profile.cohort_id || profile.enrollments?.[0]?.cohort_id || '';
+        setCohortId(cId);
+
+        if (!cId) {
+          return {
+            days: [],
+            myProgress: [],
+            cohortProgress: [],
+            liveClasses: [],
+            students: [],
+          } as any;
+        }
+
+        const [daysRes, myProgRes, cohortProgRes, liveClassesRes, studentsRes] = await Promise.all([
+          getCohortDays(cId),
+          getMyProgress(profile.id, cId),
+          getCohortProgress(cId),
+          getLiveClasses(cId),
+          getStudents(),
         ]);
+
+        return {
+          days: daysRes,
+          myProgress: myProgRes,
+          cohortProgress: cohortProgRes,
+          liveClasses: liveClassesRes,
+          students: studentsRes,
+        } as any;
       })
-      .then(([daysRes, progRes]) => {
-        setDays(daysRes);
-        setProgress(progRes);
+      .then((data) => {
+        setDays(data.days);
+        setProgress(data.myProgress);
+
+        // Determine upcoming live class
+        if (data.liveClasses && data.liveClasses.length) {
+          const upcoming = [...data.liveClasses]
+            .filter((c) => new Date(c.date_time) >= new Date())
+            .sort((a, b) => new Date(a.date_time).getTime() - new Date(b.date_time).getTime())[0];
+          setLiveClass(upcoming || null);
+        }
+
+        // Build weekly ranking based on cohort progress
+        if (data.cohortProgress && data.cohortProgress.length) {
+          const map: Record<string, { id: string; name: string; username: string; score: number }> = {};
+          data.cohortProgress.forEach((p: any) => {
+            const sid = p.student_id;
+            if (!map[sid]) {
+              const stu = data.students.find((s: StudentProfile) => s.id === sid);
+              map[sid] = {
+                id: sid,
+                name: stu?.full_name || stu?.username || 'Student',
+                username: stu?.username || '',
+                score: 0,
+              };
+            }
+            map[sid].score += p.score ?? 0;
+          });
+          const rankingArr = Object.values(map).sort((a, b) => b.score - a.score);
+          setRanking(rankingArr);
+        }
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
@@ -40,7 +97,7 @@ const StudentDashboard = () => {
     return <Layout isLoggedIn={true} userRole="student"><div className="p-10">Loading...</div></Layout>;
   }
 
-  if (days.length === 0) {
+  if (!cohortId || days.length === 0) {
     return <Layout isLoggedIn={true} userRole="student"><div className="p-10">No days available.</div></Layout>;
   }
 
@@ -49,7 +106,7 @@ const StudentDashboard = () => {
   const completedDays = progress.filter((p:any) => p.completed_at).length;
   const totalDays = days.length;
 
-  const cohortStudents:any[] = [];
+  const cohortStudents:any[] = ranking;
 
   // Get today's activities including Writing
   const todayActivities = [
@@ -62,13 +119,42 @@ const StudentDashboard = () => {
   ];
 
   // Live class details
-  const liveClass = {
-    title: 'Interactive English Conversation',
-    time: '2:00 PM - 3:00 PM',
-    meetLink: 'https://meet.google.com/xyz-abcd-efg',
-    isLive: true
-  };
+  const liveClassData = liveClass ? {
+    title: liveClass.title,
+    time: `${new Date(liveClass.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+    meetLink: liveClass.link,
+    isLive: new Date(liveClass.date_time) <= new Date() && new Date() <= new Date(new Date(liveClass.date_time).getTime() + 60*60*1000),
+  } : null;
   
+  // Helpers to map CEFR -> percentage (rough)
+  const cefrToPercent = (level?: string): number => {
+    switch (level) {
+      case 'A1':
+      case 'A1-A2':
+        return 20;
+      case 'A2':
+        return 35;
+      case 'B1':
+      case 'B1-B2':
+        return 55;
+      case 'B2':
+        return 70;
+      case 'C1':
+        return 85;
+      case 'C2':
+      case 'C1-C2':
+        return 100;
+      default:
+        return 0;
+    }
+  };
+
+  const latestProgress: any = [...progress].sort((a, b) => new Date(b.last_updated || b.day?.date || 0).getTime() - new Date(a.last_updated || a.day?.date || 0).getTime())[0];
+
+  const vocabularyScore = latestProgress ? cefrToPercent(latestProgress.vocabulary_level) : 0;
+  const writingScore = latestProgress ? cefrToPercent(latestProgress.writing_level) : 0;
+  const topicScore = latestProgress?.score ?? 0;
+
   return (
     <Layout isLoggedIn={true} userRole="student">
       <div className="container mx-auto px-2 sm:px-4">
@@ -92,47 +178,49 @@ const StudentDashboard = () => {
             label={`${completedDays} of ${totalDays} days completed`}
           />
           <ProgressCard
-            title="Vocabulary Score"
-            value={progress[0]?.score_summary?.vocabulary || 0}
+            title="Vocabulary Level"
+            value={vocabularyScore}
             maxValue={100}
-            label={`${progress[0]?.score_summary?.vocabulary}% correct`}
+            label={`${vocabularyScore}% proficiency`}
           />
           <ProgressCard
-            title="Writing Score"
-            value={85}
+            title="Writing Level"
+            value={writingScore}
             maxValue={100}
-            label="85% average"
+            label={`${writingScore}% proficiency`}
           />
           <ProgressCard
-            title="Topic Assessments"
-            value={progress[0]?.score_summary?.topic || 0}
+            title="Overall Assessment Score"
+            value={topicScore}
             maxValue={100}
-            label={`${progress[0]?.score_summary?.topic}% correct`}
+            label={`${topicScore}% average`}
           />
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
           <div className="lg:col-span-2 space-y-4">
             {/* Live Class Notice */}
-            <Alert className="border-green-200 bg-green-50">
-              <Video className="h-4 w-4 text-green-600" />
-              <AlertDescription>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-green-800">{liveClass.title}</p>
-                    <p className="text-green-700 flex items-center mt-1">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {liveClass.time}
-                    </p>
+            {liveClassData && (
+              <Alert className="border-green-200 bg-green-50">
+                <Video className="h-4 w-4 text-green-600" />
+                <AlertDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-green-800">{liveClassData.title}</p>
+                      <p className="text-green-700 flex items-center mt-1">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {liveClassData.time}
+                      </p>
+                    </div>
+                    <Button asChild size="sm" className="bg-green-600 hover:bg-green-700">
+                      <a href={liveClassData.meetLink} target="_blank" rel="noopener noreferrer">
+                        {liveClassData.isLive ? 'Join Live Class' : 'View Details'}
+                      </a>
+                    </Button>
                   </div>
-                  <Button asChild size="sm" className="bg-green-600 hover:bg-green-700">
-                    <a href={liveClass.meetLink} target="_blank" rel="noopener noreferrer">
-                      Join Live Class
-                    </a>
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
+                </AlertDescription>
+              </Alert>
+            )}
 
             <Card>
               <CardHeader>

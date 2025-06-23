@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Plus, Save, Edit, Calendar, BookOpen } from 'lucide-react';
 import { CurriculumTemplate, getCurriculumTemplate } from '@/services/curriculumTemplates';
-import { CurriculumTrimester, CurriculumDay, getTrimesterDays, updateCurriculumDay } from '@/services/curriculum';
+import { CurriculumTrimester, CurriculumDay, getTrimesterDays, updateCurriculumDay, createCurriculumDay } from '@/services/curriculum';
 import { toast } from '@/hooks/use-toast';
 
 const CurriculumDays = () => {
@@ -67,9 +67,18 @@ const CurriculumDays = () => {
 
   const handleSaveAll = async () => {
     try {
-      await Promise.all(
-        daysData.map((day) => updateCurriculumDay(day.id, day))
-      );
+      const synced: CurriculumDay[] = [];
+      for (const day of daysData) {
+        if (!day.id || day.id.startsWith('tmp_')) {
+          // unlikely now but handle just in case
+          const created = await createCurriculumDay(trimester!.id, day);
+          synced.push(created as CurriculumDay);
+        } else {
+          const updated = await updateCurriculumDay(day.id, day);
+          synced.push(updated as CurriculumDay);
+        }
+      }
+      setDaysData(synced);
       toast({
         title: 'Curriculum Template Saved',
         description: `All day content for ${trimester.name} has been saved.`,
@@ -80,29 +89,34 @@ const CurriculumDays = () => {
     }
   };
 
-  const addNewDay = () => {
-    const newDay: CurriculumDay = {
-      id: `tmp_${Date.now()}`,
-      trimester_id: trimester!.id,
-      title: `New Lesson ${daysData.length + 1}`,
-      description: `Learning objectives for day ${daysData.length + 1}`,
-      day_number: daysData.length + 1,
-      story_text: '<p>Enter the story content here...</p>',
-      topic_notes: '<p>Enter topic notes here...</p>',
-      british_audio_url: '',
-      american_audio_url: '',
-      glossary_terms: [],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    } as any;
-    setDaysData((prev) => [...prev, newDay]);
+  const addNewDay = async () => {
+    try {
+      const payload: Partial<CurriculumDay> = {
+        title: `New Lesson ${daysData.length + 1}`,
+        description: `Learning objectives for day ${daysData.length + 1}`,
+        day_number: daysData.length + 1,
+        story_text: '<p>Enter the story content here...</p>',
+        topic_notes: '<p>Enter topic notes here...</p>',
+        british_audio_url: '',
+        american_audio_url: '',
+        glossary_terms: [],
+      };
+
+      const created = await createCurriculumDay(trimester!.id, payload);
+      const dayNum = created.number ?? created.day_number ?? payload.number;
+      setDaysData((prev) => [...prev, { ...created, day_number: dayNum } as CurriculumDay]);
+      toast({ title: 'Day Added', description: `Day ${dayNum} created.` });
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Error', description: 'Failed to create day', variant: 'destructive' });
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar isLoggedIn={true} userRole="tutor" />
       
-      <main className="flex-grow container mx-auto px-4 py-8 max-w-6xl">
+      <main className="flex-grow container mx-auto px-4 py-8 pt-24 max-w-6xl">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
